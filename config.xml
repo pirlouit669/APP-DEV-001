@@ -79,4 +79,5 @@
         <variable name="SENDER_ID" value="XXXXXXX" />
     </plugin>
     <plugin name="cordova-plugin-network-information" spec="~2.0.1" />
+    <plugin name="cordova-plugin-inappbrowser" spec="~2.0.2" />
 </widget>

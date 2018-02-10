@@ -92,8 +92,8 @@ function onDeviceReady() {
       //$.mobile.keepNative = "select,input";
       $.mobile.crossDomainPages  = true;
       
-      document.addEventListener("online", onOnline, false);
-      document.addEventListener("offline", onOffline , false);
+      /*document.addEventListener("online", onOnline, false);
+      document.addEventListener("offline", onOffline , false);*/
 
       $(document).on( "click", ".btn-connexion", function(e){
             e.preventDefault();
@@ -263,7 +263,7 @@ function erreur_login (erreur){
       }
       
 }
-
+/*
 function display_network_state (state){
       $('.network_state').html('<i style="color:#46e446;" class="fas fa-toggle-on fa-2x"></i>'); //toggle-off  //power-off
       $('.network_state').html('<i style="color:#ff1100" class="fas fa-toggle-on fa-flip-horizontal fa-2x"></i>');
@@ -294,5 +294,5 @@ function checkConnection() {
         console.log('Connection type: ' + states[networkState]);
         return networkState;
 }
-
+*/
 
