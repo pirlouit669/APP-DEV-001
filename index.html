@@ -1,101 +1,100 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
-        <title>My app</title>
-        
-        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-        <script src="http://code.jquery.com/mobile/1.4.4/jquery.mobile-1.4.4.min.js"></script>
-        <script type="text/javascript" src="js/index.js"></script>
-	  <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
-        <script type="text/javascript" src="js/jquery.cookie.js"></script>
-        
-        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.4/jquery.mobile-1.4.4.min.css">
-        <link rel="stylesheet" href="css/app.css">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400|Roboto:100,300,400" >
-    </head>
-    <body>
-        <div data-role="page" id="accueil" data-enhance="false">
+      <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+            <title>Facile2Soutenir</title>
+            
+            <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+            <script src="http://code.jquery.com/mobile/1.4.4/jquery.mobile-1.4.4.min.js"></script>
+            <script type="text/javascript" src="js/index.js"></script>
+            <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+            <script type="text/javascript" src="js/jquery.cookie.js"></script>
+            
+            <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.4/jquery.mobile-1.4.4.min.css">
+            <link rel="stylesheet" href="css/app.css">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400|Roboto:100,300,400" >
+      </head>
+      <body>
+      <div data-role="page" id="accueil" class="bg-image bg3" data-enhance="false">
             <div data-role="main" class="ui-content">
-                <div style="text-align: center; padding-bottom:120px;" >
-                        <img src="img/facile2soutenir120.png">
-                        <H1>
-                              Soutenez les causes qui vous tiennent a coeur grace a vos achats en ligne.
-                        </H1>
-                </div>
-                <div style="position:absolute; bottom:60px;">
-                        <a href="#connexion" data-role="none" style="" class="btn-connexion bouton-bleu">Connexion</a>
-                        <a href="#news" data-role="none" style="" class="bouton-transparent">Actualités</a>
-                </div>
-                
+                  <div class="accueil-logo"><img src="img/facile2soutenir120.png"></div>
+                  <div class="accueil-intro"><H1>Soutenez les causes qui vous tiennent a coeur grace a vos achats en ligne.</H1></div>
+                  <div class="accueil-liens">
+                          <a href="#connexion" data-role="none" style="" class="bouton bouton-moyen bouton-bleu bouton-block bouton-form btn-connexion">Connexion</a>
+                          <a href="#news" data-role="none" style="" class="bouton bouton-moyen bouton-transparent bouton-block bouton-form">Actualités</a>
+                  </div>
             </div>
-        </div> 
+      </div> 
         
-        <div data-role="page" id="connexion">
-            <div class="blur-bg"></div>
-            <a href="#accueil" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext connexion-close">Delete</a>
+      <div data-role="page" id="connexion">
+            <div class="blur-bg bg3"></div>
+            <a href="#accueil" data-role="none" class="icone-retour"><i class="fas fa-times fa-lg"></i></a>
             <div data-role="main" class="ui-content">
-                <div style="text-align: center" >
-                        <img src="img/F2S-icon-120.png" style=" margin-bottom: 40px; width: 80px;">
+                  <div class="connexion-form">
+                        <img src="img/F2S-icon-120.png">
                         <input id="username" type="text" value="" placeholder="Adresse email" data-role="none" style="">
                         <input id="password" type="password" value="" placeholder="Mot de passe" data-role="none" >
-                        <button onclick="login();" data-role="none" class="bouton-bleu" >Connexion</button>
-                        <button data-role="none" class="bouton-transparent" style="color:#cfcfcf; font-size:14px;">Mot de passe perdu</button>
-                        <p class="status"></p>
-                </div>                
+                        <button onclick="login();" data-role="none" class="bouton bouton-moyen bouton-bleu bouton-block bouton-moyen bouton-form" id="" >Connexion</button>
+                        <button data-role="none" class="bouton bouton-transparent bouton-block bouton-form" id="mdp-perdu">Mot de passe perdu</button>
+                        <div class="status"></div>
+                  </div>                
             </div>
-        </div>
+      </div>
         
-        <div data-role="page" id="news">
+      <div data-role="page" id="news">
             <div data-role="main" class="ui-content">
-				<a href="#accueil" data-role="none" class="fleche-retour"><i class="fas fa-arrow-left fa-lg"></i></a>
-				<div class="news-main-top" style="">
-					<H1 data-role="none" style="">Les actualités</H1>
-					<div class="news-main-top-nav">
-						<div id='btn-recentes' class="btn-nav bouton bouton-majuscules bouton-100 bouton-bleu2 bouton-rond bouton-inline bouton-moyen bouton-actif">Récentes</div>
-						<div id='btn-principales' class="btn-nav bouton bouton-majuscules bouton-100 bouton-inverse bouton-rond bouton-inline bouton-moyen ">Principales</div>
-						<div id='btn-toutes' class="btn-nav bouton bouton-majuscules bouton-100 bouton-inverse bouton-rond bouton-inline bouton-moyen">Toutes</div>
-					</div>
-				</div>
-				<div id="news-container"></div>
+                  <a href="#accueil" data-role="none" class="icone-retour"><i class="fas fa-arrow-left fa-lg"></i></a>
+                  <div class="news-main-top bg-image" style="">
+                        <div class="news-main-top-titre">
+                              <H1 data-role="none" style="">Les actualités</H1>
+                        </div>
+                        <div class="news-main-top-nav">
+                              <div id='btn-recentes' class="btn-nav bouton bouton-majuscules bouton-100 bouton-bleu bouton-rond bouton-inline bouton-moyen bouton-actif">Récentes</div>
+                              <div id='btn-une' class="btn-nav bouton bouton-majuscules bouton-100 bouton-inverse bouton-rond bouton-inline bouton-moyen ">A la une</div>
+                              <div id='btn-toutes' class="btn-nav bouton bouton-majuscules bouton-100 bouton-inverse bouton-rond bouton-inline bouton-moyen">Toutes</div>
+                        </div>
+                  </div>
+                  <div id="news-container">
+                        <div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>
+                  </div>
 				
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
-                     <ul>
-                        <li class="nav-btn"><a href="#accueil" data-icon="home" data-transition="pop">Accueil</a></li>
-                        <li class="nav-btn"><a href="#connexion" data-icon="home" data-transition="pop">Connexion</a></li>
-                        <li class="nav-btn"><a href="#news" data-icon="eye" data-transition="pop" >Actualités</a></li>
-                    </ul>
-                  </div><!-- /navbar -->
+                        <ul>
+                              <li class="nav-btn"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
+                              <li class="nav-btn"><a href="#connexion" data-transition="pop"><i class="fas fa-shopping-cart fa-2x"></i></a></li>
+                              <li class="nav-btn"><a href="#news" data-transition="pop" ><i class="fas fa-newspaper fa-2x"></i></a></li>
+                        </ul>
+                  </div>
             </div>
-        </div> 
+      </div> 
 
-        <div data-role="page" id="news-detail">
+      <div data-role="page" id="news-detail">
             <div data-role="main" class="ui-content">
-				<a href="#news" data-transition="slide" data-direction="reverse" class="fleche-retour"><i class="fas fa-arrow-left fa-lg"></i></a>
-				<div class="news-detail-main-top" id="">
-					<div class="news-detail-main-top-titre">
-						<H1 data-role="none" id="news-detail-title" style=""></H1>
-					</div>
-					<div class="news-main-top-nav">
-						<h2 data-role="none" id="news-detail-date" style=""></H2>
-					</div>
-				</div>
-				<div id="news-details-contenu">
-					<div class="encours">En cours de chargement...</div>
-				</div>
+                  <a href="#news" data-transition="slide" data-direction="reverse" class="icone-retour"><i class="fas fa-arrow-left fa-lg"></i></a>
+                  <div class="news-main-top bg-image" id="">
+                        <div class="news-main-top-titre">
+                              <H1 data-role="none" id="news-detail-title" style=""></H1>
+                        </div>
+                        <div class="news-main-top-nav">
+                              <p class="date-inv" data-role="none" id="news-detail-date" style=""></p>
+                        </div>
+                  </div>
+                  <div id="news-detail-contenu">
+                        <div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>
+                  </div>
 				
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
-                <div data-role="navbar">
-                     <ul>
-                        <li class="nav-btn"><a href="#accueil" data-icon="home" data-transition="pop">Accueil</a></li>
-                        <li class="nav-btn"><a href="#connexion" data-icon="home" data-transition="pop">Connexion</a></li>
-                        <li class="nav-btn"><a href="#news" data-icon="eye" data-transition="pop" >Actualités</a></li>
-                    </ul>
-                  </div><!-- /navbar -->
+                  <div data-role="navbar">
+                        <ul>
+                              <li class="nav-btn"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
+                              <li class="nav-btn"><a href="#connexion" data-transition="pop"><i class="fas fa-shopping-cart fa-2x"></i></a></li>
+                              <li class="nav-btn"><a href="#news" data-transition="pop" ><i class="fas fa-newspaper fa-2x"></i></a></li>
+                        </ul>
+                  </div>
             </div>
         </div>
 

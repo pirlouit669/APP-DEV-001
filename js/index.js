@@ -71,128 +71,129 @@
 };
 
 */
-/*
-$(document).on('mobileinit', function () {
-      console.log('mob init');
-      $.mobile.ignoreContentEnabled = true;
-      $.mobile.keepNative = "select,input";
-      $.mobile.crossDomainPages  = true;
-});*/
 
-$(document).ready(function(){
+$(document).ready(function() {
+    // are we running in native app or in a browser?
+    window.isphone = false;
+    if(document.URL.indexOf("http://") === -1 
+        && document.URL.indexOf("https://") === -1) {
+        window.isphone = true;
+    }
+    if( window.isphone ) {
+        document.addEventListener("deviceready", onDeviceReady, false);
+    } else {
+        onDeviceReady();
+    }
+});
+
+function onDeviceReady() {
       console.log('ready');
       $.mobile.ignoreContentEnabled = true;
       //$.mobile.keepNative = "select,input";
       $.mobile.crossDomainPages  = true;
       
+      document.addEventListener("online", onOnline, false);
+      document.addEventListener("offline", onOffline , false);
+
       $(document).on( "click", ".btn-connexion", function(e){
             e.preventDefault();
             var logged_in=false;
             $.each($.cookie(), function( index, value ){
-                  console.log('A: ' + index + ' B :' + value);
                   if (index.indexOf('wordpress_logged_in_') >= 0) {
                         url = 'http://preprod.facile2soutenir.fr/mobile/?cookie_name=' + encodeURIComponent(index) + '&cookie=' + encodeURIComponent(value);
-                        console.log('c est parti mon kiki ' + url);
                         logged_in = true;
+                        document.location.href=url;
                   }
             });
             if (logged_in == false) $('body').pagecontainer('change', '#connexion');
       }); 
-});
 
-$(document).on('pageinit', '#news',function(){
-      console.log('pageinit news');
-      fetch_posts('recentes');
-
-	  
-	  $(document).on( "click", "#btn-recentes", function(){
-            $(this).addClass('bouton-bleu2').removeClass('bouton-inverse');
-            $('#btn-toutes').addClass('bouton-inverse').removeClass('bouton-bleu2');
-            $('#btn-principales').addClass('bouton-inverse').removeClass('bouton-bleu2');
-			fetch_posts('recentes');
+      
+      $(document).on('pageinit', '#news',function(){
+            fetch_posts('recentes');
+              
+            $(document).on( "click", "#btn-recentes", function(){
+                  $(this).addClass('bouton-bleu').removeClass('bouton-inverse');
+                  $('#btn-toutes').addClass('bouton-inverse').removeClass('bouton-bleu');
+                  $('#btn-une').addClass('bouton-inverse').removeClass('bouton-bleu');
+                        fetch_posts('recentes');
+            });
+              
+            $(document).on( "click", "#btn-une", function(){
+                  $(this).addClass('bouton-bleu').removeClass('bouton-inverse');
+                  $('#btn-toutes').addClass('bouton-inverse').removeClass('bouton-bleu');
+                  $('#btn-recentes').addClass('bouton-inverse').removeClass('bouton-bleu');
+                        fetch_posts('une');
+            });
+              
+            $(document).on( "click", "#btn-toutes", function(){
+                  $(this).addClass('bouton-bleu').removeClass('bouton-inverse');
+                  $('#btn-une').addClass('bouton-inverse').removeClass('bouton-bleu');
+                  $('#btn-recentes').addClass('bouton-inverse').removeClass('bouton-bleu');
+                        fetch_posts('toutes');
+            });
+              
+              
+            $(document).on( "click", ".lien-news-detail", function(){
+                  activenews = $(this).parent();
+                  activenews.addClass('news-active');
+                  $('.news').not(activenews).removeClass('news-active');
+            });
+              
+      
+              
       });
-	  
-	  
-	  $(document).on( "click", "#btn-principales", function(){
-            $(this).addClass('bouton-bleu2').removeClass('bouton-inverse');
-            $('#btn-toutes').addClass('bouton-inverse').removeClass('bouton-bleu2');
-            $('#btn-recentes').addClass('bouton-inverse').removeClass('bouton-bleu2');
-			fetch_posts('principales');
+      
+      $(document).on('pagebeforeshow', '#news-detail', function(){clean_newsdetail();});
+      
+      $(document).on('pageshow', '#news-detail',function(){
+            var post_id = $( ".news-active .lien-news-detail" ).attr('id');
+            linkurl = "https://preprod.facile2soutenir.fr/json/get_post/?id=" + post_id;
+                  $.ajax({
+                  type: "POST",
+                  url:linkurl,
+                  crossDomain: true,
+                  cache: false,
+                  success: function(data){
+                        $('.encours').hide();
+                        var post = data['post'];
+                        var post_id = post['id'];
+                        var titre = post['title'];
+                        var date = post['date'];
+                        var img = post['thumbnail_images']['full']['url'];
+                        var content = post['content'];
+                        $('#news-detail-title').html(titre);
+                        $('#news-detail-date').html(date);
+                        $('#news-detail-contenu').html(content);
+                        $('#news-detail .news-main-top').css('background-image', 'linear-gradient( rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75) ), url('+ img +')');		
+                  },
+            });
       });
-	  
-	  $(document).on( "click", "#btn-toutes", function(){
-            $(this).addClass('bouton-bleu2').removeClass('bouton-inverse');
-            $('#btn-principales').addClass('bouton-inverse').removeClass('bouton-bleu2');
-            $('#btn-recentes').addClass('bouton-inverse').removeClass('bouton-bleu2');
-			fetch_posts('toutes');
-      });
-	  
-	  
-	  $(document).on( "click", ".lien-news-detail", function(){
-            activenews = $(this).parent();
-            activenews.addClass('news-active');
-            $('.news').not(activenews).removeClass('news-active');
-      });
-        
 
-	  
-});
-
-$(document).on('pagebeforeshow', '#news-detail', function(){clean_newsdetail();});
-
-$(document).on('pageshow', '#news-detail',function(){
-      var post_id = $( ".news-active .lien-news-detail" ).attr('id');
-	console.log(post_id);
-	linkurl = "https://preprod.facile2soutenir.fr/json/get_post/?id=" + post_id;
-		$.ajax({
-            type: "POST",
-            url:linkurl,
-            crossDomain: true,
-            cache: false,
-            success: function(data){
-                  console.log(linkurl);
-                  $('.encours').hide();
-                  var post = data['post'];
-                  var post_id = post['id'];
-                  var titre = post['title'];
-                  var date = post['date'];
-                  $.each(post['attachments'], function() {
-                          img = this['images']['full']['url'];
-                  });
-                  var content = post['content'];
-                  
-                  $('#news-detail-title').html(titre);
-                  $('#news-detail-date').html(date);
-                  $('#news-details-contenu').html(content);
-                  $('.news-detail-main-top').css('background-image', 'linear-gradient( rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75) ), url('+ img +')');		
-            },
-      });
-});
-
+}
 
 function clean_newsdetail() {
       $('#news-detail-title').html('');
       $('#news-detail-date').html('');
-      $('#news-details-contenu').html('<div class="encours">En cours de chargement...</div>');
-      $('.news-detail-main-top').css('background-image', 'linear-gradient( rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75) )');  
+      $('#news-detail-contenu').html('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+      $('#news-detail .news-main-top').css('background-image', 'linear-gradient( rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75) )');  
 }
 
 function fetch_posts(requete){
       var dataString = "";
-      $('#news-container').html('<div class="encours">En cours de chargement...</div>');
+      $('#news-container').html('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
       linkurl = "https://preprod.facile2soutenir.fr/json/get_posts/";
-      //linkurl = "https://preprod.facile2soutenir.fr/json/get_recent_posts/";
 
       if (requete=='recentes') {
             linkurl += '?count=5'; //&status=publish&date_format=%27d/Y%27",  
       } 
-      if (requete=='principales') {
-            linkurl += '?count=2';
+      if (requete=='une') {
+            linkurl = "https://preprod.facile2soutenir.fr/json/get_category_posts";
+            linkurl += '?category_id=254';
       } 
       if (requete=='toutes') {
             linkurl += '?count=10';
       }
-      console.log(linkurl);
       $.ajax({
             type: "POST",
             url:linkurl,
@@ -206,9 +207,7 @@ function fetch_posts(requete){
                         var post_id = this['id'];
                         var titre = this['title'];
                         var date = this['date'];
-                        $.each(this['attachments'], function() {
-                              img = this['images']['full']['url'];
-                        });	
+                        var img = this['thumbnail_images']['full']['url'];
                         $('#news-container').append('<div class="news""><a href="#news-detail" id="'+post_id+'" class="lien-news-detail lien-full" data-transition="slide"></a><div class="voir-news"><i class="fas fa-caret-right fa-lg"></i></div><div class="news-image-container"><img src="'+img+'"></div><div class="news-contenu"><div class="news-title">'+titre+'</div><div class="news-date">'+date+'</div></div></div>');
                   });
             }
@@ -216,10 +215,14 @@ function fetch_posts(requete){
 }
 
 function login(){
+      $('.status .erreur').remove();
       var username = $("#username").val();
       var password = $("#password").val();
-      var dataString = "username="+username+"&password="+password+"&insecure=cool";    //JSON API Auth plugins allow by default only connections over https. In order to turn off this setting, you should send an extra parameter in the request:insecure=cool
+      var dataString = "username="+username+"&password="+password+"&insecure=cool"; // insecure=cool pour connection over http
       var url;
+      if ( username== "") {erreur_login ('usernamevide'); return false; }
+      if ( password== "") {erreur_login ('passwordvide'); return false; }
+      $('.status').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
       $.ajax({
             type: "POST",
             url:"https://preprod.facile2soutenir.fr/json/user/generate_auth_cookie/?",
@@ -227,34 +230,69 @@ function login(){
             crossDomain: true,
             cache: false,
             success: function(data){
-                  var cookie=data.cookie;
-                  var cookie_name=data.cookie_name;
-                  var user_id=data.user.id;
-                  url = 'http://preprod.facile2soutenir.fr/mobile/?user_id=' + user_id + '&cookie_name=' + encodeURIComponent(cookie_name) + '&cookie=' + encodeURIComponent(cookie);
-                  $.cookie(cookie_name, cookie, { expires: 365*5, path: '/' });
-                  $('body').pagecontainer('change', '#news');
-                  //$('#go-shopping').attr('href',url);
-                  //document.location.href=url;                  
+                  console.log(data);
+
+                  if (data.status=="ok") {
+                        var cookie=data.cookie;
+                        var cookie_name=data.cookie_name;
+                        var user_id=data.user.id;
+                        url = 'http://preprod.facile2soutenir.fr/mobile/?user_id=' + user_id + '&cookie_name=' + encodeURIComponent(cookie_name) + '&cookie=' + encodeURIComponent(cookie);
+                        $.cookie(cookie_name, cookie, { expires: 365*5, path: '/' });
+                        //$('body').pagecontainer('change', '#news');
+                        document.location.href=url;
+                  } else {
+                        erreur_login ('mdp');
+                  }
+                  
             },
             complete: function () {
-                  console.log(url);
+                  $('.status .encours').remove();
             }
       });
 }
 
-
-/*
-function setCookie(name,value,days) {
-    var expires = "";
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days*24*60*60*1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
-}*/
-/*
-function open_browser(link){
-    window.open(link, '_blank', 'location=yes');
+function erreur_login (erreur){
+      if (erreur=='mdp') {
+            $('.status').prepend('<div class="erreur"><p>Oups...<br>Votre email ou votre mot de passe semble incorrect</p><p><i class="fas fa-frown"></p></div>');
+      }
+      if (erreur=='usernamevide') {
+            $('.status').prepend('<div class="erreur"><p>Ca ne serait pas plus sympa si nous faisions connaissance ?</p></div>');
+      }
+      if (erreur=='passwordvide') {
+            $('.status').prepend('<div class="erreur"><p>Je suis navr&#233;, mais je risque de me faire gronder si je vous laisse entrer sans mot de passe...</p></div>');
+      }
+      
 }
-*///$('body').pagecontainer('change', '');
+
+function display_network_state (state){
+      $('.network_state').html('<i style="color:#46e446;" class="fas fa-toggle-on fa-2x"></i>'); //toggle-off  //power-off
+      $('.network_state').html('<i style="color:#ff1100" class="fas fa-toggle-on fa-flip-horizontal fa-2x"></i>');
+}
+
+function onOnline() {
+        console.log("got connection");
+        alert('got connection');
+        var connexion = checkConnection();
+        console.log("connexion");
+}
+function onOffline() {
+        console.log("lost connection");
+        alert("lost connection");
+}
+
+function checkConnection() {
+        var networkState = navigator.network.connection.type;
+        var states = {};
+        states[Connection.UNKNOWN]  = 'Unknown connection';
+        states[Connection.ETHERNET] = 'Ethernet connection';
+        states[Connection.WIFI]     = 'WiFi connection';
+        states[Connection.CELL_2G]  = 'Cell 2G connection';
+        states[Connection.CELL_3G]  = 'Cell 3G connection';
+        states[Connection.CELL_4G]  = 'Cell 4G connection';
+        states[Connection.NONE]     = 'No network connection';
+        console.log('Connection : ' + Connection);
+        console.log('Connection type: ' + states[networkState]);
+        return networkState;
+}
+
+
