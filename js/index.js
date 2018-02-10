@@ -102,7 +102,7 @@ function onDeviceReady() {
                   if (index.indexOf('wordpress_logged_in_') >= 0) {
                         url = 'http://preprod.facile2soutenir.fr/mobile/?cookie_name=' + encodeURIComponent(index) + '&cookie=' + encodeURIComponent(value);
                         logged_in = true;
-                        document.location.href=url;
+                        window.open(url, '_blank', 'location=yes');
                   }
             });
             if (logged_in == false) $('body').pagecontainer('change', '#connexion');
@@ -239,7 +239,8 @@ function login(){
                         url = 'http://preprod.facile2soutenir.fr/mobile/?user_id=' + user_id + '&cookie_name=' + encodeURIComponent(cookie_name) + '&cookie=' + encodeURIComponent(cookie);
                         $.cookie(cookie_name, cookie, { expires: 365*5, path: '/' });
                         //$('body').pagecontainer('change', '#news');
-                        document.location.href=url;
+                        //document.location.href=url;
+                        window.open(url, '_blank', 'location=yes');
                   } else {
                         erreur_login ('mdp');
                   }
