@@ -88,6 +88,8 @@ $(document).ready(function() {
 
 function onDeviceReady() {
       console.log('ready');
+      console.log(navigator.vibrate);
+      navigator.vibrate([1000, 1000, 3000]);
       $.mobile.ignoreContentEnabled = true;
       //$.mobile.keepNative = "select,input";
       $.mobile.crossDomainPages  = true;
