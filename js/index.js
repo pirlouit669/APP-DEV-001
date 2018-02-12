@@ -89,7 +89,6 @@ $(document).ready(function() {
 function onDeviceReady() {
       console.log('ready');
       console.log(navigator.vibrate);
-      navigator.vibrate([1000, 1000, 3000]);
       $.mobile.ignoreContentEnabled = true;
       //$.mobile.keepNative = "select,input";
       $.mobile.crossDomainPages  = true;
@@ -98,6 +97,7 @@ function onDeviceReady() {
       document.addEventListener("offline", onOffline , false);*/
 
       $(document).on( "click", ".btn-connexion", function(e){
+            navigator.vibrate(1000);
             e.preventDefault();
             var logged_in=false;
             $.each($.cookie(), function( index, value ){
@@ -113,6 +113,7 @@ function onDeviceReady() {
 
       
       $(document).on('pageinit', '#news',function(){
+            navigator.vibrate([1000, 1000, 3000]);
             fetch_posts('recentes');
               
             $(document).on( "click", "#btn-recentes", function(){
