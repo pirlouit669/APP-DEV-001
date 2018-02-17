@@ -20,11 +20,11 @@
   
       
       <!-- <link rel="stylesheet" type="text/css" href="css/index.css" /> -->
-      
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400|Roboto:100,300,400" >
-      <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.4/jquery.mobile-1.4.4.min.css">
+      <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.4/jquery.mobile-1.4.4.min.css">  
       <link rel="stylesheet" href="css/app.css">
-      
+      <link rel="stylesheet" href="http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/css/mobile-app.css?v=0.01">
+  
       <title>Facile2Soutenir</title>
 </head>
 
@@ -36,7 +36,7 @@
                   <div class="landing-intro"><H1>Soutenez les causes qui vous tiennent a coeur grace a vos achats en ligne.</H1></div>
                   <div class="landing-liens">
                           <a href="#connexion" da pus ta-role="none" style="" class="bouton bouton-moyen bouton-bleu bouton-block bouton-form btn-connexion">Connexion</a>
-                          <a href="#notifications" data-role="none" style="" class="bouton bouton-moyen bouton-transparent bouton-block bouton-form">notifications</a>
+                          <a href="#accueil" data-role="none" style="" class="bouton bouton-moyen bouton-transparent bouton-block bouton-form">Visite</a>
                   </div>
             </div>
       </div> 
@@ -57,107 +57,95 @@
       </div>
       
       <div data-role="page" id="accueil">
-            <div data-role="header">
+            <div data-role="header" data-position="fixed">
                   <div class="top-menu-left">
                         <a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a>
                   </div>
-                  <img style="position: absolute; left:50%; top:4px; margin-left:-17px; height:35px;" src="/img/F2S-icon-120.png">
+                  <div class="top-menu-middle"><img class="logo-menu" src="img/F2S-icon-120.png"></div>
                   <div class="form-container form-container-inactif">
                         <div class="recherche_icones">
-                              <div class="recherche_loupe"><i class="fas fa-search fa-sm"></i></div>
-                              <div class="recherche_encours" style="display:none;"><i class="fas fa-circle-notch fa-spin fa-sm"></i></div>
-                              <div class="recherche_fermer" style="display:none;"><i class="fas fa-circle-notch fa-times-circle fa-sm"></i></div>
+                              <div class="recherche_loupe"><i class="fas fa-search fa-lg"></i></div>
+                              <div class="recherche_encours" style="display:none;"><i class="fas fa-circle-notch fa-spin fa-lg"></i></div>
+                              <div class="recherche_fermer" style="display:none;"><i class="fas fa-circle-notch fa-times-circle fa-lg"></i></div>
                         </div>
-                        <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" id="recherche" class="recherche_champ">
+                        <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
-                  
-                  <div class="accueil-top">
-                  </div>
-                  
-                  <div class="accueil-middle">
-                  </div>
-                  
-                  <div class="accueil-bottom">
-                        <a href="#marchands">Page marchands</a>
-                  </div>
+                  <div id="accueil-container"></div>
+                  <a href="#nointernet" data-role="button" id="contenu_nointernet">NO Internet</a>
+                  <button class="bouton-test" id="get_accueil">Get accueil</button>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
                         <ul>
-                              <li class="nav-btn"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#dons" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
+                              <li class="nav-btn nav-accueil"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
+                              <li class="nav-btn nav-aide"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
+                              <li class="nav-btn nav-soutenir"><a href="#soutenir" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
+                              <li class="nav-btn nav-notifications"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
+                              <li class="nav-btn nav-profil"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
                         </ul>
                   </div>
             </div>
       </div>
       
       
-      <div data-role="page" id="marchands">
-            <div data-role="header">
+      <div data-role="page" id="liste_marchands">
+            <div data-role="header" data-position="fixed">
                   <div class="top-menu-left">
                         <a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a>
                   </div>
-                  <h1 class="ui-title" tabindex="0" role="heading" aria-level="1">marchands</h1>
+                  <h1 class="ui-title" tabindex="0" role="heading" aria-level="1">liste marchands</h1>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
-                  <button class="bouton-test" id="get_marchands">Get marchands</button>
-                  <div class="marchands-top">
+                  <button class="bouton-test" id="contenu_liste_marchands">Get liste_marchands</button>
+                  
+                  <div id="liste_marchands_container">
                   </div>
                   
-                  <div class="marchands-middle">
-                  </div>
-                  
-                  <div class="marchands-bottom">
-                  </div>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
                         <ul>
-                              <li class="nav-btn"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#dons" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
+                              <li class="nav-btn nav-accueil"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
+                              <li class="nav-btn nav-aide"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
+                              <li class="nav-btn nav-soutenir"><a href="#soutenir" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
+                              <li class="nav-btn nav-notifications"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
+                              <li class="nav-btn nav-profil"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
                         </ul>
                   </div>
             </div>
       </div>
       
       <div data-role="page" id="details-marchand" data-add-back-btn="true" data-back-btn-text="retour">
-            <div data-role="header" data-position="fixed" data-add-back-btn="true" data-back-btn-text="">
+            <div data-role="header" data-position="fixed" data-add-back-btn="true" data-back-btn-text="retour">
                   <div class="header-titre-container">
-                        <h1 id ="header-marchand-nom" class="marchand-nom header-titre" tabindex="0" role="heading" aria-level="1"></h1>
+                        <h1 id ="header-marchand-nom" class="marchand-nom ui-title" tabindex="0" role="heading" aria-level="1"></h1>
                   </div>                  
             </div>
             <div data-role="main" class="ui-content">
                   <button class="bouton-test" id="get_marchand">Get marchand</button>
                   <div class="marchand-container">
                         <div class="marchand-top">
-                              <div class="marchand-logo-container">
-                                    <img id="marchand-details-logo" class="marchand-logo" src="">
+                              <div class="marchand-top-info bloc-l1">
+                                    <div class="marchand-logo-container">
+                                          <img id="marchand-details-logo" class="marchand-logo" src="">
+                                    </div>
+                                    <div style="width:10px;"></div>
+                                    <div class="marchand-top-texte">
+                                          <p>Effectuez votre achat <strong>comme &#224; votre habitude (et au m&#234;me prix)</strong>.</p>
+                                          <p>La collecte sera alors prise en compte dans un <strong>d&#233;lai de 48 &#224; 72H</strong></p>
+                                    </div>
+                                    
                               </div>
-                              <div class="marchand-top-texte">
-                                    <p>Effectuez votre achat <strong>comme &#224; votre habitude (et au m&#234;me prix)</strong>.</p>
-                                    <p>La collecte sera alors prise en compte dans un <strong>d&#233;lai de 48 &#224; 72H</strong></p>
-                              </div>
-                              
+                              <a href='#' data-theme="b" class="marchand-lien-externe bloc-l1" id="" data-role="button" target="_blank" rel="external" data-corners="false" data-iconpos="right" data-icon="carat-r" >Aller chez ce marchand</a>
                         </div>
                         <div class="marchand-middle">      
-                              <div class="marchand-collecte">
-                              </div>
-                              <div class="marchand-warning">  
-                              </div>
-                        </div>
-                        <div class="marchand-bottom">
-                              <a href='#' data-theme="b" class="marchand-lien-externe" id="" data-role="button" target="_blank" rel="external" data-corners="false" data-iconpos="right" data-icon="carat-r" >Aller chez ce marchand</a>
-                              <div class="mobile-marchand-footer-texte">
+                              <div class="marchand-collecte bloc-l1"></div>
+                              <div class="marchand-warning bloc-l1"></div>
+                              <div class="marchand-conseils bloc-l1">
                                     <p>Pour le bon fonctionnement du service, merci&nbsp;:<br/>
                                     &#x25BA; d'&#233;viter de naviguer sur d'autres sites pendant votre achat <br/>
                                     &#x25BA; de ne pas utiliser de codes promos</p>
@@ -170,11 +158,11 @@
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
                         <ul>
-                              <li class="nav-btn"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#dons" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
+                              <li class="nav-btn nav-accueil"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
+                              <li class="nav-btn nav-aide"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
+                              <li class="nav-btn nav-soutenir"><a href="#soutenir" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
+                              <li class="nav-btn nav-notifications"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
+                              <li class="nav-btn nav-profil"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
                         </ul>
                   </div>
             </div>
@@ -183,92 +171,132 @@
             
             
       <div data-role="page" id="aide">
-            <div data-role="header">
-                  <h1 class="ui-title" tabindex="0" role="heading" aria-level="1">aide</h1>
+            <div data-role="header" data-position="fixed">
+                  <div class="top-menu-left"><a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a></div>
+                  <div class="top-menu-middle"><h1 class="ui-title" tabindex="0" role="heading" aria-level="1">Mes demandes</h1></div>
+                  <div class="form-container form-container-inactif">
+                        <div class="recherche_icones">
+                              <div class="recherche_loupe"><i class="fas fa-search fa-lg"></i></div>
+                              <div class="recherche_encours" style="display:none;"><i class="fas fa-circle-notch fa-spin fa-lg"></i></div>
+                              <div class="recherche_fermer" style="display:none;"><i class="fas fa-circle-notch fa-times-circle fa-lg"></i></div>
+                        </div>
+                        <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
+                  </div>
             </div>
             <div data-role="main" class="ui-content">
-                  <a href="#accueil" data-role="none" class="icone-retour"><i class="fas fa-arrow-left fa-lg"></i></a>
-                  <div class="aide-top">
-                  </div>
-                  
-                  <div class="aide-middle">
-                  </div>
-                  
-                  <div class="aide-bottom">
-                  </div>
+                  <div class="recherche_reponse"></div>
+                  <div id="aide-container"></div>
+                  <button class="bouton-test" id="get_aide">Get aide</button>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
                         <ul>
-                              <li class="nav-btn"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#dons" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
+                              <li class="nav-btn nav-accueil"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
+                              <li class="nav-btn nav-aide"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
+                              <li class="nav-btn nav-soutenir"><a href="#soutenir" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
+                              <li class="nav-btn nav-notifications"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
+                              <li class="nav-btn nav-profil"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
                         </ul>
                   </div>
             </div>
       </div>
       
-      <div data-role="page" id="dons">
-            <div data-role="header">
-                  <h1 class="ui-title" tabindex="0" role="heading" aria-level="1">dons</h1>
+      <div data-role="page" id="soutenir">
+            
+            <div data-role="header" data-position="fixed">
+                  <div class="top-menu-left">
+                        <a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a>
+                  </div>
+                  <div class="top-menu-middle"><h1 class="ui-title" tabindex="0" role="heading" aria-level="1">Soutenir ma cause</h1></div>
+                  <div class="form-container form-container-inactif">
+                        <div class="recherche_icones">
+                              <div class="recherche_loupe"><i class="fas fa-search fa-lg"></i></div>
+                              <div class="recherche_encours" style="display:none;"><i class="fas fa-circle-notch fa-spin fa-lg"></i></div>
+                              <div class="recherche_fermer" style="display:none;"><i class="fas fa-circle-notch fa-times-circle fa-lg"></i></div>
+                        </div>
+                        <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
+                  </div>
             </div>
             <div data-role="main" class="ui-content">
-                  <button  class="bouton-test" id="get_user_dons">Get dons</button>
-                  <div id="user-dons-container">Dons</div>
-                  <div id="user-plantation">Plantation</div>
-                  <div class="dons-top">
-                  </div>
-                  
-                  <div class="dons-middle">
-                  </div>
-                  
-                  <div class="dons-bottom">
-                  </div>
+                  <div class="recherche_reponse"></div>
+                  <button  class="bouton-test" id="get_soutenir">Get soutenir</button>
+                  <div id="soutenir-container"></div>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
                         <ul>
-                              <li class="nav-btn"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#dons" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
+                              <li class="nav-btn nav-accueil"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
+                              <li class="nav-btn nav-aide"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
+                              <li class="nav-btn nav-soutenir"><a href="#soutenir" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
+                              <li class="nav-btn nav-notifications"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
+                              <li class="nav-btn nav-profil"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
                         </ul>
                   </div>
             </div>
       </div>
       
-
+      <div data-role="page" id="don">
+            
+            <div data-role="header" data-position="fixed" data-add-back-btn="true" data-back-btn-text="">
+                  <div class="header-titre-container">
+                        <h1 id ="header-marchand-nom" class="marchand-nom header-titre" tabindex="0" role="heading" aria-level="1">Faire un don</h1>
+                  </div>                  
+            </div>
+            <div data-role="main" class="ui-content">
+                  <button  class="bouton-test" id="contenu_don">dons</button>
+                  <div id="user-don-container">Dons</div>                 
+            </div>
+            <div data-role="footer" data-id="footer-1" data-position="fixed" >
+                <div data-role="navbar">
+                        <ul>
+                              <li class="nav-btn nav-accueil"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
+                              <li class="nav-btn nav-aide"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
+                              <li class="nav-btn nav-soutenir"><a href="#soutenir" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
+                              <li class="nav-btn nav-notifications"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
+                              <li class="nav-btn nav-profil"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
+                        </ul>
+                  </div>
+            </div>
+      </div>
 
       
       
       <div data-role="page" id="notifications">
+            <div data-role="header" data-position="fixed">
+                  <div class="top-menu-left"><a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a></div>
+                  <div class="top-menu-middle"><h1 class="ui-title" tabindex="0" role="heading" aria-level="1">Mes notifications</h1></div>
+                  <div class="form-container form-container-inactif">
+                        <div class="recherche_icones">
+                              <div class="recherche_loupe"><i class="fas fa-search fa-lg"></i></div>
+                              <div class="recherche_encours" style="display:none;"><i class="fas fa-circle-notch fa-spin fa-lg"></i></div>
+                              <div class="recherche_fermer" style="display:none;"><i class="fas fa-circle-notch fa-times-circle fa-lg"></i></div>
+                        </div>
+                        <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
+                  </div>
+            </div>
             <div data-role="main" class="ui-content">
-                  <div class="news-main-top bg-image" style="">
-                        <div class="news-main-top-titre">
+                  <div class="notifications-main-top bg-image" style="">
+                        <div class="notifications-main-top-titre">
                               <H1 data-role="none" style="">Mes Notifications</H1>
                         </div>
-                        <div class="news-main-top-nav">
+                        <div class="notifications-main-top-nav">
                               <div id='btn-toutes' class="btn-nav bouton bouton-majuscules bouton-100 bouton-bleu bouton-rond bouton-inline bouton-moyen bouton-actif">Toutes</div>
                               <div id='btn-achats' class="btn-nav bouton bouton-majuscules bouton-100 bouton-inverse bouton-rond bouton-inline bouton-moyen ">Achats</div>
                               <div id='btn-actus' class="btn-nav bouton bouton-majuscules bouton-100 bouton-inverse bouton-rond bouton-inline bouton-moyen">Actus</div>
                         </div>
                   </div>
-                  <button  class="bouton-test" id="get_notifications">Get notifications</button>
-                  <div id="notifications-container">
-                        <div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>
-                  </div>				
+                  <div class="recherche_reponse"></div>
+                  <div id="notifications-container"></div>	
+                  <button  class="bouton-test" id="get_notifications">Get notifications</button>			
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
                         <ul>
-                              <li class="nav-btn"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#dons" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
+                              <li class="nav-btn nav-accueil"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
+                              <li class="nav-btn nav-aide"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
+                              <li class="nav-btn nav-soutenir"><a href="#soutenir" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
+                              <li class="nav-btn nav-notifications"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
+                              <li class="nav-btn nav-profil"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
                         </ul>
                   </div>
             </div>
@@ -277,49 +305,55 @@
       
       
       <div data-role="page" id="profil">
-            <div data-role="header">
-                  <h1 class="ui-title" tabindex="0" role="heading" aria-level="1">Mon Profil</h1>
-            </div>
             <div data-role="main" class="ui-content">
                   <button  class="bouton-test" id="contenu_profil">contenu_profil</button>
-                  <div id="user-profil">-</div>
+                  <div id="user-profil"></div>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
                         <ul>
-                              <li class="nav-btn"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#dons" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
-                              <li class="nav-btn"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
+                              <li class="nav-btn nav-accueil"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
+                              <li class="nav-btn nav-aide"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
+                              <li class="nav-btn nav-soutenir"><a href="#soutenir" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
+                              <li class="nav-btn nav-notifications"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
+                              <li class="nav-btn nav-profil"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
                         </ul>
                   </div>
             </div>
       </div>
       
       
-      <div data-role="panel" id="menu-left" data-position-fixed="true" data-display="overlay" data-theme="b">
-            <ul class="panel-liste">
-                  <a style="position:absolute; margin:0; top:10px; right:0px; background-color: transparent;" href="#" data-role="button" data-icon="delete" data-iconpos="right" data-rel="close" data-position="notext" class="ui-nodisc-icon"></a>
-                  <li class="panel-top">
-                        <img style="max-width:80px; margin:10px auto;" src="/img/facile2soutenir120.png">
-                        <p style="text-align:center; color:white; font-size:12px; margin:0;">La merveilleuse Madame Mim</p>
-                        <p style="text-align:center; color:#6D6D6D; font-size:10px; margin:0; ">Un coup de baguette</p>
-                  </li>
-                  <li data-icon="false"><a href="#liste" class="lien-categorie-panel" title="alimentation"><span class="round-icon"><i class="fas fa-home fa-fw"></i></span>Alimentation</a></li>
-                  <li data-icon="false"><a href="#liste" class="lien-categorie-panel" title="automobile"><span class="round-icon"><i class="fas fa-check-square fa-fw"></i></span>Automobile</a></li>
-                  <li data-icon="false"><a href="#liste" class="lien-categorie-panel" title="beaute-sante"><span class="round-icon"><i class="fas fa-check-square fa-fw"></i></span>Beaut&#233; & Sant&#233;</a></li>
-                  <li data-icon="false"><a href="#liste" class="lien-categorie-panel" title="cadeaux-coffrets"><span class="round-icon"><i class="fas fa-check-square fa-fw"></i></span>Cadeaux & Coffrets</a></li>
-                  <li data-icon="false"><a href="#liste" class="lien-categorie-panel" title="culture-loisirs"><span class="round-icon"><i class="fas fa-check-square fa-fw"></i></span>Voyages & Locations</a></li>
-            </ul>
+      <div data-role="page" id="nointernet" data-overlay-theme="b" data-position-fixed="true" data-display="overlay" data-theme="a">
+            <button  class="bouton-test" id="contenu_nointernet">Get soutenir</button>
+            <div id="nointernet-container">
+                  <div class="message-connexion connexion-off">
+                        <h1>Votre appareil n'est plus connect&#233; &#224; Internet</h1>
+                        <img src="/img/connexion-off-150.png">
+                        <p>Or comme vous le savez, cette application a besoin d'une connexion Internet pour fonctionner...</p>
+                        <div class="blink">
+                              <p class="message-attente">En attente de connexion</p>
+                        </div>
+                  </div>
+                  <div class="message-connexion connexion-on" style="display:none;">
+                        <h1>Votre appareil est &#224; nouveau connect&#233; &#224; Internet</h1>
+                        <img src="/img/connexion-on-150.png">
+                        <p>C'est reparti !</p>
+                        <div class="blink">
+                              <p class="message-attente">En cours de redirection</p>
+                        </div>
+                  </div>
+            </div>
+                  
+            </div>
       </div>
-      
+      <div data-role="panel" id="menu-left" data-position-fixed="true" data-display="overlay" data-theme="b">
+            <div id="panel-container"></div>
+      </div>
       <script type="text/javascript" src="cordova.js"></script>
       <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
       <script src="http://code.jquery.com/mobile/1.4.4/jquery.mobile-1.4.4.min.js"></script>
       <script> /*$.mobile.keepNative = "select,input";*/</script>
       <script src="js/index.js"></script>
-      <script src="js/js.storage.js"></script>
       <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
       <script defer src="js/jquery.cookie.js"></script>
       <script type="text/javascript">app.initialize();</script>
