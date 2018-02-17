@@ -738,7 +738,7 @@ function ready () {
                         $('.connexion-on').fadeIn();
                         setTimeout(function() {
                               $.mobile.changePage($('#landing'));
-                        }, 2000);
+                        }, 3000);
                   }
                   //connectionStatus = navigator.onLine ? 'online' : 'offline';
             }, 5000);

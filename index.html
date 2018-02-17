@@ -75,7 +75,6 @@
                   <div class="recherche_reponse"></div>
                   <div id="accueil-container"></div>
                   <a href="#nointernet" data-role="button" id="contenu_nointernet">NO Internet</a>
-                  <button class="bouton-test" id="get_accueil">Get accueil</button>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -93,18 +92,12 @@
       
       <div data-role="page" id="liste_marchands">
             <div data-role="header" data-position="fixed">
-                  <div class="top-menu-left">
-                        <a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a>
-                  </div>
+                  <div class="top-menu-left"><a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a></div>
                   <h1 class="ui-title" tabindex="0" role="heading" aria-level="1">liste marchands</h1>
             </div>
             <div data-role="main" class="ui-content">
-                  <div class="recherche_reponse"></div>
-                  <button class="bouton-test" id="contenu_liste_marchands">Get liste_marchands</button>
-                  
-                  <div id="liste_marchands_container">
-                  </div>
-                  
+                  <div class="recherche_reponse"></div>                  
+                  <div id="liste_marchands_container"></div>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -126,7 +119,6 @@
                   </div>                  
             </div>
             <div data-role="main" class="ui-content">
-                  <button class="bouton-test" id="get_marchand">Get marchand</button>
                   <div class="marchand-container">
                         <div class="marchand-top">
                               <div class="marchand-top-info bloc-l1">
@@ -219,7 +211,6 @@
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
-                  <button  class="bouton-test" id="get_soutenir">Get soutenir</button>
                   <div id="soutenir-container"></div>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
@@ -243,8 +234,7 @@
                   </div>                  
             </div>
             <div data-role="main" class="ui-content">
-                  <button  class="bouton-test" id="contenu_don">dons</button>
-                  <div id="user-don-container">Dons</div>                 
+                  <div id="user-don-container"></div>                 
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -300,13 +290,9 @@
                         </ul>
                   </div>
             </div>
-      </div> 
-      
-      
-      
+      </div>
       <div data-role="page" id="profil">
             <div data-role="main" class="ui-content">
-                  <button  class="bouton-test" id="contenu_profil">contenu_profil</button>
                   <div id="user-profil"></div>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
@@ -324,7 +310,6 @@
       
       
       <div data-role="page" id="nointernet" data-overlay-theme="b" data-position-fixed="true" data-display="overlay" data-theme="a">
-            <button  class="bouton-test" id="contenu_nointernet">Get soutenir</button>
             <div id="nointernet-container">
                   <div class="message-connexion connexion-off">
                         <h1>Votre appareil n'est plus connect&#233; &#224; Internet</h1>
@@ -342,6 +327,7 @@
                               <p class="message-attente">En cours de redirection</p>
                         </div>
                   </div>
+                  <a class="bouton-test" href="#accueil" >retour</button>
             </div>
                   
             </div>
