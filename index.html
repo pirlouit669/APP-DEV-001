@@ -21,9 +21,14 @@
       
       <!-- <link rel="stylesheet" type="text/css" href="css/index.css" /> -->
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400|Roboto:100,300,400" >
-      <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.4/jquery.mobile-1.4.4.min.css">  
+      <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">  
       <link rel="stylesheet" href="css/app.css">
-      <link rel="stylesheet" href="http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/css/mobile-app.css?v=0.01">
+      <link rel="stylesheet" id = "extcss" href="http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/css/mobile-app.css?v=0.01">
+      <script>
+            var uniqueNum = new Date().getTime();
+            var cssURL = 'http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/css/mobile-app.css?ver=' + uniqueNum;
+            document.getElementById("extcss").href = cssURL;
+      </script>
   
       <title>Facile2Soutenir</title>
 </head>
@@ -93,7 +98,9 @@
       <div data-role="page" id="liste_marchands">
             <div data-role="header" data-position="fixed">
                   <div class="top-menu-left"><a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a></div>
-                  <h1 class="ui-title" tabindex="0" role="heading" aria-level="1">liste marchands</h1>
+                  <div class="top-menu-middle">
+                        <h1 class="ui-title" tabindex="0" role="heading" aria-level="1">liste marchands</h1>
+                  </div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>                  
@@ -114,8 +121,8 @@
       
       <div data-role="page" id="details-marchand" data-add-back-btn="true" data-back-btn-text="retour">
             <div data-role="header" data-position="fixed" data-add-back-btn="true" data-back-btn-text="retour">
-                  <div class="header-titre-container">
-                        <h1 id ="header-marchand-nom" class="marchand-nom ui-title" tabindex="0" role="heading" aria-level="1"></h1>
+                  <div class="top-menu-middle">
+                        <h1 id ="" class="marchand-nom ui-title" tabindex="0" role="heading" aria-level="1"></h1>
                   </div>                  
             </div>
             <div data-role="main" class="ui-content">
@@ -178,7 +185,7 @@
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
                   <div id="aide-container"></div>
-                  <button class="bouton-test" id="get_aide">Get aide</button>
+                  <a class="bouton-test" id="get_aide">Get aide</a>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -193,12 +200,34 @@
             </div>
       </div>
       
+      <div data-role="page" id="details-ticket" data-add-back-btn="true" data-back-btn-text="retour">
+            <div data-role="header" data-position="fixed" data-add-back-btn="true" data-back-btn-text="retour">
+                  <div class="top-menu-middle">
+                        <h1 id="" class="ticket-titre ui-title" tabindex="0" role="heading" aria-level="1"></h1>
+                  </div>                  
+            </div>
+            <div data-role="main" class="ui-content">
+                  <div id="ticket-container"></div>
+            </div>
+            <div data-role="footer" data-id="footer-1" data-position="fixed" >
+                <div data-role="navbar">
+                        <ul>
+                              <li class="nav-btn nav-accueil"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
+                              <li class="nav-btn nav-aide"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
+                              <li class="nav-btn nav-soutenir"><a href="#soutenir" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
+                              <li class="nav-btn nav-notifications"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
+                              <li class="nav-btn nav-profil"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
+                        </ul>
+                  </div>
+            </div>
+      </div>
+      
+      
+      
       <div data-role="page" id="soutenir">
             
             <div data-role="header" data-position="fixed">
-                  <div class="top-menu-left">
-                        <a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a>
-                  </div>
+                  <div class="top-menu-left"><a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a></div>
                   <div class="top-menu-middle"><h1 class="ui-title" tabindex="0" role="heading" aria-level="1">Soutenir ma cause</h1></div>
                   <div class="form-container form-container-inactif">
                         <div class="recherche_icones">
@@ -226,12 +255,9 @@
             </div>
       </div>
       
-      <div data-role="page" id="don">
-            
+      <div data-role="page" id="don">     
             <div data-role="header" data-position="fixed" data-add-back-btn="true" data-back-btn-text="">
-                  <div class="header-titre-container">
-                        <h1 id ="header-marchand-nom" class="marchand-nom header-titre" tabindex="0" role="heading" aria-level="1">Faire un don</h1>
-                  </div>                  
+                  <div class="header-titre-container"><h1 id ="header-marchand-nom" class="marchand-nom header-titre" tabindex="0" role="heading" aria-level="1">Faire un don</h1></div>                  
             </div>
             <div data-role="main" class="ui-content">
                   <div id="user-don-container"></div>                 
@@ -250,7 +276,6 @@
       </div>
 
       
-      
       <div data-role="page" id="notifications">
             <div data-role="header" data-position="fixed">
                   <div class="top-menu-left"><a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a></div>
@@ -265,19 +290,9 @@
                   </div>
             </div>
             <div data-role="main" class="ui-content">
-                  <div class="notifications-main-top bg-image" style="">
-                        <div class="notifications-main-top-titre">
-                              <H1 data-role="none" style="">Mes Notifications</H1>
-                        </div>
-                        <div class="notifications-main-top-nav">
-                              <div id='btn-toutes' class="btn-nav bouton bouton-majuscules bouton-100 bouton-bleu bouton-rond bouton-inline bouton-moyen bouton-actif">Toutes</div>
-                              <div id='btn-achats' class="btn-nav bouton bouton-majuscules bouton-100 bouton-inverse bouton-rond bouton-inline bouton-moyen ">Achats</div>
-                              <div id='btn-actus' class="btn-nav bouton bouton-majuscules bouton-100 bouton-inverse bouton-rond bouton-inline bouton-moyen">Actus</div>
-                        </div>
-                  </div>
                   <div class="recherche_reponse"></div>
                   <div id="notifications-container"></div>	
-                  <button  class="bouton-test" id="get_notifications">Get notifications</button>			
+                  <a class="bouton-test" id="get_notifications">Get notifications</a>			
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -327,7 +342,7 @@
                               <p class="message-attente">En cours de redirection</p>
                         </div>
                   </div>
-                  <a class="bouton-test" href="#accueil" >retour</button>
+                  <a class="bouton-test" href="#accueil" >retour</a>
             </div>
                   
             </div>

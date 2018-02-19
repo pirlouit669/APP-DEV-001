@@ -67,6 +67,8 @@ function ready () {
       // gestion du cookie
       var F2S_cookie = '';
       $.each($.cookie(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {F2S_cookie = value;}});
+      console.log('F2S_cookie : ');
+      console.log(F2S_cookie);
       
       //mise en page
       $.mobile.ignoreContentEnabled = true;      //$.mobile.keepNative = "select,input";
@@ -102,7 +104,8 @@ function ready () {
       //GESTION DE LA RECHERCHE AJAX
       //***************
       
-      $(document).on( "focus", ".form-container-inactif", function(e){
+      $(document).on( "click", ".form-container-inactif", function(e){
+            console.log('focus container');
             $(this).toggleClass('form-container-actif');
             $(this).toggleClass('form-container-inactif');
             $('.recherche_fermer').show();
@@ -179,32 +182,114 @@ function ready () {
     
       $(document).on('pageinit', '#accueil', function(){contenu_accueil();});
       $(document).on('pageinit', '#aide', function(){contenu_aide();});
+      $(document).on('pageshow', '#details-ticket',function(){
+            $('#details-ticket').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            var tid=$( ".ticket_actif" ).attr('id');
+            $.ajax({ // recupere les infos détaillées du ticket
+                  url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                  cache: false,
+                  data: {
+                        'action':'am_get_ticket_details',
+                        'ticket_id' : tid
+                  },
+                  success:function(resultat){
+                        $(".encours").fadeOut();
+                        $("#ticket-container").html(resultat);
+                        //$("#ticket-container").fadeIn();
+                        $( "#form_nouvelle_reponse" ).trigger('create');
+                        $('#submit_nouvelle_reponse').on('click', {ticket_id: tid, cookie: F2S_cookie}, cool_function);
+                        
+                        function cool_function(event){
+                              if(event.handled !== true) {
+                                    event.handled = true;
+                                    if($('#contenu_nouvelle_reponse').val().length > 0 ){
+                                          $.ajax({
+                                                url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                                                data: {
+                                                      action : 'am_post_ticket_response',
+                                                      cookie : event.data.cookie,
+                                                      parent : event.data.ticket_id,
+                                                      reponse : $('#contenu_nouvelle_reponse').val()
+                                                },
+                                                type: 'post',                   
+                                                async: 'true',
+                                                dataType: 'json',
+                                                beforeSend: function() {
+                                                      // show ajax spinner
+                                                },
+                                                complete: function() {
+                                                      // hide ajax spinner
+                                                },
+                                                success: function (result) {
+                                                console.log(result);
+                                                },
+                                                error: function (request,error) {               
+                                                      alert('Oups... Erreur de reseau... Ca n\'est (sans doute) pas de notre faute. Voulez-vous reessayer ?');
+                                                }
+                                          });                   
+                                    } else {
+                                          alert('hmmm... vous n\'avez rien d\'autre a dire ?');
+                                    }
+                              }
+                              return false;
+                        }
+                        
+                        /*$(document).on('click', '#submit_nouvelle_reponse', {param1: tid, param2: "World"}, function(e) { // catch the form's submit event
+                              if(e.handled !== true) {
+                                    e.handled = true;
+                                    if($('#contenu_nouvelle_reponse').val().length > 0 ){
+                                          $('#form_nouvelle_reponse').prop('disabled', true);
+                                          console.log('3 tid : ' + tid);
+                                          console.log('3 cookie : ' + F2S_cookie);
+                                          console.log(e.data.param1);
+                                          console.log(e.param1);
+                                          $.ajax({
+                                                url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                                                data: {
+                                                      action : 'am_post_ticket_response',
+                                                      cookie : F2S_cookie,
+                                                      parent : tid,
+                                                      reponse : $('#contenu_nouvelle_reponse').val()
+                                                },
+                                                type: 'post',                   
+                                                async: 'true',
+                                                dataType: 'json',
+                                                beforeSend: function() {
+                                                      // show ajax spinner
+                                                },
+                                                complete: function() {
+                                                      // hide ajax spinner
+                                                },
+                                                success: function (result) {
+      console.log(result);
+                                                },
+                                                error: function (request,error) {               
+                                                      alert('Oups... Erreur de reseau... Ca n\'est (sans doute) pas de notre faute. Voulez-vous reessayer ?');
+                                                }
+                                          });                   
+                                    } else {
+                                          alert('hmmm... vous n\'avez rien d\'autre a dire ?');
+                                    }
+                                    
+                              }
+                        return false; // cancel original event to prevent form submitting
+                        }); */   
+                        
+                        
+                  },
+                  error: function(erreur){
+                        console.log(erreur);
+                  }
+            });
+      });
       $(document).on('pageinit', '#soutenir', function(){contenu_soutenir(10);});
       $(document).on('pageinit', '#don', function(){contenu_don();});
       $(document).on('pageinit', '#notifications', function(){
             console.log('init notifications');
             contenu_notifications(10, 'toutes');
-            $(document).on( "click", "#btn-toutes", function(){
-                  console.log('toutes');
-                  $(this).addClass('bouton-bleu').removeClass('bouton-inverse');
-                  $('#btn-achats').addClass('bouton-inverse').removeClass('bouton-bleu');
-                  $('#btn-actus').addClass('bouton-inverse').removeClass('bouton-bleu');
-                  contenu_notifications(10, 'toutes');
-            });              
-            $(document).on( "click", "#btn-achats", function(){
-                  console.log('achats');
-                  $(this).addClass('bouton-bleu').removeClass('bouton-inverse');
-                  $('#btn-toutes').addClass('bouton-inverse').removeClass('bouton-bleu');
-                  $('#btn-actus').addClass('bouton-inverse').removeClass('bouton-bleu');
-                  contenu_notifications(10, 'achats');
-            });
-            $(document).on( "click", "#btn-actus", function(){
-                  console.log('actus');
-                  $(this).addClass('bouton-bleu').removeClass('bouton-inverse');
-                  $('#btn-toutes').addClass('bouton-inverse').removeClass('bouton-bleu');
-                  $('#btn-achats').addClass('bouton-inverse').removeClass('bouton-bleu');
-                  contenu_notifications(10, 'actus');
-            });
+            
+            
+            
             /*$(document).on( "click", ".lien-news-detail", function(){
                   activenews = $(this).parent();
                   activenews.addClass('news-active');
@@ -232,7 +317,7 @@ function ready () {
                         'mid' : mid
                   },
                   success:function(marchand){
-                        $( ".contenu-marchand").removeClass('waiting');
+                        $( ".contenu-marchand").removeClass('waiting'); // ???????????????
                         
                         $("#header-marchand-nom").html(marchand['nom']);
                         $("#marchand-details-logo").attr('src', marchand['logo']);
@@ -252,7 +337,8 @@ function ready () {
                   }
             });
       });
-      $(document).on('pageshow', '#nointernet', function(){contenu_nointernet();});
+      $(document).on('pagebeforeshow', '#nointernet', function (e, data) {contenu_nointernet(data);});
+      //$(document).on('pageshow', '#nointernet', function(){contenu_nointernet();});
       
       $(document).on( 'click', '#get_accueil', function(e){contenu_accueil();});
       $(document).on( 'click', '#get_aide', function(e){contenu_aide();});
@@ -273,7 +359,6 @@ function ready () {
             });
       } 
       function contenu_accueil() {
-            console.log('prepa accueil');
             $('#accueil').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
@@ -327,10 +412,32 @@ function ready () {
                   success:function(resultat) {
                         $('.encours').fadeOut();
                         $('#notifications-container').html(resultat);
+
+                        $(document).on( "click", "#btn-toutes", function(){
+                              /*$(this).addClass('bouton-bleu').removeClass('bouton-inverse');
+                              $('#btn-achats').addClass('bouton-inverse').removeClass('bouton-bleu');
+                              $('#btn-actus').addClass('bouton-inverse').removeClass('bouton-bleu');*/
+                              contenu_notifications(10, 'toutes');
+                        });              
+                        $(document).on( "click", "#btn-achats", function(){
+                              /*$(this).addClass('bouton-bleu').removeClass('bouton-inverse');
+                              $('#btn-toutes').addClass('bouton-inverse').removeClass('bouton-bleu');
+                              $('#btn-actus').addClass('bouton-inverse').removeClass('bouton-bleu');*/
+                              contenu_notifications(10, 'achats');
+                        });
+                        $(document).on( "click", "#btn-actus", function(){
+                              console.log('actus');
+                              /*$(this).addClass('bouton-bleu').removeClass('bouton-inverse');
+                              $('#btn-toutes').addClass('bouton-inverse').removeClass('bouton-bleu');
+                              $('#btn-achats').addClass('bouton-inverse').removeClass('bouton-bleu');*/
+                              contenu_notifications(10, 'actus');
+                        });
                   }
             });
       }
       function contenu_aide() {
+            console.log('loading aide');
+            console.log('F2S_cookie : ' + F2S_cookie);
             $('#aide').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
             $('.nav-aide .number_container').fadeOut();
             $.ajax({
@@ -339,7 +446,13 @@ function ready () {
                   data: {'action':'am_contenu_aide', 'cookie' : F2S_cookie},
                   success:function(resultat) {
                         $('.encours').fadeOut();
-                        $('#aide-container').html(resultat);
+                        $('#aide-container').html(resultat);                        
+                        $(".ticket_link").on( "click", function(e){
+                              $(this).parents().find('a').removeClass("ticket_actif");
+                              videticket();
+                              $(this).addClass('ticket_actif');
+                              $('.ticket-titre').text($(this).text());
+                        });  
                   }
             });
       }   
@@ -729,15 +842,17 @@ function ready () {
             
       }
 
-      function contenu_nointernet() {
-            console.log('load page no internet');
+      function contenu_nointernet(data) {
+            var previous = data.prevPage.attr('id');
+            console.log('page precedente : ' + previous);
             vibre();
-            setInterval(function () {
+            var refreshIntervalId = setInterval(function () {
                   if (checkConnection()!=false) {
+                        clearInterval(refreshIntervalId);
                         $('.connexion-off').hide();
                         $('.connexion-on').fadeIn();
                         setTimeout(function() {
-                              $.mobile.changePage($('#landing'));
+                              $.mobile.changePage($('#'+previous));
                         }, 3000);
                   }
                   //connectionStatus = navigator.onLine ? 'online' : 'offline';
@@ -816,6 +931,11 @@ function videmarchand(){// vide les infos marchands initiales.
       $("#marchand-details-logo").attr('src', '');
       $('#details-marchand .ui-content').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
       $(".marchand-container").hide();
+}
+function videticket(){// vide les infos ticket initiales.
+      $('#ticket-details').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+      $('#ticket-container').html('');
+      //$('#ticket-container').hide();
 }
 function login(){
       $('.status .erreur').remove();

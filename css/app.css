@@ -47,10 +47,22 @@ ul {padding:0;}
 
 
 /* NO INTERNET */
+.message-connexion {
+    position:absolute;
+    text-align:center;
+    width:280px;
+    left:50%;
+    margin-left:-140px;
+    top:50%;   
+}
+.connexion-off {margin-top: -180px;}
+.connexion-on { margin-top: -160px;}
+
+.message-connexion h1 {color:#656565;}
 @media screen and (min-aspect-ratio: 1/1) and (min-width:400px) {
     .message-connexion {display: block;position: inherit;margin:30px auto;width:auto;}
 }
-.message-attente { border-radius:4px; -webkit-border-radius:4px; color:#FFFFFF; max-width: 300px; font-size:16px; margin: 10px auto; padding:5px 0px; display:block;}
+.message-attente { border-radius:4px; -webkit-border-radius:4px; color:#FFFFFF; max-width: 300px; font-size:16px; margin: 10px auto; padding:5px; display:block; text-align: center;}
 .connexion-off .message-attente {background-color:#f7574b;}
 .connexion-on .message-attente {background-color:#00b050;}
 @keyframes fade {
