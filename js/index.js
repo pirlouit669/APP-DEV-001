@@ -197,19 +197,20 @@ function ready () {
                         $("#ticket-container").html(resultat);
                         //$("#ticket-container").fadeIn();
                         $( "#form_nouvelle_reponse" ).trigger('create');
-                        $('#submit_nouvelle_reponse').on('click', {ticket_id: tid, cookie: F2S_cookie}, cool_function);
+                        $('#submit_nouvelle_reponse').on('click', {ticket_id: tid, cookie: F2S_cookie}, nouvelle_reponse);
                         
-                        function cool_function(event){
+                        function nouvelle_reponse(event){
                               if(event.handled !== true) {
                                     event.handled = true;
                                     if($('#contenu_nouvelle_reponse').val().length > 0 ){
+                                          contenu = $('#contenu_nouvelle_reponse').val();
                                           $.ajax({
                                                 url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                                                 data: {
-                                                      action : 'am_post_ticket_response',
+                                                      action : 'am_post_ticket',
                                                       cookie : event.data.cookie,
-                                                      parent : event.data.ticket_id,
-                                                      reponse : $('#contenu_nouvelle_reponse').val()
+                                                      parent_id : event.data.ticket_id,
+                                                      contenu : contenu
                                                 },
                                                 type: 'post',                   
                                                 async: 'true',
@@ -221,7 +222,17 @@ function ready () {
                                                       // hide ajax spinner
                                                 },
                                                 success: function (result) {
-                                                console.log(result);
+                                                      $('#ticket_nouvelle_reponse_msg').html('<div class="ticket_message"><p>Merci pour votre message.</p><p>Nous reviendrons vers vous aussi vite que possible !</p></div>');
+                                                      ligne = '<tr class="wpas-reply-single new-reply" style="display:none;" valign="top"><td><div class="wpas-user-profile">'+result['avatar']+'</div></td>';
+                                                      ligne += '<td> <div class="wpas-reply-meta">';
+                                                      ligne += '<div class="wpas-reply-user"><span class="wpas-profilename">'+result['login']+'</span></div>';
+                                                      ligne += '<div class="wpas-reply-time"><span class="wpas-human-date">'+result['date']+'</span></div>';
+                                                      ligne += '</div>';
+                                                      ligne += '<div class="wpas-reply-content">' + texte + '</div></td></tr>';
+                                                      $('#details-ticket #table-replies tbody').append(ligne);
+                                                      $('.new-reply').fadeIn(1000, function () {
+                                                            $('#ticket_nouvelle_reponse').fadeOut(function(){ $('#ticket_nouvelle_reponse_msg').fadeIn() });
+                                                      });
                                                 },
                                                 error: function (request,error) {               
                                                       alert('Oups... Erreur de reseau... Ca n\'est (sans doute) pas de notre faute. Voulez-vous reessayer ?');
@@ -246,10 +257,10 @@ function ready () {
                                           $.ajax({
                                                 url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                                                 data: {
-                                                      action : 'am_post_ticket_response',
+                                                      action : 'am_post_ticket',
                                                       cookie : F2S_cookie,
                                                       parent : tid,
-                                                      reponse : $('#contenu_nouvelle_reponse').val()
+                                                      texte : $('#contenu_nouvelle_reponse').val()
                                                 },
                                                 type: 'post',                   
                                                 async: 'true',
@@ -284,18 +295,7 @@ function ready () {
       });
       $(document).on('pageinit', '#soutenir', function(){contenu_soutenir(10);});
       $(document).on('pageinit', '#don', function(){contenu_don();});
-      $(document).on('pageinit', '#notifications', function(){
-            console.log('init notifications');
-            contenu_notifications(10, 'toutes');
-            
-            
-            
-            /*$(document).on( "click", ".lien-news-detail", function(){
-                  activenews = $(this).parent();
-                  activenews.addClass('news-active');
-                  $('.news').not(activenews).removeClass('news-active');
-            });*/
-      });
+      $(document).on('pageinit', '#notifications', function(){contenu_notifications(10, 'toutes');});
       $(document).on('pageinit', '#profil', function(){contenu_profil();});
       $(document).on('pageshow', '#details-marchand',function(){
             var mid = $( ".marchand-lien-externe" ).attr('id'); // recupere l'id du marchand dans le champ ID de mobile bouton
@@ -355,32 +355,43 @@ function ready () {
                   data: {'action':'am_contenu_panel_left', 'cookie' : F2S_cookie},
                   success:function(resultat) {
                         $('#panel-container').html(resultat);
+                  },
+                  complete:function() {
+                        $( ".lien-categorie" ).on( "click", function(e) {
+                              var slug=jQuery(this).attr('id');
+                              //$( ".liste-marchands" ).attr('id', slug);
+                              //$.mobile.navigate('#accueil');
+                              contenu_liste_marchands ('', slug);
+                        });
+                        $( ".mlien" ).on( "click", function(e) {
+                              videmarchand(); // vide les infos marchands initiales.
+                              var mid=$(this).attr('id'); // récupère l'ID du marchand
+                              $( ".marchand-lien-externe" ).attr('id', mid); // positionne l'ID du marchand dans le champ ID de mobile bouton pour que la page mobile marchand puisse le recuperer
+                        });
                   }
             });
       } 
       function contenu_accueil() {
+            $('#accueil-container').html('');
             $('#accueil').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_accueil', 'cookie' : F2S_cookie},
                   success:function(resultat) {
+                        console.log(resultat);
                         $('.encours').fadeOut();
                         $('#accueil-container').html(resultat);
                   },
                   complete:function() {
                         $( ".lien-categorie" ).on( "click", function(e) {
-                              //e.preventDefault();
                               var slug=jQuery(this).attr('id');
-                              //$( ".liste-marchands" ).attr('id', slug);
-                              //$.mobile.navigate('#accueil');
-                              console.log('populate liste_marchands avec slug : ' + slug);
                               contenu_liste_marchands ('', slug);
                         });
                         $( ".mlien" ).on( "click", function(e) {
-                              console.log('clic marchand accueil');
                               videmarchand(); // vide les infos marchands initiales.
                               var mid=$(this).attr('id'); // récupère l'ID du marchand
+                              $('.marchand-nom').text($(this).attr('title'));
                               $( ".marchand-lien-externe" ).attr('id', mid); // positionne l'ID du marchand dans le champ ID de mobile bouton pour que la page mobile marchand puisse le recuperer
                         });
                   }
@@ -388,7 +399,7 @@ function ready () {
       }
       function contenu_soutenir(nombre, type) {
             $('#soutenir').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-            $('.nav-soutenir .number_container').fadeOut();
+            
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
@@ -396,6 +407,7 @@ function ready () {
                   success:function(resultat) {
                         $('.encours').fadeOut();
                         $('#soutenir-container').html(resultat);
+                        $('.nav-soutenir .number_container').fadeOut();
                   },
                   error:function(erreur) {
                         console.log(erreur);
@@ -404,7 +416,7 @@ function ready () {
       }
       function contenu_notifications(nombre, type) {
             $('#notifications').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-            $('.nav-notifications .number_container').fadeOut();
+            
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
@@ -412,7 +424,7 @@ function ready () {
                   success:function(resultat) {
                         $('.encours').fadeOut();
                         $('#notifications-container').html(resultat);
-
+                        $('.nav-notifications .number_container').fadeOut();
                         $(document).on( "click", "#btn-toutes", function(){
                               /*$(this).addClass('bouton-bleu').removeClass('bouton-inverse');
                               $('#btn-achats').addClass('bouton-inverse').removeClass('bouton-bleu');
@@ -436,23 +448,72 @@ function ready () {
             });
       }
       function contenu_aide() {
-            console.log('loading aide');
             console.log('F2S_cookie : ' + F2S_cookie);
             $('#aide').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-            $('.nav-aide .number_container').fadeOut();
+            
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_aide', 'cookie' : F2S_cookie},
                   success:function(resultat) {
                         $('.encours').fadeOut();
-                        $('#aide-container').html(resultat);                        
+                        $('#aide-container').html(resultat);
+                        $('.nav-aide .number_container').fadeOut();
                         $(".ticket_link").on( "click", function(e){
                               $(this).parents().find('a').removeClass("ticket_actif");
                               videticket();
                               $(this).addClass('ticket_actif');
                               $('.ticket-titre').text($(this).text());
-                        });  
+                        });
+                        
+                        $( "#form_nouvelle_demande" ).trigger('create');
+                        $('#submit_nouvelle_demande').on('click', {cookie: F2S_cookie}, nouvelle_demande);
+                        
+                        function nouvelle_demande(event){
+                              if(event.handled !== true) {
+                                    event.handled = true;
+                                    if($('#contenu_nouvelle_demande').val().length > 0 ){
+                                          titre=$('#titre_nouvelle_demande').val();
+                                          contenu = $('#contenu_nouvelle_demande').val();
+                                          
+                                          $.ajax({
+                                                url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                                                data: {
+                                                      action : 'am_post_ticket',
+                                                      cookie : event.data.cookie,
+                                                      contenu : contenu,
+                                                      titre : titre
+                                                },
+                                                type: 'post',                   
+                                                async: 'true',
+                                                dataType: 'json',
+                                                beforeSend: function() {// show ajax spinner
+                                                },
+                                                complete: function() {
+                                                      // hide ajax spinner
+                                                },
+                                                success: function (result) {
+                                                      console.log(result);
+                                                      
+                                                      $('#ticket_nouvelle_demande_msg').html('<div class="ticket_message"><p>Merci pour votre message.</p><p>Nous reviendrons vers vous aussi vite que possible !</p></div>');
+                                                            ligne = '<tr style="display:none;" class="new-demande"><td><span class="wpas-label status-new">nouveau</span>';
+                                                            ligne += '<td><div id="'+result['ticket_id']+'" class="ticket_link">'+ titre +' (#' + result['ticket_id'] + ')</div></td>';
+                                                            ligne += '<td>'+result['date']+'</td></tr>';
+                                                            $('.wpas-ticket-details-header tbody').append(ligne);
+                                                            $('.new-demande').fadeIn(1000, function () {
+                                                                  $('#ticket_nouvelle_demande').fadeOut(function(){ $('#ticket_nouvelle_demande_msg').fadeIn() });
+                                                      });
+                                                },
+                                                error: function (request,error) {               
+                                                      alert('Oups... Erreur de reseau... Ca n\'est (sans doute) pas de notre faute. Voulez-vous reessayer ?');
+                                                }
+                                          });                   
+                                    } else {
+                                          alert('hmmm... vous n\'avez rien d\'autre a dire ?');
+                                    }
+                              }
+                              return false;
+                        }   
                   }
             });
       }   
@@ -466,6 +527,7 @@ function ready () {
                   success:function(resultat) {
                         $('.encours').fadeOut();
                         $('#user-profil').html(resultat);
+                        $('.nav-soutenir .number_container').fadeOut();
                   },
                   error:function(erreur) {
                         console.log(erreur);
@@ -573,7 +635,7 @@ function ready () {
                         
                         $( "#voirplus" ).on( "click", function(e) {
                               var i=0;
-                              jQuery( ".achats-container .achat:hidden" ).each(function( index ) {
+                              jQuery( "#liste-achats .achat:hidden" ).each(function( index ) {
                                     i++;
                                     if (i<=10) {
                                           $(this).show('slow');
@@ -819,10 +881,11 @@ function ready () {
                   },
                   success:function(nombre){
                         update_nr('accueil', nombre['marchands']);
-                        update_nr('aide', 0);
-                        update_nr('soutenir', 0);
+                        update_nr('aide', nombre['aide']);
+                        update_nr('soutenir', nombre['soutenir']);
                         update_nr('notifications', nombre['notifications']);
                         update_nr('profil', nombre['transactions']);
+                        console.log(nombre);
                   },
                   error: function(erreur){
                   }
@@ -841,7 +904,6 @@ function ready () {
             else block.find('.number_container').hide();
             
       }
-
       function contenu_nointernet(data) {
             var previous = data.prevPage.attr('id');
             console.log('page precedente : ' + previous);
@@ -934,6 +996,8 @@ function videmarchand(){// vide les infos marchands initiales.
 }
 function videticket(){// vide les infos ticket initiales.
       $('#ticket-details').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+      $('#ticket_nouvelle_reponse').show();
+      $('ticket_nouvelle_reponse_msg').hide();
       $('#ticket-container').html('');
       //$('#ticket-container').hide();
 }
