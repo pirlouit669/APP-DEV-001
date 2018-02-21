@@ -8,13 +8,14 @@ var app = {
     },
     onDeviceReady: function() { // deviceready Event Handler: The scope of 'this' is the event. In order to call the 'receivedEvent' function, we must explicitly call 'app.receivedEvent(...);'
         ready();
-        //app.setupPush(); //console.log('calling setup push');
+        console.log('calling setup push');
+        //app.setupPush();
     },
     setupPush: function() {
-        console.log('calling push init');
+        console.log('inside setup push');
         var push = PushNotification.init({
             "android": {
-                "senderID": "XXXXXXXX"
+                "senderID": "1005363421918"
             },
             "browser": {},
             "ios": {
@@ -24,11 +25,12 @@ var app = {
             },
             "windows": {}
         });
-        console.log('after init');
+        console.log('after setup push');
 
         push.on('registration', function(data) {
             console.log('registration event: ' + data.registrationId);
-
+            //document.getElementById("regId").innerHTML = data.registrationId;
+            
             var oldRegId = localStorage.getItem('registrationId');
             if (oldRegId !== data.registrationId) {
                 // Save new registration ID
@@ -61,57 +63,57 @@ var app = {
 };
 
 function ready () {
-      console.log('ready');
+      console.log('function ready');
       $.mobile.crossDomainPages  = true;
       
       // gestion du cookie
-      var F2S_cookie = '';
-      $.each($.cookie(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {F2S_cookie = value;}});
-      console.log('F2S_cookie : ');
-      console.log(F2S_cookie);
+            var F2S_cookie = '';
+            $.each($.cookie(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {F2S_cookie = value;}});
       
       //mise en page
-      $.mobile.ignoreContentEnabled = true;      //$.mobile.keepNative = "select,input";
+            $.mobile.ignoreContentEnabled = true;      //$.mobile.keepNative = "select,input";
       
       // initilisation de panel left      
-      contenu_panel_left();
-      $("#menu-left").panel().enhanceWithin();
+            contenu_panel_left();
+            $("#menu-left").panel().enhanceWithin();
       
-      // check internet
-      //try{checkConnection();}catch (e) {alert("Oupps une erreur c'est produite : "+e);}
-      checkConnection();
+      // check internet       //try{checkConnection();}catch (e) {alert("Oupps une erreur c'est produite : "+e);}
+            checkConnection();
       
       // gestion connexion
-      $(document).on( "click", ".btn-connexion", function(e){
-            e.preventDefault();
-            var logged_in=false;
-            $.each($.cookie(), function( index, value ){
-                  if (index.indexOf('wordpress_logged_in_') >= 0) {
-                        url = 'http://www.facile2soutenir.fr/mobile/?cookie_name=' + encodeURIComponent(index) + '&cookie=' + encodeURIComponent(value);
-                        logged_in = true;
-                        console.log(value);
-                        $.mobile.navigate('#accueil');
-                  } 
+            $(document).on( "click", ".btn-connexion", function(e){
+                  e.preventDefault();
+                  var logged_in=false;
+                  $.each($.cookie(), function( index, value ){
+                        if (index.indexOf('wordpress_logged_in_') >= 0) {
+                              url = 'http://www.facile2soutenir.fr/mobile/?cookie_name=' + encodeURIComponent(index) + '&cookie=' + encodeURIComponent(value);
+                              logged_in = true;
+                              $.mobile.navigate('#accueil');
+                        } 
+                  });
+                  console.log('not logged in');
+                  if (logged_in == false) $('body').pagecontainer('change', '#connexion');
             });
-            console.log('not logged in');
-            if (logged_in == false) $('body').pagecontainer('change', '#connexion');
-      });
       
       // Ajout des nombres rouges
-      maj_nombres_rouges();
+            maj_nombres_rouges();
+      
+      
+      
+      $('#details-marchand').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+      
+      
       
       //***************
       //GESTION DE LA RECHERCHE AJAX
       //***************
       
       $(document).on( "click", ".form-container-inactif", function(e){
-            console.log('focus container');
             $(this).toggleClass('form-container-actif');
             $(this).toggleClass('form-container-inactif');
             $('.recherche_fermer').show();
       });
       $(document).on( "blur", ".form-container-actif", function(e){
-            console.log('focus');
             $(this).toggleClass('form-container-actif');
             $(this).toggleClass('form-container-inactif');
             $('.recherche_fermer').hide();
@@ -128,7 +130,6 @@ function ready () {
             }
       });    
       $('#marchands').on( "click", ".recherche_fermer", function(e){ // ????
-            console.log('click a voir');
             $(this).toggleClass('form-container-actif');
             $(this).toggleClass('form-container-inactif');
             $('.recherche_fermer').hide();
@@ -145,7 +146,6 @@ function ready () {
                         cache:false,
                         data: {'action':'am_recherche_marchands', 'keyword' : keyword},
                         success:function(data) {
-                              //console.log(data);
                               //$('.ui-content').prepend('<div class="recherche_reponse" style="display:none;">'+data+'</div>');
                               $('.recherche_reponse').html(data);
                               $('.recherche_encours').hide();
@@ -153,6 +153,7 @@ function ready () {
                                         console.log('mlien click');
                                         videmarchand(); // vide les infos marchands initiales.
                                         var mid=$(this).attr('id'); // récupère l'ID du marchand
+                                        $('.marchand-nom').text($(this).attr('title'));
                                         console.log('mid recupere : ' + mid)
                                         $( ".marchand-lien-externe" ).attr('id', mid); // positionne l'ID du marchand dans le champ ID de mobile bouton pour que la page mobile marchand puisse le recuperer
                               });                              
@@ -169,17 +170,11 @@ function ready () {
                   $('.recherche_fermer').css('display', 'none');
             }
       });     
+
+      //***************
+      // PAGES INIT 
+      //***************
       
-      //<div><a class="marchand-fav" data-role="button" data-inline="true" data-iconpos="notext" data-icon="star"></a></div>
-      // POPULATE detail marchand
-      /*$( ".mlien" ).on( "click", function(e) {
-            console.log('mlien click');
-		videmarchand(); // vide les infos marchands initiales.
-            var mid=$(this).attr('id'); // récupère l'ID du marchand
-            console.log('mid recupere : ' + mid)
-            $( ".marchand-lien-externe" ).attr('id', mid); // positionne l'ID du marchand dans le champ ID de mobile bouton pour que la page mobile marchand puisse le recuperer
-      });*/
-    
       $(document).on('pageinit', '#accueil', function(){contenu_accueil();});
       $(document).on('pageinit', '#aide', function(){contenu_aide();});
       $(document).on('pageshow', '#details-ticket',function(){
@@ -289,7 +284,7 @@ function ready () {
                         
                   },
                   error: function(erreur){
-                        console.log(erreur);
+                        console.log('ERREUR' + erreur);
                   }
             });
       });
@@ -317,24 +312,37 @@ function ready () {
                         'mid' : mid
                   },
                   success:function(marchand){
-                        $( ".contenu-marchand").removeClass('waiting'); // ???????????????
                         
                         $("#header-marchand-nom").html(marchand['nom']);
                         $("#marchand-details-logo").attr('src', marchand['logo']);
-                        $( ".marchand-lien-externe" ).attr('href', 'http:www.facile2soutenir.fr/go/' + marchand['lien']+ '?webapp='+mid); // weba^pp
+                        $( ".marchand-lien-externe" ).attr('href', 'http://www.facile2soutenir.fr/go/' + marchand['lien']+ '?webapp='+mid); // weba^pp
                         if (marchand['conditions']!='') {      
                               $(".marchand-warning").html(marchand['conditions']);
                               $(".marchand-warning").show();
                         } else {
                               $(".marchand-warning").hide();
                         } 
-                        
                         $(".marchand-collecte").html(marchand['collecte']);
-                        $('.encours').fadeOut();
-                        $(".marchand-container").fadeIn();
+                        
+                        $('#details-marchand .encours').fadeOut(function(){ $('#details-marchand .ui-content').fadeIn() });
+                        //$('.encours').fadeOut();
+                        //$(".marchand-container").fadeIn();
+                        
+                        
+                        $( ".mobile-fav" ).on( "click", function(e) {
+                              jQuery( this ).toggleClass( "marchand-favori" );
+                              jQuery.ajax({
+                                    url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                                    data: {
+                                          'action':'am_toggle_marchand_favori',
+                                          'mid' : mid
+                                    },
+                                    success:function(resultat) {},
+                              });
+                        });
                   },
-                  error: function(erreur){
-                  }
+                  error:function(erreur) {console.log('ERREUR' + erreur);},
+                  
             });
       });
       $(document).on('pagebeforeshow', '#nointernet', function (e, data) {contenu_nointernet(data);});
@@ -348,7 +356,6 @@ function ready () {
       $(document).on( 'click', '#contenu_profil', function(e){contenu_profil();});
       
       function contenu_panel_left() {
-            console.log('get panel left');
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
@@ -379,7 +386,6 @@ function ready () {
                   cache:false,
                   data: {'action':'am_contenu_accueil', 'cookie' : F2S_cookie},
                   success:function(resultat) {
-                        console.log(resultat);
                         $('.encours').fadeOut();
                         $('#accueil-container').html(resultat);
                   },
@@ -409,9 +415,7 @@ function ready () {
                         $('#soutenir-container').html(resultat);
                         $('.nav-soutenir .number_container').fadeOut();
                   },
-                  error:function(erreur) {
-                        console.log(erreur);
-                  }
+                  error:function(erreur) {console.log('ERREUR' + erreur);}
             });
       }
       function contenu_notifications(nombre, type) {
@@ -438,7 +442,6 @@ function ready () {
                               contenu_notifications(10, 'achats');
                         });
                         $(document).on( "click", "#btn-actus", function(){
-                              console.log('actus');
                               /*$(this).addClass('bouton-bleu').removeClass('bouton-inverse');
                               $('#btn-toutes').addClass('bouton-inverse').removeClass('bouton-bleu');
                               $('#btn-achats').addClass('bouton-inverse').removeClass('bouton-bleu');*/
@@ -448,7 +451,6 @@ function ready () {
             });
       }
       function contenu_aide() {
-            console.log('F2S_cookie : ' + F2S_cookie);
             $('#aide').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
             
             $.ajax({
@@ -492,9 +494,7 @@ function ready () {
                                                 complete: function() {
                                                       // hide ajax spinner
                                                 },
-                                                success: function (result) {
-                                                      console.log(result);
-                                                      
+                                                success: function (result) {                                                      
                                                       $('#ticket_nouvelle_demande_msg').html('<div class="ticket_message"><p>Merci pour votre message.</p><p>Nous reviendrons vers vous aussi vite que possible !</p></div>');
                                                             ligne = '<tr style="display:none;" class="new-demande"><td><span class="wpas-label status-new">nouveau</span>';
                                                             ligne += '<td><div id="'+result['ticket_id']+'" class="ticket_link">'+ titre +' (#' + result['ticket_id'] + ')</div></td>';
@@ -529,9 +529,7 @@ function ready () {
                         $('#user-profil').html(resultat);
                         $('.nav-soutenir .number_container').fadeOut();
                   },
-                  error:function(erreur) {
-                        console.log(erreur);
-                  },
+                  error:function(erreur) {console.log('ERREUR' + erreur);},
                   complete:function(){
                         $( "#mform-choix-cause" ).trigger('create');
                         $( "#choix-cause-input" ).textinput({clearBtn: true});
@@ -539,7 +537,6 @@ function ready () {
             
                         // ************** LISTENER changement don auto
                         $("#don-auto").change(function () {
-                              console.log(jQuery(this).val());
                               $( ".texte-auto" ).toggleClass('hide');
                               $.ajax({
                                     url: "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
@@ -549,9 +546,7 @@ function ready () {
                                           'auto' : $(this).val(),
                                           'cookie' : F2S_cookie,
                                     },
-                                    success:function(data) {
-                                          console.log(data);
-                                    }
+                                    success:function(data) {}
                               });  
                         });
                         
@@ -601,7 +596,6 @@ function ready () {
                         });
                         
                         $( "#choix-cause-input" ).blur(function() {
-                              console.log('blur');
                               if (!$( "#choix-cause-id").val()) {
                                     //jQuery('#mform-choix-cause .ui-input-search').addClass("cause-incorrecte");
                                     
@@ -646,9 +640,8 @@ function ready () {
                         
                         
                         function maj_affichage_favorite() {
-                              console.log('maj affich favo');
-                              console.log($('#choix-cause-user').val());
-                              console.log($('#choix-cause-id').val());
+                              //console.log($('#choix-cause-user').val());
+                              //console.log($('#choix-cause-id').val());
                               $.ajax({
                                     type: 'POST', 
                                     url: 'https://www.facile2soutenir.fr/wp-admin/admin-ajax.php',
@@ -660,7 +653,6 @@ function ready () {
                                           cookie : F2S_cookie,
                                     }, 
                                     success: function (resultat) {
-                                          console.log('maj ok');
                                           $('#mform-choix-cause').hide();
                                           $('.cause_fav').slideDown( "slow", function() {
                                                 $('#don-auto').val('oui').flipswitch("refresh");
@@ -680,8 +672,8 @@ function ready () {
                                           'cookie' : F2S_cookie,
                                     },
                                     success:function(data) {
-                                          console.log('update_don_auto ok');
-                                          console.log(data);
+                                          //console.log('update_don_auto ok');
+                                          //console.log(data);
                                     }
                               });
                               
@@ -703,9 +695,7 @@ function ready () {
                   success:function(resultat) {
                         $('#user-don-container').html(resultat);
                   },
-                  error:function(erreur) {
-                        console.log(erreur);
-                  },
+                  error:function(erreur) {console.log('ERREUR' + erreur);},
                   complete:function(){
                         $( "#mform-don" ).trigger('create');
                         $( "#choix-cause-don-input" ).textinput({clearBtn: true});
@@ -775,7 +765,6 @@ function ready () {
                         
                         jQuery( "#don-montant" ).blur(function() {
                               var dispo = parseFloat(jQuery('.disponible').html().replace(",", "."));
-                              //console.log(dispo);
                               if (!jQuery.isNumeric(jQuery(this).val())) {
                                      jQuery(this).addClass("valeur-incorrecte");
                                      jQuery('#don-erreur').text('Oups... la valeur du don est incorrecte').show();
@@ -846,27 +835,24 @@ function ready () {
             });
       }
       function contenu_liste_marchands (nombre, categorie) { // 3eme param pour "a partir de ..." ?
-            console.log ('nombre ' + nombre);
-            console.log ('categorie ' + categorie);
+            $('#liste_marchands_container').html('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_liste_marchands', 'nombre' : nombre, 'categorie' : categorie},
                   success:function(resultat) {
-                        console.log(resultat);
+                        $('#liste_marchands_container .encours').fadeOut();
                         $('#liste_marchands_container').html(resultat);
                         
                         $( ".mlien" ).on( "click", function(e) {
-                              console.log('mlien click');
                               videmarchand(); // vide les infos marchands initiales.
                               var mid=$(this).attr('id'); // récupère l'ID du marchand
-                              console.log('mid recupere : ' + mid)
+                              $('.marchand-nom').text($(this).attr('title'));
+                              //console.log('mid recupere : ' + mid)
                               $( ".marchand-lien-externe" ).attr('id', mid); // positionne l'ID du marchand dans le champ ID de mobile bouton pour que la page mobile marchand puisse le recuperer
                         });
                   },
-                  error:function(erreur) {
-                        console.log(erreur);
-                  }
+                  error:function(erreur) {console.log('ERREUR' + erreur);}
             });
       }
       function maj_nombres_rouges(){
@@ -885,7 +871,6 @@ function ready () {
                         update_nr('soutenir', nombre['soutenir']);
                         update_nr('notifications', nombre['notifications']);
                         update_nr('profil', nombre['transactions']);
-                        console.log(nombre);
                   },
                   error: function(erreur){
                   }
@@ -906,7 +891,6 @@ function ready () {
       }
       function contenu_nointernet(data) {
             var previous = data.prevPage.attr('id');
-            console.log('page precedente : ' + previous);
             vibre();
             var refreshIntervalId = setInterval(function () {
                   if (checkConnection()!=false) {
@@ -948,12 +932,7 @@ function checkConnection() {
 function vibre () {
       navigator.vibrate(1000);
 }
-function clean_newsdetail() {
-      $('#news-detail-title').html('');
-      $('#news-detail-date').html('');
-      $('#news-detail-contenu').html('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-      $('#news-detail .news-main-top').css('background-image', 'linear-gradient( rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75) )');  
-}
+
 function fetch_posts(requete){
       var dataString = "";
       $('#news-container').html('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
@@ -991,8 +970,11 @@ function fetch_posts(requete){
 function videmarchand(){// vide les infos marchands initiales.
       $("#header-marchand-nom").html('');
       $("#marchand-details-logo").attr('src', '');
-      $('#details-marchand .ui-content').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-      $(".marchand-container").hide();
+      $('#details-marchand .ui-content').hide();
+      $('#details-marchand .encours').show();
+      //$(".marchand-container").hide();
+      //$('#details-marchand').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+      
 }
 function videticket(){// vide les infos ticket initiales.
       $('#ticket-details').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
@@ -1017,7 +999,7 @@ function login(){
             crossDomain: true,
             cache: false,
             success: function(data){
-                  console.log(data);
+                  //console.log(data);
                   if (data.status=="ok") {
                         var cookie=data.cookie;
                         var cookie_name=data.cookie_name;
@@ -1025,8 +1007,8 @@ function login(){
                         url = 'http://www.facile2soutenir.fr/mobile/?user_id=' + user_id + '&cookie_name=' + encodeURIComponent(cookie_name) + '&cookie=' + encodeURIComponent(cookie);
                         $.cookie(cookie_name, cookie, { expires: 365*5, path: '/' });
 // F2S_cookie = cookie; marche pas
-                        console.log(cookie);
-                        console.log(encodeURIComponent(cookie));
+                        //console.log(cookie);
+                        //console.log(encodeURIComponent(cookie));
 
                         $.mobile.navigate('#accueil');
                         //$('body').pagecontainer('change', '#accueil');
