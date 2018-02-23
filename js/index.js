@@ -7,12 +7,12 @@ var app = {
         document.addEventListener('deviceready', this.onDeviceReady, false);
     },
     onDeviceReady: function() { // deviceready Event Handler: The scope of 'this' is the event. In order to call the 'receivedEvent' function, we must explicitly call 'app.receivedEvent(...);'
-        ready();
-        console.log('calling setup push');
+        alert('calling setup push');
         app.setupPush();
+        ready();
     },
     setupPush: function() {
-        console.log('inside setup push');
+        alert('inside setup push');
         var push = PushNotification.init({
             "android": {
                 "senderID": "1005363421918"
@@ -27,7 +27,7 @@ var app = {
         });
 
         push.on('registration', function(data) {
-            console.log('registration event: ' + data.registrationId);
+            alert('registration event: ' + data.registrationId);
             //document.getElementById("regId").innerHTML = data.registrationId;
             
             var oldRegId = localStorage.getItem('registrationId');
@@ -81,7 +81,7 @@ var app = {
 };
 
 function ready () {
-      console.log('function ready');
+      alert('ready');
       $.mobile.crossDomainPages  = true;
       
       // gestion du cookie
