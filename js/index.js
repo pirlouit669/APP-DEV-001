@@ -7,13 +7,24 @@ var app = {
         document.addEventListener('deviceready', this.onDeviceReady, false);
     },
     onDeviceReady: function() { // deviceready Event Handler: The scope of 'this' is the event. In order to call the 'receivedEvent' function, we must explicitly call 'app.receivedEvent(...);'
-        app.setupPush();
+      
+      $(".landing-intro").append('<br>1');
+      app.setupPush();
+      
+      $(".landing-intro").append('<br>1.5');
         ready();
+        
+      $(".landing-intro").append('<br>2');
     },
     setupPush: function() {
       
         $('h1').css('color', 'red');
         alert('inside setup push');
+        
+        
+      $(".landing-intro").append('<br>3');
+        
+        
         var push = PushNotification.init({
             "android": {
                 "senderID": "1005363421918"
@@ -27,14 +38,21 @@ var app = {
             "windows": {}
         });
 
+        
+        
+        
         $.ajax({
-                  url: "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
-                  data: {
-                        'action':'am_test_push',
-                        'rid': 'inside setup push',
-                  },
-            });
+            url: "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+            data: {
+                  'action':'am_test_push',
+                  'rid': 'inside setup push',
+            },
+       });
 
+        
+        
+      $(".landing-intro").append('<br>4');
+        
         push.on('registration', function(data) {
             var rid = data.registrationId;
             alert('registration event: ' + rid);
@@ -60,10 +78,17 @@ var app = {
             });
             
         });
+        
+        
+        
 
         push.on('error', function(e) {
             console.log("push error = " + e.message);
         });
+        
+        
+        
+        
 
         push.on('notification', function(data) {
             console.log('notification event');
@@ -78,7 +103,11 @@ var app = {
 };
 
 function ready () {
+      
       $('h1').css('color', 'yellow');
+      $(".landing-intro").append('<br>5');
+      
+      
       $.ajax({
             url: "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
             data: {
@@ -88,6 +117,7 @@ function ready () {
       });
       
       
+      $(".landing-intro").append('<br>6');
       
       $.mobile.crossDomainPages  = true;
       
@@ -128,6 +158,7 @@ function ready () {
       $('#details-marchand').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
       
       
+      $(".landing-intro").append('<br>7');
       
       //***************
       //GESTION DE LA RECHERCHE AJAX
