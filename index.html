@@ -75,12 +75,12 @@
                         </div>
                         <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
+                  <div class="bouton-test refresh" id="get_accueil">refresh</div>
+                  <div class="bouton-test test-internet" >Coupure</div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
                   <div id="accueil-container"></div>
-                  <a href="#accueil" id="get_accueil">get accueil</a>
-                  <a href="#nointernet" data-role="button" id="contenu_nointernet">NO Internet</a>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -184,11 +184,12 @@
                         </div>
                         <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
+                  <div class="bouton-test refresh" id="get_aide">refresh</div>
+                  <div class="bouton-test test-internet" >Coupure</div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
                   <div id="aide-container"></div>
-                  <a class="bouton-test" id="get_aide">Get aide</a>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -240,6 +241,8 @@
                         </div>
                         <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
+                  <div class="bouton-test refresh" id="get_soutenir">refresh</div>
+                  <div class="bouton-test test-internet" >Coupure</div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
@@ -278,6 +281,25 @@
             </div>
       </div>
 
+      <div data-role="page" id="planter">     
+            <div data-role="header" data-position="fixed" data-add-back-btn="true" data-back-btn-text="">
+                  <div class="top-menu-middle"><h1 class="ui-title" tabindex="0" role="heading" aria-level="1">Planter un arbre</h1></div>
+            </div>
+            <div data-role="main" class="ui-content">
+                  <div id="user-don-container"></div>                 
+            </div>
+            <div data-role="footer" data-id="footer-1" data-position="fixed" >
+                <div data-role="navbar">
+                        <ul>
+                              <li class="nav-btn nav-accueil"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
+                              <li class="nav-btn nav-aide"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
+                              <li class="nav-btn nav-soutenir"><a href="#soutenir" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
+                              <li class="nav-btn nav-notifications"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
+                              <li class="nav-btn nav-profil"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
+                        </ul>
+                  </div>
+            </div>
+      </div>
       
       <div data-role="page" id="notifications">
             <div data-role="header" data-position="fixed">
@@ -291,11 +313,12 @@
                         </div>
                         <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
+                  <div class="bouton-test refresh" id="get_notifications">refresh</div>
+                  <div class="bouton-test test-internet" >Coupure</div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
-                  <div id="notifications-container"></div>	
-                  <a class="bouton-test" id="get_notifications">Get notifications</a>			
+                  <div id="notifications-container"></div>			
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -312,6 +335,8 @@
       <div data-role="page" id="profil">
             <div data-role="main" class="ui-content">
                   <div id="user-profil"></div>
+                  <div class="bouton-test refresh" id="get_profil">refresh</div>
+                  <div class="bouton-test test-internet" >Coupure</div>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">

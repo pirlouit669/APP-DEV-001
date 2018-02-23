@@ -352,9 +352,12 @@ function ready () {
       $(document).on( 'click', '#get_accueil', function(e){contenu_accueil();});
       $(document).on( 'click', '#get_aide', function(e){contenu_aide();});
       $(document).on( 'click', '#get_soutenir', function(e){contenu_soutenir(10);});
-      $(document).on( 'click', '#contenu_don', function(e){contenu_don();});
       $(document).on( 'click', '#get_notifications',function(){contenu_notifications(10, 'toutes');});
-      $(document).on( 'click', '#contenu_profil', function(e){contenu_profil();});
+      $(document).on( 'click', '#get_profil', function(e){contenu_profil();});
+      $(document).on( 'click', '#contenu_don', function(e){contenu_don();});
+      $(document).on( 'click', '.test-internet', function () {
+            $.mobile.navigate('#nointernet');
+       });
       
       function contenu_panel_left() {
             $.ajax({
@@ -415,6 +418,8 @@ function ready () {
                         $('.encours').fadeOut();
                         $('#soutenir-container').html(resultat);
                         $('.nav-soutenir .number_container').fadeOut();
+                        
+                        
                   },
                   error:function(erreur) {console.log('ERREUR' + erreur);}
             });
@@ -689,17 +694,19 @@ function ready () {
             });
       }
       function contenu_don() {
+            $('#don').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_don', 'cookie' : F2S_cookie},
                   success:function(resultat) {
+                        $('.encours').fadeOut();
                         $('#user-don-container').html(resultat);
                   },
                   error:function(erreur) {console.log('ERREUR' + erreur);},
                   complete:function(){
-                        $( "#mform-don" ).trigger('create');
-                        $( "#choix-cause-don-input" ).textinput({clearBtn: true});
+                        $( "#mform-choix-cause-don" ).trigger('create');
+                        $( "#choix-cause-input-don" ).textinput({clearBtn: true});
             
 
                         // ************** LISTENER liste des asso
@@ -710,9 +717,9 @@ function ready () {
                               html = "";
                               jQueryul.html( "" );
                               $( "#btn-don").removeClass('btn-don-actif');
-                              $( "#don-cause").val("");
-                              //if (!value) $('#choix-cause-erreur-dons').hide();
-                              if ( value && value.length >= 0.5 ) {
+                              $( "#choix-cause-id-don").val("");
+                              if (!value) $('#cause-erreur-don').hide();
+                              if ( value && value.length >= 2 ) {
                                     jQueryul.append( '<div class="encours"><i class="fas fa-spinner fa-spin fa-2x"></i></div>');
                                     jQueryul.listview( "refresh" );
                                     $.ajax({
@@ -739,18 +746,19 @@ function ready () {
                               var bloc=jQuery(this).children('.mbloc-cause');
                               var cause_id = bloc.attr('id');
                               var cause_nom=jQuery(this).find('.nom-cause').text();
-                              jQuery('#choix-cause-don-input').val(cause_nom);
-                              jQuery('#don-cause').val(cause_id);
+                              jQuery('#choix-cause-input-don').val(cause_nom);
+                              jQuery('#choix-cause-id-don').val(cause_id);
                               jQuery('#liste-causes-don').html( "" );
-                              jQuery('#choix-cause-don-input').removeClass("cause-incorrecte");
+                              jQuery('#choix-cause-input-don').removeClass("cause-incorrecte");
                               jQuery('#cause-erreur-don').hide().text('Oups...');
-                              if (!jQuery('#don-montant').hasClass("valeur-incorrecte")) {
+                              if (!jQuery('#don-montant').hasClass("valeur-incorrecte") && jQuery('#don-montant').val() < dispo && jQuery(this).val()>0) {
                                     jQuery( "#btn-don").addClass('btn-don-actif');
                               }
                         });
                         
-                        $( "#choix-cause-don-input" ).blur(function() {
-                              if (!jQuery( "#don-cause").val()) {
+                        $( "#choix-cause-input-don" ).blur(function() {
+                              console.log('blur');
+                              if (!jQuery( "#choix-cause-id-don").val()) {
                                     jQuery(this).addClass("cause-incorrecte");
                                     jQuery('#cause-erreur-don').text('Oups... je ne trouve pas cette cause').show();
                                     jQuery( "#btn-don").removeClass('btn-don-actif');
@@ -766,20 +774,20 @@ function ready () {
                         
                         jQuery( "#don-montant" ).blur(function() {
                               var dispo = parseFloat(jQuery('.disponible').html().replace(",", "."));
-                              if (!jQuery.isNumeric(jQuery(this).val())) {
+                              console.log(dispo);
+                              if (!jQuery.isNumeric(jQuery(this).val()) || jQuery(this).val()==0) {
                                      jQuery(this).addClass("valeur-incorrecte");
-                                     jQuery('#don-erreur').text('Oups... la valeur du don est incorrecte').show();
+                                     jQuery('#montant-erreur-don').text('Oups... la valeur du don est incorrecte').show();
                                      jQuery( "#btn-don").removeClass('btn-don-actif');
                               } else {
-                                    if (jQuery(this).val() > dispo) {
+                                    if (jQuery(this).val() > dispo ) {
                                           jQuery(this).addClass("valeur-incorrecte");
-                                          jQuery('#don-erreur').text('Oups... c\'est un petit peu trop par rapport au montant disponible').show();
+                                          jQuery('#montant-erreur-don').text('Oups... c\'est un petit peu trop par rapport au montant disponible').show();
                                           jQuery( "#btn-don").removeClass('btn-don-actif');
-                                    } else {
+                                    } else  {
                                           jQuery(this).removeClass("valeur-incorrecte");
-                                          jQuery('#don-erreur').hide().text('Oups...');
-                                          
-                                          if (jQuery( "#don-cause").val()>0 && jQuery( "#don-montant").val() >0) {
+                                          jQuery('#montant-erreur-don').hide().text('Oups...');
+                                          if (jQuery( "#choix-cause-id-don").val()>0 && jQuery(this).val() >0) {
                                                 jQuery( "#btn-don").addClass('btn-don-actif');
                                           }
                                     }
@@ -799,8 +807,8 @@ function ready () {
                                           data: {
                                                 action : 'don_mob',
                                                 montant : jQuery('#don-montant').val(),
-                                                user_id : jQuery('#don-user').val(),
-                                                cause_id : jQuery('#don-cause').val(),
+                                                user_id : jQuery('#choix-cause-user-don').val(),
+                                                cause_id : jQuery('#choix-cause-id-don').val(),
                                                 //formData : data // Convert a form to a JSON string representation
                                           },            
                                           complete: function() { // This callback function will trigger on data sent/received complete
