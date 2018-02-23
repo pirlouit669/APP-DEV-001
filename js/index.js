@@ -9,7 +9,7 @@ var app = {
     onDeviceReady: function() { // deviceready Event Handler: The scope of 'this' is the event. In order to call the 'receivedEvent' function, we must explicitly call 'app.receivedEvent(...);'
         ready();
         console.log('calling setup push');
-        //app.setupPush();
+        app.setupPush();
     },
     setupPush: function() {
         console.log('inside setup push');
