@@ -25,7 +25,6 @@ var app = {
             },
             "windows": {}
         });
-        console.log('after setup push');
 
         push.on('registration', function(data) {
             console.log('registration event: ' + data.registrationId);
@@ -44,6 +43,25 @@ var app = {
 
             listeningElement.setAttribute('style', 'display:none;');
             receivedElement.setAttribute('style', 'display:block;');
+            
+            // mise à jour dans la database
+            var ajaxurl = "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php";
+            var rid = data.registrationId;
+            $.ajax({
+                  url: ajaxurl,
+                  data: {
+                        'action':'am_test_push',
+                        'rid': rid,
+                  },
+                  success:function(resultat) {
+                        //$( "#log").append('<br>Ajax est toujours un succes');
+                        alert ('Ajax est toujours un succes');
+                  },
+                  error:function(error) {
+                        alert('erreur :' + error);
+                  },
+            });
+            
         });
 
         push.on('error', function(e) {
