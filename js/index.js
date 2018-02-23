@@ -7,11 +7,12 @@ var app = {
         document.addEventListener('deviceready', this.onDeviceReady, false);
     },
     onDeviceReady: function() { // deviceready Event Handler: The scope of 'this' is the event. In order to call the 'receivedEvent' function, we must explicitly call 'app.receivedEvent(...);'
-        alert('calling setup push');
         app.setupPush();
         ready();
     },
     setupPush: function() {
+      
+        $('h1').css('color', 'red');
         alert('inside setup push');
         var push = PushNotification.init({
             "android": {
@@ -25,33 +26,57 @@ var app = {
             },
             "windows": {}
         });
+        var ajaxurl = "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php";
+        $.ajax({
+                  url: ajaxurl,
+                  data: {
+                        'action':'am_test_push',
+                        'rid': 123,
+                  },
+                  beforeSend:function(){
+                        alert ('Ajax sera-t-il un succes ?');
+                  },
+                  success:function(resultat) {
+                        //$( "#log").append('<br>Ajax est toujours un succes');
+                        alert ('Ajax est toujours un succes');
+                  },
+                  error:function(error) {
+                        alert('erreur :' + error);
+                  },
+            });
 
         push.on('registration', function(data) {
-            alert('registration event: ' + data.registrationId);
+            var rid = data.registrationId;
+            alert('registration event: ' + rid);
             //document.getElementById("regId").innerHTML = data.registrationId;
+            $('h1').css('color', 'blue');
             
             var oldRegId = localStorage.getItem('registrationId');
-            if (oldRegId !== data.registrationId) {
+            if (oldRegId !== rid) {
                 // Save new registration ID
-                localStorage.setItem('registrationId', data.registrationId);
+                localStorage.setItem('registrationId', rid);
                 // Post registrationId to your app server as the value has changed
             }
-
+/*
             var parentElement = document.getElementById('registration');
             var listeningElement = parentElement.querySelector('.waiting');
             var receivedElement = parentElement.querySelector('.received');
 
             listeningElement.setAttribute('style', 'display:none;');
             receivedElement.setAttribute('style', 'display:block;');
-            
+         */   
             // mise à jour dans la database
             var ajaxurl = "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php";
-            var rid = data.registrationId;
+            
+            
             $.ajax({
                   url: ajaxurl,
                   data: {
                         'action':'am_test_push',
                         'rid': rid,
+                  },
+                  beforeSend:function(){
+                        alert ('Ajax sera-t-il un succes ?');
                   },
                   success:function(resultat) {
                         //$( "#log").append('<br>Ajax est toujours un succes');
