@@ -1,41 +1,42 @@
 var app = {
     
-    initialize: function() { // Application Constructor
-        this.bindEvents();
-    },
-    bindEvents: function() { // Bind Event Listeners : Bind any events that are required on startup. Common events are: 'load', 'deviceready', 'offline', and 'online'.
-        document.addEventListener('deviceready', this.onDeviceReady, false);
-    },
-    onDeviceReady: function() { // deviceready Event Handler: The scope of 'this' is the event. In order to call the 'receivedEvent' function, we must explicitly call 'app.receivedEvent(...);'
-      app.setupPush();
-      ready();
-    },
-    setupPush: function() {
-        var push = PushNotification.init({
-            "android": {
-                "senderID": "1005363421918"
-            },
-            "browser": {},
-            "ios": {
-            "fcmSandbox": false,
-                "sound": true,
-                "vibration": true,
-                "badge": true
-            },
-            "windows": {}
-        });
-        
-        push.on('registration', function(data) {
+      initialize: function() { // Application Constructor
+            this.bindEvents();
+      },
+      bindEvents: function() { // Bind Event Listeners : Bind any events that are required on startup. Common events are: 'load', 'deviceready', 'offline', and 'online'.
+            document.addEventListener('deviceready', this.onDeviceReady, false);
+      },
+      onDeviceReady: function() { // deviceready Event Handler: The scope of 'this' is the event. In order to call the 'receivedEvent' function, we must explicitly call 'app.receivedEvent(...);'
+            app.setupPush();
+            ready();
+      },
+      setupPush: function() {
+            var push = PushNotification.init({
+                  "android": {
+                        "senderID": "1005363421918"
+                  },
+                  "browser": {},
+                  "ios": {
+                        "senderID": "1005363421918",
+                        "fcmSandbox": false,
+                        "sound": true,
+                        "vibration": true,
+                        "badge": true
+                  },
+                  "windows": {}
+            });
+        // macdonst : if you don't provide the GCM Sender ID to the ios options then it will use APNS by default.
+      push.on('registration', function(data) {
             var rid = data.registrationId;
             alert('registration event: ' + rid);
             alert('registration type: ' + data.registrationType);
             
             var oldRegId = localStorage.getItem('registrationId');
             if (oldRegId !== rid) {
-                // Save new registration ID
-                localStorage.setItem('registrationId', rid);
-                // Post registrationId to your app server as the value has changed
-                // mise à jour dans la database
+                  // Save new registration ID
+                  localStorage.setItem('registrationId', rid);
+                  // Post registrationId to your app server as the value has changed
+                  // mise à jour dans la database
                   $.ajax({
                         url: "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                         data: {
