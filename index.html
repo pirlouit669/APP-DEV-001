@@ -40,7 +40,9 @@
                   <div class="landing-logo"><img src="img/facile2soutenir120.png"></div>
                   <div class="landing-intro"><H1>Soutenez les causes qui vous tiennent a coeur grace a vos achats en ligne.</H1></div>
                   <div class="landing-liens">
-                          <a href="#connexion" da pus ta-role="none" style="" class="bouton bouton-moyen bouton-bleu bouton-block bouton-form btn-connexion">Connexion</a>
+                          <a href="#connexion" data-role="none" style="" class="bouton bouton-moyen bouton-bleu bouton-block bouton-form btn-connexion">Connexion</a>
+                          <p class="oubien">ou bien</p>
+                          <a href="#" onclick="connexion_facebook();" data-role="none" class="bouton bouton-moyen bouton-facebook bouton-block bouton-moyen bouton-form" id="btn-connexion-fb" >Connexion Facebook</button>
                           <a href="#accueil" data-role="none" style="" class="bouton bouton-moyen bouton-transparent bouton-block bouton-form">Visite</a>
                   </div>
             </div>
@@ -55,13 +57,13 @@
                         <input id="username" type="text" value="" placeholder="Adresse email" data-role="none" style="">
                         <input id="password" type="password" value="" placeholder="Mot de passe" data-role="none" >
                         <button onclick="login();" data-role="none" class="bouton bouton-moyen bouton-bleu bouton-block bouton-moyen bouton-form" id="" >Connexion</button>
-                        <button data-role="none" class="bouton bouton-transparent bouton-block bouton-form" id="mdp-perdu">Mot de passe perdu</button>
+                        <button onclick="mdp_perdu();" data-role="none" class="bouton bouton-transparent bouton-block bouton-form" id="btn-mdp-perdu">Mot de passe perdu</button>
+                        <button onclick="inscription();" data-role="none" class="bouton bouton-transparent bouton-block bouton-form" id="btn-inscription">Pas encore inscrit ?</button>
                         <div class="status"></div>
                   </div>                
             </div>
       </div>
-      
-      <div data-role="page" id="accueil">
+     <div data-role="page" id="accueil">
             <div data-role="header" data-position="fixed">
                   <div class="top-menu-left">
                         <a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a>
@@ -76,7 +78,8 @@
                         <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
                   <div class="bouton-test refresh" id="get_accueil">refresh</div>
-                  <div class="bouton-test test-internet" >Coupure</div>
+                  <div onclick="online()" class="bouton-test" style="background:#6be49c !important; right:90px;">on</div>
+                  <div onclick="offline()" class="bouton-test" style="background:#ff5151 !important; right:40px;">off</div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
@@ -129,30 +132,9 @@
                   <!--<div><a class="mobile-fav" data-role="button" data-inline="true" data-iconpos="notext" data-icon="star">aa</a></div>-->
             </div>
             <div data-role="main" class="ui-content">
-                  <div class="marchand-container">
-                        <div class="marchand-top">
-                              <div class="marchand-top-info bloc-l1">
-                                    <div class="marchand-logo-container">
-                                          <img id="marchand-details-logo" class="marchand-logo" src="">
-                                    </div>
-                                    <div style="width:10px;"></div>
-                                    <div class="marchand-top-texte">
-                                          <p>Effectuez votre achat <strong>comme &#224; votre habitude (et au m&#234;me prix)</strong>.</p>
-                                          <p>La collecte sera alors prise en compte dans un <strong>d&#233;lai de 48 &#224; 72H</strong></p>
-                                    </div>
-                                    
-                              </div>
-                              <a href='#' data-theme="b" class="marchand-lien-externe bloc-l1" id="" data-role="button" target="_blank" rel="external" data-corners="false" data-iconpos="right" data-icon="carat-r" >Aller chez ce marchand</a>
-                        </div>
-                        <div class="marchand-middle">      
-                              <div class="marchand-collecte bloc-l1"></div>
-                              <div class="marchand-warning bloc-l1"></div>
-                              <div class="marchand-conseils bloc-l1">
-                                    <p>Pour le bon fonctionnement du service, merci&nbsp;:<br/>
-                                    &#x25BA; d'&#233;viter de naviguer sur d'autres sites pendant votre achat <br/>
-                                    &#x25BA; de ne pas utiliser de codes promos</p>
-                              </div> 
-                        </div>
+                  <div id="marchand-container">
+                        <div id="marchand-infos"></div>
+                        <a href='#' data-theme="b" class="marchand-lien-externe bloc-l1" id="" data-role="button" target="_blank" rel="external" data-corners="false" data-iconpos="right" data-icon="carat-r" >Aller chez ce marchand</a>
                   </div>
                   
       
@@ -286,7 +268,7 @@
                   <div class="top-menu-middle"><h1 class="ui-title" tabindex="0" role="heading" aria-level="1">Planter un arbre</h1></div>
             </div>
             <div data-role="main" class="ui-content">
-                  <div id="user-don-container"></div>                 
+                  <div id="planter-container"></div>                 
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -354,6 +336,9 @@
       
       
       <div data-role="page" id="nointernet" data-overlay-theme="b" data-position-fixed="true" data-display="overlay" data-theme="a">
+            
+                  <div onclick="online()" class="bouton-test" style="background:#6be49c !important; right:90px;">on</div>
+                  <div onclick="offline()" class="bouton-test" style="background:#ff5151 !important; right:40px;">off</div>
             <div id="nointernet-container">
                   <div class="message-connexion connexion-off">
                         <h1>Votre appareil n'est plus connect&#233; &#224; Internet</h1>
