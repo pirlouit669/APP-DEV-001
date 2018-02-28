@@ -34,20 +34,25 @@ h2 {font-weight: 300;    margin-bottom: 0.5em;}
 .ui-content{background: transparent; /*position: relative; */padding:0; overflow: visible; /*overflow:hidden;*/} /*en test pour que le spinner soit visible au chargemetn des pages */
 .ui-btn:focus {box-shadow: none !important;}
 
-
+#affichage-rid {position: absolute; left: 0; color: white; top:1em; max-width:200px;}
 
 /* LANDING */
 #landing .ui-content {flex-direction: column;  min-height: 100vh;  display: flex;  align-items: center;  justify-content: center; text-align:center;}
-.landing-logo{margin:10px 0 20px; }
-.landing-intro{margin:10px 0 40px; max-width: 90%;}
-.landing-liens {margin:5px auto;}
+.landing-logo{margin:-40px 0 20px; }
+.landing-intro{margin:0 0 10px; max-width: 90%;}
+.landing-liens {margin:5px auto; position: relative;}
 
 .oubien {position:relative;  color: #c5c5c5; font-size: .8em;margin: 0.5em; }
 .oubien:after{content:''; border-bottom:1px solid #c5c5c5; position:absolute; top: 50%; width: 25%; right: 10%; }
 .oubien:before{content:''; border-bottom:1px solid #c5c5c5; position:absolute; top: 50%;    width: 25%;    left: 10%; }
 
+#landing-status {position: absolute; left: 0; color: white; top:170px; width:300px; margin:-35px; }
+.connexion-info {    margin: 10px auto 0; color: #FFEB3B; border-top: 1px solid #FFEB3B; padding: 0.5em 0px;}
+.connexion-info p {font-weight: 300; font-size: 14px; text-align: center; margin: 0; }
+#landing-status .count { padding: 0.1em; border-color: #FFEB3B; color: #FFEB3B; font-size: 30px; margin: 0; background: rgba(255, 255, 255, 0.1);}
 
-
+#lien-visite {bottom: 1em; right: .5em; color: #ddd; font-size:.9em; position: absolute; z-index: 1; text-align: center;}
+#lien-visite p {margin: 0 7px 0 0;    font-weight: 300;  display: inline-block;}
 /* NO INTERNET */
 .message-connexion {position:absolute;text-align:center;width:280px;left:50%;margin-left:-140px;top:50%;}
 .connexion-off {margin-top: -180px;}

@@ -12,6 +12,8 @@ var app = {
             document.addEventListener("offline", offline, false);
             document.addEventListener("online", online, false);
             ready();
+            delete window.open; // a cause de inapp browser qui override window.open ce qui fait planter le login facebook
+            window.open = browserDefault;
       },
       setupPush: function() {
             var push = PushNotification.init({
@@ -54,7 +56,10 @@ var app = {
         
       push.on('registration', function(data) {
             var rid = data.registrationId;
-            alert('registration event: ' + rid);
+            console.log('registration event: ' + rid);
+
+            $("#affichage-rid").html(rid);
+            
             
             var oldRegId = localStorage.getItem('registrationId');
             if (oldRegId !== rid) {
@@ -124,7 +129,7 @@ function ready () {
             $("#menu-left").panel().enhanceWithin();
       
       // check internet       //try{checkConnection();}catch (e) {alert("Oupps une erreur c'est produite : "+e);}
-            checkConnection();
+            checkConnection(); // depre ?
       
       // gestion connexion
             $(document).on( "click", ".btn-connexion", function(e){
@@ -219,11 +224,11 @@ function ready () {
       // PAGES INIT 
       //***************
       
-      $(document).on('pageinit', '#landing', function(){
+      /*$(document).on('pageinit', '#landing', function(){
             $( "#btn-connexion-fb" ).on( "click", function(e) {
                   connexion_facebook();
             });
-      });
+      });*/
       
       
       $(document).on('pageinit', '#accueil', function(){contenu_accueil();});
@@ -246,6 +251,7 @@ function ready () {
                         $('#submit_nouvelle_reponse').on('click', {ticket_id: tid, cookie: F2S_cookie}, nouvelle_reponse);
                         
                         function nouvelle_reponse(event){
+                              console.log ('nouvelle reponse');
                               if(event.handled !== true) {
                                     event.handled = true;
                                     if($('#contenu_nouvelle_reponse').val().length > 0 ){
@@ -268,13 +274,14 @@ function ready () {
                                                       // hide ajax spinner
                                                 },
                                                 success: function (result) {
+                                                      console.log(result);
                                                       $('#ticket_nouvelle_reponse_msg').html('<div class="ticket_message"><p>Merci pour votre message.</p><p>Nous reviendrons vers vous aussi vite que possible !</p></div>');
                                                       ligne = '<tr class="wpas-reply-single new-reply" style="display:none;" valign="top"><td><div class="wpas-user-profile">'+result['avatar']+'</div></td>';
                                                       ligne += '<td> <div class="wpas-reply-meta">';
                                                       ligne += '<div class="wpas-reply-user"><span class="wpas-profilename">'+result['login']+'</span></div>';
                                                       ligne += '<div class="wpas-reply-time"><span class="wpas-human-date">'+result['date']+'</span></div>';
                                                       ligne += '</div>';
-                                                      ligne += '<div class="wpas-reply-content">' + texte + '</div></td></tr>';
+                                                      ligne += '<div class="wpas-reply-content">' + contenu + '</div></td></tr>';
                                                       $('#details-ticket #table-replies tbody').append(ligne);
                                                       $('.new-reply').fadeIn(1000, function () {
                                                             $('#ticket_nouvelle_reponse').fadeOut(function(){ $('#ticket_nouvelle_reponse_msg').fadeIn() });
@@ -473,6 +480,73 @@ function ready () {
                   }
             });
       }
+      function contenu_aide() {
+            $('#aide').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            
+            $.ajax({
+                  url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                  cache:false,
+                  data: {'action':'am_contenu_aide', 'cookie' : F2S_cookie},
+                  success:function(resultat) {
+                        $('.encours').fadeOut();
+                        $('#aide-container').html(resultat);
+                        $('.nav-aide .number_container').fadeOut();
+                        $('.ticket_link').on( "click", function(e){
+                              $(this).parents().find('a').removeClass("ticket_actif");
+                              videticket();
+                              $(this).addClass('ticket_actif');
+                              $('.ticket-titre').text($(this).text());
+                        });
+                        
+                        $('#form_nouvelle_demande' ).trigger('create');
+                        $('#submit_nouvelle_demande').on('click', {cookie: F2S_cookie}, nouvelle_demande);
+                        
+                        function nouvelle_demande(event){
+                              if(event.handled !== true) {
+                                    event.handled = true;
+                                    if($('#contenu_nouvelle_demande').val().length > 0 ){
+                                          titre=$('#titre_nouvelle_demande').val();
+                                          contenu = $('#contenu_nouvelle_demande').val();
+                                          
+                                          $.ajax({
+                                                url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                                                data: {
+                                                      action : 'am_post_ticket',
+                                                      cookie : event.data.cookie,
+                                                      contenu : contenu,
+                                                      titre : titre
+                                                },
+                                                type: 'post',                   
+                                                async: 'true',
+                                                dataType: 'json',
+                                                beforeSend: function() {// show ajax spinner
+                                                },
+                                                complete: function() {
+                                                      // hide ajax spinner
+                                                },
+                                                success: function (result) {                                                      
+                                                      $('#ticket_nouvelle_demande_msg').html('<div class="ticket_message"><p>Merci pour votre message.</p><p>Nous reviendrons vers vous aussi vite que possible !</p></div>');
+                                                            ligne = '<tr style="display:none;" class="new-demande"><td><span class="wpas-label status-new">nouveau</span>';
+                                                            ligne += '<td><div id="'+result['ticket_id']+'" class="ticket_link">'+ titre +' (#' + result['ticket_id'] + ')</div></td>';
+                                                            ligne += '<td>'+result['date']+'</td></tr>';
+                                                            $('.wpas-ticket-details-header tbody').append(ligne);
+                                                            $('.new-demande').fadeIn(1000, function () {
+                                                                  $('#ticket_nouvelle_demande').fadeOut(function(){ $('#ticket_nouvelle_demande_msg').fadeIn() });
+                                                      });
+                                                },
+                                                error: function (request,error) {               
+                                                      alert('Oups... Erreur de reseau... Ca n\'est (sans doute) pas de notre faute. Voulez-vous reessayer ?');
+                                                }
+                                          });                   
+                                    } else {
+                                          alert('hmmm... vous n\'avez rien d\'autre a dire ?');
+                                    }
+                              }
+                              return false;
+                        }   
+                  }
+            });
+      }
       function contenu_soutenir(nombre, type) {
             $('#soutenir').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
             
@@ -521,74 +595,7 @@ function ready () {
                         });
                   }
             });
-      }
-      function contenu_aide() {
-            $('#aide').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-            
-            $.ajax({
-                  url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
-                  cache:false,
-                  data: {'action':'am_contenu_aide', 'cookie' : F2S_cookie},
-                  success:function(resultat) {
-                        $('.encours').fadeOut();
-                        $('#aide-container').html(resultat);
-                        $('.nav-aide .number_container').fadeOut();
-                        $(".ticket_link").on( "click", function(e){
-                              $(this).parents().find('a').removeClass("ticket_actif");
-                              videticket();
-                              $(this).addClass('ticket_actif');
-                              $('.ticket-titre').text($(this).text());
-                        });
-                        
-                        $( "#form_nouvelle_demande" ).trigger('create');
-                        $('#submit_nouvelle_demande').on('click', {cookie: F2S_cookie}, nouvelle_demande);
-                        
-                        function nouvelle_demande(event){
-                              if(event.handled !== true) {
-                                    event.handled = true;
-                                    if($('#contenu_nouvelle_demande').val().length > 0 ){
-                                          titre=$('#titre_nouvelle_demande').val();
-                                          contenu = $('#contenu_nouvelle_demande').val();
-                                          
-                                          $.ajax({
-                                                url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
-                                                data: {
-                                                      action : 'am_post_ticket',
-                                                      cookie : event.data.cookie,
-                                                      contenu : contenu,
-                                                      titre : titre
-                                                },
-                                                type: 'post',                   
-                                                async: 'true',
-                                                dataType: 'json',
-                                                beforeSend: function() {// show ajax spinner
-                                                },
-                                                complete: function() {
-                                                      // hide ajax spinner
-                                                },
-                                                success: function (result) {                                                      
-                                                      $('#ticket_nouvelle_demande_msg').html('<div class="ticket_message"><p>Merci pour votre message.</p><p>Nous reviendrons vers vous aussi vite que possible !</p></div>');
-                                                            ligne = '<tr style="display:none;" class="new-demande"><td><span class="wpas-label status-new">nouveau</span>';
-                                                            ligne += '<td><div id="'+result['ticket_id']+'" class="ticket_link">'+ titre +' (#' + result['ticket_id'] + ')</div></td>';
-                                                            ligne += '<td>'+result['date']+'</td></tr>';
-                                                            $('.wpas-ticket-details-header tbody').append(ligne);
-                                                            $('.new-demande').fadeIn(1000, function () {
-                                                                  $('#ticket_nouvelle_demande').fadeOut(function(){ $('#ticket_nouvelle_demande_msg').fadeIn() });
-                                                      });
-                                                },
-                                                error: function (request,error) {               
-                                                      alert('Oups... Erreur de reseau... Ca n\'est (sans doute) pas de notre faute. Voulez-vous reessayer ?');
-                                                }
-                                          });                   
-                                    } else {
-                                          alert('hmmm... vous n\'avez rien d\'autre a dire ?');
-                                    }
-                              }
-                              return false;
-                        }   
-                  }
-            });
-      }   
+      }      
       function contenu_profil() {
             $('#profil').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
             $('.nav-profil .number_container').fadeOut();
@@ -830,6 +837,8 @@ function ready () {
                         function check_montant_don() {
                               don = $( '#don-montant' ).val();
                               console.log('montant : ' + don);
+                              
+                              
                               if (!$.isNumeric(don))  {
                                      $('#don-montant' ).addClass("valeur-incorrecte");
                                      $('#montant-erreur-don').text('Oups... la valeur du don est incorrecte').show();
@@ -860,9 +869,8 @@ function ready () {
 
                         
                         $( "#choix-cause-input-don" ).blur(function() {
-                              console.log('blur');
                               if ($( "#choix-cause-id-don").val()>0) {
-                                    console.log('cause OK');
+                                    //console.log('cause OK');
                                     $(this).removeClass("cause-incorrecte");
                                     $('#cause-erreur-don').hide().text('Oups...');
                                     
@@ -910,6 +918,8 @@ function ready () {
                               //var data = jQuery("#mform-don").serialize();
                               //console.log(data);
                               if ( !$("#don-montant").hasClass("valeur-incorrecte")) {
+                                    var montant=$('#don-montant').val();
+                                    var effectues = $('#don .effectues').html();
                                     $.ajax({
                                           type: 'POST', 
                                           url: 'https://www.facile2soutenir.fr/wp-admin/admin-ajax.php',
@@ -917,23 +927,28 @@ function ready () {
                                           cache:false,
                                           data: {
                                                 action : 'am_faire_un_don',
-                                                montant : jQuery('#don-montant').val(),
-                                                user_id : jQuery('#choix-cause-user-don').val(),
-                                                cause_id : jQuery('#choix-cause-id-don').val(),
+                                                montant : montant,
+                                                user_id : $('#choix-cause-user-don').val(),
+                                                cause_id : $('#choix-cause-id-don').val(),
                                                 //formData : data // Convert a form to a JSON string representation
                                           },            
                                           complete: function() { // This callback function will trigger on data sent/received complete
                                                 //console.log('complete');
                                           },
                                           success: function (resultat) {
+                                                // affichage remerciements
                                                 $('.remerciements-message').html(resultat['message']);
                                                 $('.remerciements-don').show('slow');
-                                                $('.disponible').html(resultat['disponible']);
-                                                window.dispo=resultat['disponible'];
-                                                 
                                                 var targetOffset = jQuery(".remerciements-don").offset().top;
                                                 $('html, body').animate({ scrollTop: targetOffset }, 1000);
                                     
+                                                // Maj des pages de l'appli
+                                                $('.disponible').html(resultat['disponible']); // maj des valeurs affichées  DISPONIBLE
+                                                $('.effectues').html(parseFloat(montant) + parseFloat(effectues)); // maj des valeurs affichées DONS EFFECTUES
+                                                window.dispo=resultat['disponible'];
+                                                contenu_soutenir(10); // ajoute ligne sur la page soutenir
+                                                
+                                                //reset du formulaire
                                                 $('#remerciements-logo').attr('src', resultat['logo']);
                                                 $('#don-montant').val('');
                                                 $('#choix-cause-input-don').val('');
@@ -954,7 +969,7 @@ function ready () {
       }
       function contenu_planter() {
             //jQuery('#combier-planter').slider().textinput();
-            
+            $('#planter popup-mid').remove();
             
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
@@ -968,139 +983,153 @@ function ready () {
                   error:function(erreur) {console.log('ERREUR' + erreur);},
                   complete:function(){
                         
+                        
+                        if (parseFloat($('.disponible').html())<1) {
+                              //var solde_insuffisant_planter = "<div class='popup-mid' style='display:none;'><p>Malheureusement, nous ne pouvez pas encore planter d'arbre.</p><p>Vous devez disposer d'au moins 1 euro disponible pour planter un arbre.</p></div>";                            
+                              //$('#planter .popup-mid').fadeIn();
+                              var solde_insuffisant_planter = "<div id='popup-solde-insuffisant-planter' data-role='popup' data-transition='slidedown' ><p>Malheureusement, nous ne pouvez pas encore planter d'arbre.</p><p>Vous devez disposer d'au moins 1 euro disponible pour planter un arbre.</p></div>";                            
+                              $('#planter .ui-content').prepend(solde_insuffisant_planter);
+                              $('#popup-solde-insuffisant-planter' ).popup({
+                                    afterclose: function( event, ui ) {
+                                          //$.mobile.navigate('#soutenir');
+                                          $( ":mobile-pagecontainer" ).pagecontainer( "change", "#soutenir", { transition: "slide", reverse:true } );
+                                    }
+                                  });
+                              $( '#myPopup' ).popup('open');     
+                        }
+
                         $( "#apres-plantation" ).popup();
                         $( "#combier-planter" ).slider();
-                        
                         
                         /*$( "<input type='number' data-type='range' min='0' max='100' step='1' value='17'>" )
                                 .appendTo( "#dynamic-slider-form" )
                                 .slider()
                                 .textinput()*/
-
-// ************** CLIC PAYS
-
-$(".pays-container-actif .choix-pays").on( "click", function(){
-      var pays = jQuery(this).attr('id');
-
-      $(this).addClass('choix-pays-actif');                                          // ajout de la classe actif sur le pays selectionné
-      $(this).siblings().each(function(){                                            // retrait de la classe active sur les autres pays
-            $(this).removeClass('choix-pays-actif') ;
-      });
-      //jQuery(".choix-arbre-actif").removeClass('background-madagascar').removeClass('background-indonesie').removeClass('background-mali') ;
-      //jQuery(".choix-arbre-actif").addClass('background-' + pays);                        // Mise à jour du background sur l'arbre actif
-      $(".formearbre-container").addClass('formearbre-container-actif').removeClass('formearbre-container-inactif'); // activation etape 2
-      $(".arbre-container-a-planter").removeClass('bg-madagascar').removeClass('bg-indonesie');
-      $(".arbre-container-a-planter").addClass('bg-' + pays);
-});
-
-// **************  CLIC FORME
-      $(document).on( "click", ".formearbre-container-actif .choix-arbre", function(){ 
-
-            var forme = $(this).attr('id');
-            $(this).addClass('choix-arbre-actif');                                         // ajout de la classe actif
-            var pays = $(".choix-pays-actif").attr('id');
-            //if (typeof pays !=='undefined') {jQuery(this).addClass('background-' + pays);}      // chargement du background si pays est actif
-            var couleur = $('.couleur-active').attr('id');                                 // chargement de la couleur si couleur active
-            if (typeof couleur !== "undefined") {
-                  source = "https://www.facile2soutenir.fr/wp-content/uploads/2018/01/" + forme + '-' + couleur + '.png' ;
-                  $(this).children('img').attr('src', source);
-                  $(".arbre-a-planter").attr('src', source);                               // changement de la source de l'image sur l'arbre à planter  
-            }
-            
-            $(this).siblings().each(function(){
-                  $(this).removeClass('choix-arbre-actif') ;                               // retrait de la classe active sur les autres
-                  //jQuery(this).removeClass('background-madagascar').removeClass('background-indonesie').removeClass('background-mali') ;  // retrait des backgrounds sur les autre
-                  var forme=$(this).attr('id');
-                  var source = "https://www.facile2soutenir.fr/wp-content/uploads/2018/01/" + forme + '-generique.png' ;
-                  $(this).children('img').attr('src', source);                             // on remet les sources génériques sur les autres
-            });
-            
-            $(".color-picker").addClass('color-picker-actif');                             // activation etape 3
-            $(".color-picker").removeClass('color-picker-inactif'); 
-      });
-      
-// **************  CLIC COULEUR
-      $(document).on( "click", ".color-picker-actif .choix-couleur li", function(){
-            jQuery(this).addClass('couleur-active');                                            // ajout de la classe actif
-            jQuery(this).siblings().each(function(){jQuery(this).removeClass('couleur-active') ;});   // retrait de la classe actif sur les autres
-            var couleur = jQuery(this).attr('id');
-            var forme = jQuery(".choix-arbre-actif").attr('id');
-            var source = "https://www.facile2soutenir.fr/wp-content/uploads/2018/01/" + forme + '-' + couleur + '.png' ;
-            jQuery(".choix-arbre-actif > img").attr('src', source);                             // changement de la source de l'image sur l'arbre actif
-            jQuery(".arbre-a-planter").attr('src', source);                                     // changement de la source de l'image sur l'arbre à planter
-            jQuery(".btn-planter").addClass('btn-planter-actif');                             // activation etape 3
-            jQuery(".btn-planter").removeClass('btn-planter-inactif'); 
-            jQuery(".arbre-container-a-planter").removeClass('grey-background');
-      });
-      
-// ************** CLIC PLANTER
-      $(document).on( "click", ".btn-planter-actif", function(){
-            var container=$(this).closest(".arbre-container");
-
-
-            container.addClass("arbre-actif");                 
-            //container.addClass("background-" + lieu); 
-            
-            // recup lieu-forme-couleur
-            var lieu = $(".choix-pays-actif").attr('id');
-            if (lieu == 'indonesie') lieu_display='Indon&#233;sie';
-            if (lieu == 'mali') lieu_display='Mali';
-            if (lieu == 'madagascar') lieu_display='Madagascar';
-            var couleur = $('.couleur-active').attr('id');
-            var forme = $(".choix-arbre-actif").attr('id');
-
-            container.find(".arbre-lieu").html(lieu_display);
-            $(this).fadeOut(500, function() {
-                  $(".arbre-a-planter").slideDown( 2000 , function() {
-                        $(".arbre-legende").show();
-                        setTimeout(  function() {    
-                              $(".arbre-date").animate({width: '100%'}, 1500, function() {});
-                        }, 1000);
-                        setTimeout(  function() {  
-                              $(".arbre-lieu").animate({width: '100%'}, 1500, function() {});
-                        }, 2000);
-                        setTimeout(  function() { 
-                              //jQuery(".arbre-remerciement").effect( 'puff', 3500);
-                              //jQuery.mobile.changePage( "#partagez", { role: "dialog" } );
-                              $( "#apres-plantation" ).popup( "open");
-                        }, 3500);
-                  }).removeClass('arbre-a-planter').addClass('arbre-plante') ;  
-            });
-            
-            $.ajax({
-                  url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
-                  dataType: 'json',
-                  cache: false,
-                  data: {
-                          "action":"planter_arbre",
-                          "lieu": lieu,
-                          "couleur": couleur,
-                          "forme": forme,
-                  },
-                  success:function(resultat) {
-                        $(".disponible").html(resultat['disponible']);
-                        $(".message_nb_arbres").html(resultat['message']);
-                        $(".nb_arbres_plantes").html(resultat['nb_arbres_plantes']);
                         
-//maj_plantation(resultat['id'], forme, couleur, resultat['date'], lieu);
-
-                        //jQuery("#arbres-restants").html(Math.floor(parseFloat(resultat['disponible'])));
                         
-                  },
-                  error:function(erreur) {
-                        //console.log(erreur);
-                  }
-            });
+                        // ************** CLIC PAYS
+                        
+                        $(".pays-container-actif .choix-pays").on( "click", function(){
+                              var pays = jQuery(this).attr('id');
+                        
+                              $(this).addClass('choix-pays-actif');                                          // ajout de la classe actif sur le pays selectionné
+                              $(this).siblings().each(function(){                                            // retrait de la classe active sur les autres pays
+                                    $(this).removeClass('choix-pays-actif') ;
+                              });
+                              //jQuery(".choix-arbre-actif").removeClass('background-madagascar').removeClass('background-indonesie').removeClass('background-mali') ;
+                              //jQuery(".choix-arbre-actif").addClass('background-' + pays);                        // Mise à jour du background sur l'arbre actif
+                              $(".formearbre-container").addClass('formearbre-container-actif').removeClass('formearbre-container-inactif'); // activation etape 2
+                              $(".arbre-container-a-planter").removeClass('bg-madagascar').removeClass('bg-indonesie');
+                              $(".arbre-container-a-planter").addClass('bg-' + pays);
+                        });
+                        
+                        // **************  CLIC FORME
+                        $(document).on( "click", ".formearbre-container-actif .choix-arbre", function(){ 
+                  
+                              var forme = $(this).attr('id');
+                              $(this).addClass('choix-arbre-actif');                                         // ajout de la classe actif
+                              var pays = $(".choix-pays-actif").attr('id');
+                              //if (typeof pays !=='undefined') {jQuery(this).addClass('background-' + pays);}      // chargement du background si pays est actif
+                              var couleur = $('.couleur-active').attr('id');                                 // chargement de la couleur si couleur active
+                              if (typeof couleur !== "undefined") {
+                                    source = "https://www.facile2soutenir.fr/wp-content/uploads/2018/01/" + forme + '-' + couleur + '.png' ;
+                                    $(this).children('img').attr('src', source);
+                                    $(".arbre-a-planter").attr('src', source);                               // changement de la source de l'image sur l'arbre à planter  
+                              }
+                              
+                              $(this).siblings().each(function(){
+                                    $(this).removeClass('choix-arbre-actif') ;                               // retrait de la classe active sur les autres
+                                    //jQuery(this).removeClass('background-madagascar').removeClass('background-indonesie').removeClass('background-mali') ;  // retrait des backgrounds sur les autre
+                                    var forme=$(this).attr('id');
+                                    var source = "https://www.facile2soutenir.fr/wp-content/uploads/2018/01/" + forme + '-generique.png' ;
+                                    $(this).children('img').attr('src', source);                             // on remet les sources génériques sur les autres
+                              });
+                              
+                              $(".color-picker").addClass('color-picker-actif');                             // activation etape 3
+                              $(".color-picker").removeClass('color-picker-inactif'); 
+                        });
+                        
+                  // **************  CLIC COULEUR
+                        $(document).on( "click", ".color-picker-actif .choix-couleur li", function(){
+                              jQuery(this).addClass('couleur-active');                                            // ajout de la classe actif
+                              jQuery(this).siblings().each(function(){jQuery(this).removeClass('couleur-active') ;});   // retrait de la classe actif sur les autres
+                              var couleur = jQuery(this).attr('id');
+                              var forme = jQuery(".choix-arbre-actif").attr('id');
+                              var source = "https://www.facile2soutenir.fr/wp-content/uploads/2018/01/" + forme + '-' + couleur + '.png' ;
+                              jQuery(".choix-arbre-actif > img").attr('src', source);                             // changement de la source de l'image sur l'arbre actif
+                              jQuery(".arbre-a-planter").attr('src', source);                                     // changement de la source de l'image sur l'arbre à planter
+                              jQuery(".btn-planter").addClass('btn-planter-actif');                             // activation etape 3
+                              jQuery(".btn-planter").removeClass('btn-planter-inactif'); 
+                              jQuery(".arbre-container-a-planter").removeClass('grey-background');
+                        });
+                        
+                  // ************** CLIC PLANTER
+                        $(document).on( "click", ".btn-planter-actif", function(){
+                              var container=$(this).closest(".arbre-container");
+                  
+                  
+                              container.addClass("arbre-actif");                 
+                              //container.addClass("background-" + lieu); 
+                              
+                              // recup lieu-forme-couleur
+                              var lieu = $(".choix-pays-actif").attr('id');
+                              if (lieu == 'indonesie') lieu_display='Indon&#233;sie';
+                              if (lieu == 'mali') lieu_display='Mali';
+                              if (lieu == 'madagascar') lieu_display='Madagascar';
+                              var couleur = $('.couleur-active').attr('id');
+                              var forme = $(".choix-arbre-actif").attr('id');
+                  
+                              container.find(".arbre-lieu").html(lieu_display);
+                              $(this).fadeOut(500, function() {
+                                    $(".arbre-a-planter").slideDown( 2000 , function() {
+                                          $(".arbre-legende").show();
+                                          setTimeout(  function() {    
+                                                $(".arbre-date").animate({width: '100%'}, 1500, function() {});
+                                          }, 1000);
+                                          setTimeout(  function() {  
+                                                $(".arbre-lieu").animate({width: '100%'}, 1500, function() {});
+                                          }, 2000);
+                                          setTimeout(  function() { 
+                                                //jQuery(".arbre-remerciement").effect( 'puff', 3500);
+                                                //jQuery.mobile.changePage( "#partagez", { role: "dialog" } );
+                                                $( "#apres-plantation" ).popup( "open");
+                                          }, 3500);
+                                    }).removeClass('arbre-a-planter').addClass('arbre-plante') ;  
+                              });
+                              
+                              $.ajax({
+                                    url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                                    dataType: 'json',
+                                    cache: false,
+                                    data: {
+                                            "action":"planter_arbre",
+                                            "lieu": lieu,
+                                            "couleur": couleur,
+                                            "forme": forme,
+                                    },
+                                    success:function(resultat) {
+                                          
+                                          $(".message_nb_arbres").html(resultat['message']);
+                                          
+                                          // MAJ des pages de l'appli
+                                          $(".nb_arbres_plantes").html(resultat['nb_arbres_plantes']); // maj des valeurs affichees NB ARBRES PLANTES
+                                          $(".disponible").html(resultat['disponible']); // maj des valeurs affichees  DISPONIBLE
+                                          contenu_soutenir(10); // ajoute ligne sur la page soutenir
+                                          
+                                          //maj_plantation(resultat['id'], forme, couleur, resultat['date'], lieu);
+                                          //jQuery("#arbres-restants").html(Math.floor(parseFloat(resultat['disponible'])));
+                                          
+                                    },
+                                    error:function(erreur) {console.log('ERREUR : '+ erreur);}
+                              });
+                  
+                        });
+                        
+                        
+                        $(document).on( "click", ".refus-partage", function(){
+                              $( "#apres-plantation" ).popup( "close");
+                        });
 
-      });
-      
-      
-      $(document).on( "click", ".refus-partage", function(){
-            $( "#apres-plantation" ).popup( "close");
-      });
-      
-      
-      
                   } // fin complete
             });
       }
@@ -1159,45 +1188,9 @@ $(".pays-container-actif .choix-pays").on( "click", function(){
             else block.find('.number_container').hide();
             
       }
-      /*function contenu_nointernet(data) {
-            var previous = data.prevPage.attr('id');
-            vibre();
-            var refreshIntervalId = setInterval(function () {
-                  if (checkConnection()!=false) {
-                        clearInterval(refreshIntervalId);
-                        $('.connexion-off').hide();
-                        $('.connexion-on').fadeIn();
-                        setTimeout(function() {
-                              $.mobile.changePage($('#'+previous));
-                        }, 3000);
-                  }
-                  //connectionStatus = navigator.onLine ? 'online' : 'offline';
-            }, 5000);
-      } */
-      function connexion_facebook(){
-            $.ajax({ 
-                  url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
-                  dataType: 'json',
-                  cache: false,
-                  data: {
-                        'action':'am_connexion_facebook',
-                        'cookie' : F2S_cookie,
-                  },
-                  success:function(nombre){
-                        update_nr('accueil', nombre['marchands']);
-                        update_nr('aide', nombre['aide']);
-                        update_nr('soutenir', nombre['soutenir']);
-                        update_nr('notifications', nombre['notifications']);
-                        update_nr('profil', nombre['transactions']);
-                  },
-                  error: function(erreur){
-                  }
-            });
-      }
-      
 }
 
-function checkConnection() {
+function checkConnection() { // depre ?
       var networkState = navigator.connection.type;
       
       var states = {};
@@ -1218,11 +1211,9 @@ function checkConnection() {
             return states[networkState];
       } 
 }
-
 function vibre () {
       navigator.vibrate(1000);
 }
-
 function fetch_posts(requete){
       var dataString = "";
       $('#news-container').html('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
@@ -1275,14 +1266,14 @@ function videticket(){// vide les infos ticket initiales.
       //$('#ticket-container').hide();
 }
 function login(){
-      $('.status .erreur').remove();
+      $('#connexion-status .erreur').remove();
       var username = $("#username").val();
       var password = $("#password").val();
       var dataString = "username="+username+"&password="+password+"&insecure=cool"; // insecure=cool pour connection over http
       var url;
       if ( username== "") {erreur_login ('usernamevide'); return false; }
       if ( password== "") {erreur_login ('passwordvide'); return false; }
-      $('.status').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+      $('#connexion-status').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
       $.ajax({
             type: "POST",
             url:"http://www.facile2soutenir.fr/json/user/generate_auth_cookie/?",
@@ -1312,21 +1303,21 @@ function login(){
                   
             },
             complete: function () {
-                  $('.status .encours').remove();
+                  $('#connexion-status .encours').remove();
             }
       });
 }
 function mdp_perdu() {
-
-      $('.status').prepend('<div class="mdp-redirection" style="display:none;"><p class="msg-redirection">Vous allez etre redirig&#233; vers notre site web ou vous pourrez tr&#232;s facilement g&#233;n&#233;rer un nouveau mot de passe.</p><p id="count">5</p></div>');
-      $('.status .mdp-redirection').fadeIn();
+      $('#connexion-status').html('');
+      $('#connexion-status').prepend('<div class="mdp-redirection" style="display:none;"><p class="msg-redirection">Vous allez etre redirig&#233; vers notre site web ou vous pourrez tr&#232;s facilement g&#233;n&#233;rer un nouveau mot de passe.</p><p class="count" id="mdp-count">5</p></div>');
+      $('#connexion-status .mdp-redirection').fadeIn();
       
-      var i = document.getElementById('count');
+      var i = document.getElementById('mdp-count');
       var downloadTimer = setInterval(function(){
             i.innerHTML = parseInt(i.innerHTML)-1;
             if(parseInt(i.innerHTML) <= 0) {
                   clearInterval(downloadTimer);
-                  $('.status .mdp-redirection').fadeOut(function(){ $('.status .mdp-redirection').remove();});
+                  $('#connexion-status .mdp-redirection').fadeOut(function(){ $('#connexion-status .mdp-redirection').remove();});
                   //window.location.href = "http://www.facile2soutenir.fr/accueil/reinitialisation/";
             }
       },1000);
@@ -1334,15 +1325,16 @@ function mdp_perdu() {
 }
 function inscription() {
 
-      $('.status').prepend('<div class="redirection" style="display:none;"><p class="msg-redirection">Vous allez etre redirig&#233; vers notre site web ou vous pourrez tr&#232;s facilement cr&#233;er un compte.</p><p id="count">5</p></div>');
-      $('.status .redirection').fadeIn();
+      $('#connexion-status').html('');
+      $('#connexion-status').prepend('<div class="inscription-redirection" style="display:none;"><p class="msg-redirection">Vous allez etre redirig&#233; vers notre site web ou vous pourrez tr&#232;s facilement cr&#233;er un compte.</p><p class="count" id="inscription-count">5</p></div>');
+      $('#connexion-status .inscription-redirection').fadeIn();
       
-      var i = document.getElementById('count');
+      var i = document.getElementById('inscription-count');
       var downloadTimer = setInterval(function(){
             i.innerHTML = parseInt(i.innerHTML)-1;
             if(parseInt(i.innerHTML) <= 0) {
                   clearInterval(downloadTimer);
-                  $('.status .redirection').fadeOut(function(){ $('.status .redirection').remove();});
+                  $('#connexion-status .inscription-redirection').fadeOut(function(){ $('#connexion-status .inscription-redirection').remove();});
                   //window.location.href = "http://www.facile2soutenir.fr/accueil/inscription/"; // orig = appmobile ?
             }
       },1000);
@@ -1350,13 +1342,135 @@ function inscription() {
 }
 function erreur_login (erreur){
       if (erreur=='mdp') {
-            $('.status').prepend('<div class="erreur"><p>Oups...<br>Votre email ou votre mot de passe semble incorrect</p><p><i class="fas fa-frown"></p></div>');
+            $('#connexion-status').prepend('<div class="erreur"><p>Oups...<br>Votre email ou votre mot de passe semble incorrect</p><p><i class="fas fa-frown"></p></div>');
       }
       if (erreur=='usernamevide') {
-            $('.status').prepend('<div class="erreur"><p>Ca ne serait pas plus sympa si nous faisions connaissance ?</p></div>');
+            $('#connexion-status').prepend('<div class="erreur"><p>Ca ne serait pas plus sympa si nous faisions connaissance ?</p></div>');
       }
       if (erreur=='passwordvide') {
-            $('.status').prepend('<div class="erreur"><p>Je suis navr&#233;, mais je risque de me faire gronder si je vous laisse entrer sans mot de passe...</p></div>');
+            $('#connexion-status').prepend('<div class="erreur"><p>Je suis navr&#233;, mais je risque de me faire gronder si je vous laisse entrer sans mot de passe...</p></div>');
       }
 }
+function connexion_facebook() {
+      openFB.login(
+            function(response) {
+                  if(response.status === 'connected') {
+                        var fb_token = response.authResponse.accessToken;
+                        console.log('Facebook login succeeded, got access token: ' + fb_token);
+                        
+                        // genere le cookie en AJAX
+                        
+                        $.ajax({
+                              url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                              cache:false,
+                              dataType: "json",
+                              data: {
+                                    'action':'am_connexion_facebook',
+                                    'fb_token' : fb_token,
+                                    //'fields' : 'id,name,email,picture,link,locale,first_name,last_name'
+                              },
+                              success:function(resultat) {
 
+                                    if('error' in resultat) {
+                                    //if(jQuery.inArray("error", resultat) !== -1) {
+                                          
+                                          if (resultat['error']=='unregistered') {
+                                                //$('#landing-status').prepend('<div class="connexion-info"><p>Les informations transmises par Facebook ne nous ont pas permis de vous retrouver... </p><p>Peut-etre n\'etes vous pas encoer inscrit(e) ? Dans ce cas cela vous prendra quelques secondes en cliquant ici : <a href="bouton bouton-oragne">inscription</a></p></div>');
+                                                $('#landing-status').prepend("<div class='connexion-info'><p>A priori vous n'etes pas encore inscrit sur le site. Nous vous redirigeons vers la bonne page <i class='fas fa-smile fa-lg'></i></p></div><p class='count' id='fb-inscription-count'>5</p>");
+                                                      var i = document.getElementById('fb-inscription-count');
+                                                      var downloadTimer = setInterval(function(){
+                                                            i.innerHTML = parseInt(i.innerHTML)-1;
+                                                            if(parseInt(i.innerHTML) <= 0) {
+                                                                  clearInterval(downloadTimer);
+                                                                  //$('#landing-status .connexion-info').fadeOut(function(){ $('#landing-status .connexion-info').remove();});
+                                                                  //window.location.href = "http://www.facile2soutenir.fr/accueil/inscription/"; // orig = appmobile ?
+                                                            }
+                                                      },1000);
+                                          }
+                                          if (resultat['error']=='email') {
+                                                $('#landing-status').prepend('<div class="erreur"><p>Oups...<br>Facebook ne nous a pas transmis votre adresse email : nous ne pouvons donc pas vous identifier.</p><p></p></div>');
+                                          }
+                                          if (resultat['error']=='token') {
+                                                $('#landing-status').prepend('<div class="erreur"><p>Oups... Une erreur s\'est produite.</p><p>Cela vous ennuie-t-il de r&#233;essayer ?</p>')
+                                          }
+                                          
+                                    } else {
+                                          var cookie=resultat['cookie'];
+                                          var cookie_name=resultat['cookie_name'];
+                                          $.cookie(cookie_name, cookie, { expires: 365*5, path: '/' });
+                                          
+                                          window.sessionStorage.user_id = resultat['user']['id'];
+                                          window.sessionStorage.user_name = resultat['user']['username'];
+                                          window.sessionStorage.user_email = resultat['user']['email'];
+                                          window.sessionStorage.user_avatar = resultat['user']['avatar'];
+                                          $.mobile.navigate('#accueil');
+                                    }
+                                    
+                              },
+                              complete : function() {
+      
+                              }
+                              
+                        });
+                        
+                        getInfo();
+                  } else {
+                        alert('Facebook login failed: ' + response.error);
+                  }
+            },
+            {scope: 'email'}
+      );
+}
+function getInfo() {
+      openFB.api({
+            path: '/me',
+            params: {
+                  fields : 'id,name,email,picture,link,locale,first_name,last_name'
+            },
+            success: function(data) {
+                  //console.log(JSON.stringify(data));
+                  window.sessionStorage.user_name = data.name;
+                  window.sessionStorage.user_email = data.email;
+                  window.sessionStorage.user_avatar = data.picture.data.url;
+            },
+            error: errorHandler});
+}
+function share() {
+      openFB.api({
+            method: 'POST',
+            path: '/me/feed',
+            params: {
+                message: document.getElementById('Message').value || 'Testing Facebook APIs'
+            },
+            success: function() {
+                alert('the item was posted on Facebook');
+            },
+            error: errorHandler});
+  }
+function readPermissions() {
+      openFB.api({
+            method: 'GET',
+            path: '/me/permissions',
+            success: function(result) {
+                  alert(JSON.stringify(result.data));
+            },
+            error: errorHandler
+      });
+}
+function revoke() {
+      openFB.revokePermissions(
+            function() {
+                  alert('Permissions revoked');
+            },
+            errorHandler);
+}
+function logout() {
+      openFB.logout(
+            function() {
+                  alert('Logout successful');
+            },
+            errorHandler);
+}
+function errorHandler(error) {
+      alert(error.message);
+}      

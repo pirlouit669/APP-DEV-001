@@ -17,13 +17,15 @@
       * Create your own at http://cspisawesome.com
       -->
       <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
-  
       
       <!-- <link rel="stylesheet" type="text/css" href="css/index.css" /> -->
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400|Roboto:100,300,400" >
       <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">  
       <link rel="stylesheet" href="css/app.css">
       <link rel="stylesheet" id = "extcss" href="http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/css/mobile-app.css?v=0.01">
+      
+      <script>var browserDefault = window.open; // a cause de inapp browser qui override window.open ce qui fait planter le login facebook</script>
+      
       <script>
             var uniqueNum = new Date().getTime();
             var cssURL = 'http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/css/mobile-app.css?ver=' + uniqueNum;
@@ -34,16 +36,17 @@
 </head>
 
 <body>
-      
     <div data-role="page" id="landing" class="bg-image bg3" data-enhance="false">
+            <div id="affichage-rid">pas de RID</div>
+            <a href="#accueil" data-role="none" id="lien-visite" class=""><p>Acc&#232;s visiteur</p><i class="fas fa-sign-in-alt fa-lg"></i></a>
             <div data-role="main" class="ui-content">
                   <div class="landing-logo"><img src="img/facile2soutenir120.png"></div>
-                  <div class="landing-intro"><H1>Soutenez les causes qui vous tiennent a coeur grace a vos achats en ligne.</H1></div>
+                  <div class="landing-intro"><H1>Soutenez les causes qui vous tiennent &#224; coeur gr&#226;ce &#224; vos achats en ligne.</H1></div>
                   <div class="landing-liens">
-                          <a href="#connexion" data-role="none" style="" class="bouton bouton-moyen bouton-bleu bouton-block bouton-form btn-connexion">Connexion</a>
-                          <p class="oubien">ou bien</p>
-                          <a href="#" onclick="connexion_facebook();" data-role="none" class="bouton bouton-moyen bouton-facebook bouton-block bouton-moyen bouton-form" id="btn-connexion-fb" >Connexion Facebook</button>
-                          <a href="#accueil" data-role="none" style="" class="bouton bouton-moyen bouton-transparent bouton-block bouton-form">Visite</a>
+                        <a href="#connexion" data-role="none" style="" class="bouton bouton-moyen bouton-bleu bouton-block bouton-form btn-connexion">Connexion</a>
+                        <p class="oubien">ou bien</p>
+                        <a href="#" onclick="connexion_facebook();" data-role="none" class="bouton bouton-moyen bouton-facebook bouton-block bouton-moyen bouton-form" id="btn-connexion-fb" >Connexion Facebook</a>
+                        <div id="landing-status" class="status"></div>
                   </div>
             </div>
       </div> 
@@ -59,11 +62,11 @@
                         <button onclick="login();" data-role="none" class="bouton bouton-moyen bouton-bleu bouton-block bouton-moyen bouton-form" id="" >Connexion</button>
                         <button onclick="mdp_perdu();" data-role="none" class="bouton bouton-transparent bouton-block bouton-form" id="btn-mdp-perdu">Mot de passe perdu</button>
                         <button onclick="inscription();" data-role="none" class="bouton bouton-transparent bouton-block bouton-form" id="btn-inscription">Pas encore inscrit ?</button>
-                        <div class="status"></div>
+                        <div id="connexion-status" class="status"></div>
                   </div>                
             </div>
       </div>
-     <div data-role="page" id="accueil">
+      <div data-role="page" id="accueil">
             <div data-role="header" data-position="fixed">
                   <div class="top-menu-left">
                         <a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a>
@@ -167,7 +170,6 @@
                         <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
                   <div class="bouton-test refresh" id="get_aide">refresh</div>
-                  <div class="bouton-test test-internet" >Coupure</div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
@@ -224,7 +226,6 @@
                         <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
                   <div class="bouton-test refresh" id="get_soutenir">refresh</div>
-                  <div class="bouton-test test-internet" >Coupure</div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
@@ -296,7 +297,6 @@
                         <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
                   <div class="bouton-test refresh" id="get_notifications">refresh</div>
-                  <div class="bouton-test test-internet" >Coupure</div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
@@ -318,7 +318,6 @@
             <div data-role="main" class="ui-content">
                   <div id="user-profil"></div>
                   <div class="bouton-test refresh" id="get_profil">refresh</div>
-                  <div class="bouton-test test-internet" >Coupure</div>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -356,9 +355,6 @@
                               <p class="message-attente">En cours de redirection</p>
                         </div>
                   </div>
-                  <a class="bouton-test" href="#accueil" >retour</a>
-            </div>
-                  
             </div>
       </div>
       <div data-role="panel" id="menu-left" data-position-fixed="true" data-display="overlay" data-theme="b">
@@ -371,6 +367,8 @@
       <script src="js/jquery.cookie.js"></script>
       <script src="js/index.js"></script>
       <script type="text/javascript">app.initialize();</script>
+      <script src="js/openfb.js"></script>
+      <script>openFB.init({appId: '204764659934740'});</script>
 </body>
 
 </html>
