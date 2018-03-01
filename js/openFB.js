@@ -1,6 +1,6 @@
 
 var openFB = (function () {
-
+alert('openFB');
       var loginURL = 'https://www.facebook.com/dialog/oauth',
           logoutURL = 'https://www.facebook.com/logout.php',
 
@@ -34,9 +34,9 @@ var openFB = (function () {
             loginProcessed;
             
     
-    if (navigator.userAgent.match(/(ios|iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
+    //if (navigator.userAgent.match(/(ios|iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
             runningInCordova = true;
-     }
+     //}
 
     /*
             
