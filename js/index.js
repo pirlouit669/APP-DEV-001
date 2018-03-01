@@ -1,5 +1,6 @@
 var previous="connexion";
 var runinphonegap = navigator.userAgent.match(/(ios|iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/);
+var F2S_cookie = '';
 //alert (runinphonegap);
 
 var openFB = (function () {
@@ -182,7 +183,7 @@ var openFB = (function () {
                   tokenStore.fbAccessToken = obj['access_token'];
                   if (loginCallback) loginCallback({status: 'connected', authResponse: {accessToken: obj['access_token']}});
                   
-$('#affichage-token-fb').html('token fb : ' + obj['access_token']);
+$('#affichage-token-fb').html('token fb : ' + obj['access_token'].substring(0,10));
 
             } else if (url.indexOf("error=") > 0) {
                   queryString = url.substring(url.indexOf('?') + 1, url.indexOf('#'));
@@ -364,8 +365,6 @@ var app = {
       push.on('registration', function(data) {
             var rid = data.registrationId;
             console.log('registration event: ' + rid);
-
-$("#affichage-rid").html(rid);
             
             
             var oldRegId = localStorage.getItem('registrationId');
@@ -411,9 +410,9 @@ function ready () {
       $.mobile.crossDomainPages  = true;
       
       // gestion du cookie
-            var F2S_cookie = '';
             $.each($.cookie(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {F2S_cookie = value;}});
-            $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie);
+            $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie.substring(0,10));
+            
       //mise en page
             $.mobile.ignoreContentEnabled = true;      //$.mobile.keepNative = "select,input";
       
@@ -444,6 +443,16 @@ function ready () {
       
       // Ajout des nombres rouges
             maj_nombres_rouges();
+      
+      $.event.special.tap.tapholdThreshold = 2000;
+      $.event.special.tap.emitTapOnTaphold=false
+      $(document).on( "taphold", function( event ) { 
+            deconnexion();        
+      });
+      
+      
+
+      
       
       
       //***************
@@ -561,6 +570,7 @@ function ready () {
                                                       // hide ajax spinner
                                                 },
                                                 success: function (result) {
+                                                      // manque test contenu result (status = ok ?)
                                                       console.log(result);
                                                       $('#ticket_nouvelle_reponse_msg').html('<div class="ticket_message"><p>Merci pour votre message.</p><p>Nous reviendrons vers vous aussi vite que possible !</p></div>');
                                                       ligne = '<tr class="wpas-reply-single new-reply" style="display:none;" valign="top"><td><div class="wpas-user-profile">'+result['avatar']+'</div></td>';
@@ -1478,6 +1488,7 @@ function ready () {
             else block.find('.number_container').hide();
             
       }
+
 }
 function deconnexion() {
      
@@ -1487,7 +1498,7 @@ function deconnexion() {
                   $.removeCookie(index);
             }
      });
-     F2S_cookie='';
+     F2S_cookie = '';
      $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie);
      sessionStorage.clear();
      $('#affichage-token-fb').html('token fb : ');
@@ -1681,78 +1692,7 @@ function erreur_login (erreur){
             $('#connexion-status').prepend('<div class="erreur"><p>Je suis navr&#233;, mais je risque de me faire gronder si je vous laisse entrer sans mot de passe...</p></div>');
       }
 }
-function connexion_facebook() {
-      openFB.login(
-            function(response) {
-                  if(response.status === 'connected') {
-                        var fb_token = response.authResponse.accessToken;
-                        console.log('Facebook login succeeded, got access token: ' + fb_token);
-                        alert('Facebook login succeeded, got access token: ' + fb_token);
-                        // genere le cookie en AJAX
-                        
-                        $.ajax({
-                              url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
-                              cache:false,
-                              dataType: "json",
-                              data: {
-                                    'action':'am_connexion_facebook',
-                                    'fb_token' : fb_token,
-                                    //'fields' : 'id,name,email,picture,link,locale,first_name,last_name'
-                              },
-                              success:function(resultat) {
 
-                                    if('error' in resultat) {
-                                    //if(jQuery.inArray("error", resultat) !== -1) {
-                                          
-                                          if (resultat['error']=='unregistered') {
-                                                //$('#landing-status').prepend('<div class="connexion-info"><p>Les informations transmises par Facebook ne nous ont pas permis de vous retrouver... </p><p>Peut-etre n\'etes vous pas encoer inscrit(e) ? Dans ce cas cela vous prendra quelques secondes en cliquant ici : <a href="bouton bouton-oragne">inscription</a></p></div>');
-                                                $('#landing-status').prepend("<div class='connexion-info'><p>A priori vous n'etes pas encore inscrit sur le site. Nous vous redirigeons vers la bonne page <i class='fas fa-smile fa-lg'></i></p></div><p class='count' id='fb-inscription-count'>5</p>");
-                                                      var i = document.getElementById('fb-inscription-count');
-                                                      var downloadTimer = setInterval(function(){
-                                                            i.innerHTML = parseInt(i.innerHTML)-1;
-                                                            if(parseInt(i.innerHTML) <= 0) {
-                                                                  clearInterval(downloadTimer);
-                                                                  //$('#landing-status .connexion-info').fadeOut(function(){ $('#landing-status .connexion-info').remove();});
-                                                                  //window.location.href = "http://www.facile2soutenir.fr/accueil/inscription/"; // orig = appmobile ?
-                                                            }
-                                                      },1000);
-                                          }
-                                          if (resultat['error']=='email') {
-                                                $('#landing-status').prepend('<div class="erreur"><p>Oups...<br>Facebook ne nous a pas transmis votre adresse email : nous ne pouvons donc pas vous identifier.</p><p></p></div>');
-                                          }
-                                          if (resultat['error']=='token') {
-                                                $('#landing-status').prepend('<div class="erreur"><p>Oups... Une erreur s\'est produite.</p><p>Cela vous ennuie-t-il de r&#233;essayer ?</p>')
-                                          }
-                                          
-                                    } else {
-                                          var cookie=resultat['cookie'];
-                                          var cookie_name=resultat['cookie_name'];
-                                          $.cookie(cookie_name, cookie, { expires: 365*5, path: '/' });
-                                          F2S_cookie = cookie;
-                                          $('#affichage-cookie').html('F2S_cookie (FB): ' + F2S_cookie);
-                                          //$('#affichage-cookie').html();
-                                          window.sessionStorage.user_id = resultat['user']['id'];
-                                          window.sessionStorage.user_name = resultat['user']['username'];
-                                          window.sessionStorage.user_email = resultat['user']['email'];
-                                          window.sessionStorage.user_avatar = resultat['user']['avatar'];
-                                          $.mobile.navigate('#accueil');
-                                    }
-                                    
-                              },
-                              complete : function() {
-      
-                              }
-                              
-                        });
-                        
-                        getInfo();
-                  } else {
-                        alert('Facebook login failed: ' + response.error);
-                  }
-            },
-            {scope: 'email'}
-      );
-}
 function getInfo() {
       openFB.api({
             path: '/me',
@@ -1818,4 +1758,84 @@ function online() {
             $.mobile.changePage($('#'+previous));
       }, 3000);
 }
+
+      function show_cookie() {
+            $.each($.cookie(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {alert ('logged_in : ' + value);}});
+      }
+      function show_F2S_cookie() {
+            alert ('F2S_cookie : ' + F2S_cookie);
+      }
+      
+            function connexion_facebook() {
+            openFB.login(
+                  function(response) {
+                        if(response.status === 'connected') {
+                              var fb_token = response.authResponse.accessToken;
+                              console.log('Facebook login succeeded, got access token: ' + fb_token);
+                              alert('Facebook login succeeded, got access token: ' + fb_token);
+                              // genere le cookie en AJAX
+                              
+                              $.ajax({
+                                    url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                                    cache:false,
+                                    dataType: "json",
+                                    data: {
+                                          'action':'am_connexion_facebook',
+                                          'fb_token' : fb_token,
+                                          //'fields' : 'id,name,email,picture,link,locale,first_name,last_name'
+                                    },
+                                    success:function(resultat) {
+      
+                                          if('error' in resultat) {
+                                          //if(jQuery.inArray("error", resultat) !== -1) {
+                                                
+                                                if (resultat['error']=='unregistered') {
+                                                      //$('#landing-status').prepend('<div class="connexion-info"><p>Les informations transmises par Facebook ne nous ont pas permis de vous retrouver... </p><p>Peut-etre n\'etes vous pas encoer inscrit(e) ? Dans ce cas cela vous prendra quelques secondes en cliquant ici : <a href="bouton bouton-oragne">inscription</a></p></div>');
+                                                      $('#landing-status').prepend("<div class='connexion-info'><p>A priori vous n'etes pas encore inscrit sur le site. Nous vous redirigeons vers la bonne page <i class='fas fa-smile fa-lg'></i></p></div><p class='count' id='fb-inscription-count'>5</p>");
+                                                            var i = document.getElementById('fb-inscription-count');
+                                                            var downloadTimer = setInterval(function(){
+                                                                  i.innerHTML = parseInt(i.innerHTML)-1;
+                                                                  if(parseInt(i.innerHTML) <= 0) {
+                                                                        clearInterval(downloadTimer);
+                                                                        //$('#landing-status .connexion-info').fadeOut(function(){ $('#landing-status .connexion-info').remove();});
+                                                                        //window.location.href = "http://www.facile2soutenir.fr/accueil/inscription/"; // orig = appmobile ?
+                                                                  }
+                                                            },1000);
+                                                }
+                                                if (resultat['error']=='email') {
+                                                      $('#landing-status').prepend('<div class="erreur"><p>Oups...<br>Facebook ne nous a pas transmis votre adresse email : nous ne pouvons donc pas vous identifier.</p><p></p></div>');
+                                                }
+                                                if (resultat['error']=='token') {
+                                                      $('#landing-status').prepend('<div class="erreur"><p>Oups... Une erreur s\'est produite.</p><p>Cela vous ennuie-t-il de r&#233;essayer ?</p>')
+                                                }
+                                                
+                                          } else {
+                                                var cookie=resultat['cookie'];
+                                                var cookie_name=resultat['cookie_name'];
+                                                $.cookie(cookie_name, cookie, { expires: 365*5, path: '/' });
+                                                F2S_cookie = cookie;
+                                                $('#affichage-cookie').html('F2S_cookie (FB): ' + F2S_cookie.substring(0,10));
+                                                //$('#affichage-cookie').html();
+                                                window.sessionStorage.user_id = resultat['user']['id'];
+                                                window.sessionStorage.user_name = resultat['user']['username'];
+                                                window.sessionStorage.user_email = resultat['user']['email'];
+                                                window.sessionStorage.user_avatar = resultat['user']['avatar'];
+                                                $.mobile.navigate('#accueil');
+                                          }
+                                          
+                                    },
+                                    complete : function() {
+            
+                                    }
+                                    
+                              });
+                              
+                              getInfo();
+                        } else {
+                              alert('Facebook login failed: ' + response.error);
+                        }
+                  },
+                  {scope: 'email'}
+            );
+      }
 
