@@ -517,12 +517,6 @@ function ready () {
       // PAGES INIT 
       //***************
       
-      /*$(document).on('pageinit', '#landing', function(){
-            $( "#btn-connexion-fb" ).on( "click", function(e) {
-                  connexion_facebook();
-            });
-      });*/
-      
       
       $(document).on('pageinit', '#accueil', function(){contenu_accueil();});
       $(document).on('pageinit', '#aide', function(){contenu_aide();});
