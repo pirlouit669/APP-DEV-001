@@ -33,11 +33,17 @@ var openFB = (function () {
     // Used in the exit event handler to identify if the login has already been processed elsewhere (in the oauthCallback function)
             loginProcessed;
             
+    
+    if (navigator.userAgent.match(/(ios|iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
+            runningInCordova = true;
+     }
+
+    /*
             
     document.addEventListener("deviceready", function () {
             runningInCordova = true;
     }, false);
-    
+    */
 
     /**
      * Initialize the OpenFB module. You must use this function and initialize the module with an appId before you can
@@ -109,6 +115,7 @@ var openFB = (function () {
                 redirectURL = runningInCordova ? cordovaOAuthRedirectURL : oauthRedirectURL;
 
                 
+alert('redirectURL : ' + redirectURL);
 //redirectURL = oauthRedirectURL;
                 
                 
@@ -119,6 +126,7 @@ var openFB = (function () {
         // Inappbrowser load start handler: Used when running in Cordova only
             function loginWindow_loadStartHandler(event) {
                   var url = event.url;
+alert('url : ' + url);                  
                   if (url.indexOf("access_token=") > 0 || url.indexOf("error=") > 0) {
                         // When we get the access token fast, the login window (inappbrowser) is still opening with animation
                         // in the Cordova app, and trying to close it while it's animating generates an exception. Wait a little...

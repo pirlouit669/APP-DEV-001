@@ -1352,12 +1352,14 @@ function erreur_login (erreur){
       }
 }
 function connexion_facebook() {
+      alert('connexion_facebook');
       openFB.login(
             function(response) {
+                  alert('response');
                   if(response.status === 'connected') {
                         var fb_token = response.authResponse.accessToken;
                         console.log('Facebook login succeeded, got access token: ' + fb_token);
-                        
+                        alert(fb_token);
                         // genere le cookie en AJAX
                         
                         $.ajax({
