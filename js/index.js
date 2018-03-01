@@ -321,8 +321,8 @@ var app = {
             document.addEventListener("offline", offline, false);
             document.addEventListener("online", online, false);
             ready();
-            delete window.open; // a cause de inapp browser qui override window.open ce qui fait planter le login facebook
-            window.open = browserDefault;
+            //delete window.open; // a cause de inapp browser qui override window.open ce qui fait planter le login facebook
+            //window.open = browserDefault;
       },
       setupPush: function() {
             var push = PushNotification.init({
