@@ -59,7 +59,7 @@ var openFB = (function () {
      *  accessToken: (optional) An already authenticated access token.
      */
     function init(params) {
-
+alert('OpenFB init');      
             if (params.appId) {
                   fbAppId = params.appId;
             } else {

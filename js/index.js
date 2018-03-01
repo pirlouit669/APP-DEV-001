@@ -113,6 +113,9 @@ function online() {
 
 function ready () {
       
+      alert('before open FB init');
+      openFB.init({appId: '204764659934740'});
+      alert('after open FB init');
       window.dispo = 0;
 
       $.mobile.crossDomainPages  = true;
