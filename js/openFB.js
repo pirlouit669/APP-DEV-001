@@ -106,10 +106,10 @@ var openFB = (function () {
             var loginWindow,
                 startTime,
                 scope = '',
-//redirectURL = runningInCordova ? cordovaOAuthRedirectURL : oauthRedirectURL;
+                redirectURL = runningInCordova ? cordovaOAuthRedirectURL : oauthRedirectURL;
 
                 
-                redirectURL = oauthRedirectURL;
+//redirectURL = oauthRedirectURL;
                 
                 
             if (!fbAppId) {
