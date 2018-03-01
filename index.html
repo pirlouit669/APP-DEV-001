@@ -38,6 +38,8 @@
 <body>
     <div data-role="page" id="landing" class="bg-image bg3" data-enhance="false">
             <div id="affichage-rid">pas de RID</div>
+            <div id="affichage-token-fb">pas de token</div>
+            <div id="affichage-cookie">pas de cookie</div>
             <a href="#accueil" data-role="none" id="lien-visite" class=""><p>Acc&#232;s visiteur</p><i class="fas fa-sign-in-alt fa-lg"></i></a>
             <div data-role="main" class="ui-content">
                   <div class="landing-logo"><img src="img/facile2soutenir120.png"></div>
@@ -111,7 +113,7 @@
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>                  
-                  <div id="liste_marchands_container"></div>
+                  <div id="liste-marchands-container"></div>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -249,7 +251,7 @@
                   <div class="top-menu-middle"><h1 class="ui-title" tabindex="0" role="heading" aria-level="1">Faire un don</h1></div>
             </div>
             <div data-role="main" class="ui-content">
-                  <div id="user-don-container"></div>                 
+                  <div id="don-container"></div>                 
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -300,7 +302,7 @@
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
-                  <div id="notifications-container"></div>			
+                  <div id="notifications-container"><div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div></div>			
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -316,8 +318,9 @@
       </div>
       <div data-role="page" id="profil">
             <div data-role="main" class="ui-content">
-                  <div id="user-profil"></div>
+                  <div id="profil-container"></div>
                   <div class="bouton-test refresh" id="get_profil">refresh</div>
+                  <div class="bouton-test" id="deconnexion" href="#">Deconnexion</a>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">

@@ -34,8 +34,9 @@ h2 {font-weight: 300;    margin-bottom: 0.5em;}
 .ui-content{background: transparent; /*position: relative; */padding:0; overflow: visible; /*overflow:hidden;*/} /*en test pour que le spinner soit visible au chargemetn des pages */
 .ui-btn:focus {box-shadow: none !important;}
 
-#affichage-rid {position: absolute; left: 0; color: white; top:1em; max-width:200px;}
-
+#affichage-rid {position: absolute; left: 0; color: white; top:1em; font-size:10px;}
+#affichage-token-fb {position: absolute; left: 0; color: white; top:2em; font-size:10px;}
+#affichage-cookie {position: absolute; left: 0; color: white; top:3em; font-size:10px;}
 /* LANDING */
 #landing .ui-content {flex-direction: column;  min-height: 100vh;  display: flex;  align-items: center;  justify-content: center; text-align:center;}
 .landing-logo{margin:-40px 0 20px; }

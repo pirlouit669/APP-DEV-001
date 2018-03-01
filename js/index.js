@@ -1,6 +1,9 @@
+var previous="connexion";
+var runinphonegap = navigator.userAgent.match(/(ios|iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/);
+//alert (runinphonegap);
 
 var openFB = (function () {
-alert('openFB');
+
       var loginURL = 'https://www.facebook.com/dialog/oauth',
           logoutURL = 'https://www.facebook.com/logout.php',
 
@@ -33,11 +36,7 @@ alert('openFB');
     // Used in the exit event handler to identify if the login has already been processed elsewhere (in the oauthCallback function)
             loginProcessed;
             
-    
-    //if (navigator.userAgent.match(/(ios|iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {}
-            runningInCordova = true;
-     //
-
+            runningInCordova=runinphonegap;
     /*
             
     document.addEventListener("deviceready", function () {
@@ -59,7 +58,7 @@ alert('openFB');
      *  accessToken: (optional) An already authenticated access token.
      */
     function init(params) {
-alert('OpenFB init');      
+//alert('OpenFB init');      
             if (params.appId) {
                   fbAppId = params.appId;
             } else {
@@ -113,11 +112,7 @@ alert('OpenFB init');
                 startTime,
                 scope = '',
                 redirectURL = runningInCordova ? cordovaOAuthRedirectURL : oauthRedirectURL;
-
-                
-alert('redirectURL : ' + redirectURL);
-//redirectURL = oauthRedirectURL;
-                
+               
                 
             if (!fbAppId) {
                   return callback({status: 'unknown', error: 'Facebook App Id not set.'});
@@ -125,8 +120,7 @@ alert('redirectURL : ' + redirectURL);
 
         // Inappbrowser load start handler: Used when running in Cordova only
             function loginWindow_loadStartHandler(event) {
-                  var url = event.url;
-alert('url : ' + url);                  
+                  var url = event.url;                
                   if (url.indexOf("access_token=") > 0 || url.indexOf("error=") > 0) {
                         // When we get the access token fast, the login window (inappbrowser) is still opening with animation
                         // in the Cordova app, and trying to close it while it's animating generates an exception. Wait a little...
@@ -187,6 +181,9 @@ alert('url : ' + url);
                   obj = parseQueryString(queryString);
                   tokenStore.fbAccessToken = obj['access_token'];
                   if (loginCallback) loginCallback({status: 'connected', authResponse: {accessToken: obj['access_token']}});
+                  
+$('#affichage-token-fb').html('token fb : ' + obj['access_token']);
+
             } else if (url.indexOf("error=") > 0) {
                   queryString = url.substring(url.indexOf('?') + 1, url.indexOf('#'));
                   obj = parseQueryString(queryString);
@@ -306,7 +303,6 @@ alert('url : ' + url);
     }
 
 }());
-
 var app = {
     
       initialize: function() { // Application Constructor
@@ -321,8 +317,10 @@ var app = {
             document.addEventListener("offline", offline, false);
             document.addEventListener("online", online, false);
             ready();
-            //delete window.open; // a cause de inapp browser qui override window.open ce qui fait planter le login facebook
-            //window.open = browserDefault;
+            if (!runinphonegap) {
+                  delete window.open; // a cause de inapp browser qui override window.open ce qui fait planter le login facebook
+                  window.open = browserDefault;
+            }
       },
       setupPush: function() {
             var push = PushNotification.init({
@@ -367,7 +365,7 @@ var app = {
             var rid = data.registrationId;
             console.log('registration event: ' + rid);
 
-            $("#affichage-rid").html(rid);
+$("#affichage-rid").html(rid);
             
             
             var oldRegId = localStorage.getItem('registrationId');
@@ -405,26 +403,9 @@ var app = {
     }
 };
 
-var previous="connexion";
-function offline() {
-      $('.connexion-on').hide();
-      $('.connexion-off').show();
-      $.mobile.changePage($('#nointernet'), 'pop', false, true);
-}
-function online() {
-      $('.connexion-off').hide();
-      $('.connexion-on').fadeIn();
-      setTimeout(function() {
-            $.mobile.changePage($('#'+previous));
-      }, 3000);
-}
-
-
 function ready () {
-      
-      alert('before open FB init');
+
       openFB.init({appId: '204764659934740'});
-      alert('after open FB init');
       window.dispo = 0;
 
       $.mobile.crossDomainPages  = true;
@@ -432,7 +413,7 @@ function ready () {
       // gestion du cookie
             var F2S_cookie = '';
             $.each($.cookie(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {F2S_cookie = value;}});
-      
+            $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie);
       //mise en page
             $.mobile.ignoreContentEnabled = true;      //$.mobile.keepNative = "select,input";
       
@@ -794,7 +775,7 @@ function ready () {
       }
       function contenu_aide() {
             $('#aide').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-            
+            alert(F2S_cookie);
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
@@ -877,8 +858,8 @@ function ready () {
             });
       }
       function contenu_notifications(nombre, type) {
-            $('#notifications').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-            
+            //$('#notifications').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            $('#notifications .encours').show();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
@@ -917,7 +898,7 @@ function ready () {
                   data: {'action':'am_contenu_profil', 'cookie' : F2S_cookie},
                   success:function(resultat) {
                         $('.encours').fadeOut();
-                        $('#user-profil').html(resultat);
+                        $('#profil-container').html(resultat);
                         $('.nav-soutenir .number_container').fadeOut();
                   },
                   error:function(erreur) {console.log('ERREUR' + erreur);},
@@ -1029,6 +1010,9 @@ function ready () {
                               if (i<10) $( "#voirplus" ).hide();
                         });
                         
+                        $( "#deconnexion" ).on( "click", function(e) {
+                              deconnexion();
+                        });
                         
                         function maj_affichage_favorite() {
                               //console.log($('#choix-cause-user').val());
@@ -1088,7 +1072,7 @@ function ready () {
                   data: {'action':'am_contenu_don', 'cookie' : F2S_cookie},
                   success:function(resultat) {
                         $('.encours').fadeOut();
-                        $('#user-don-container').html(resultat);
+                        $('#don-container').html(resultat);
                         window.dispo = parseFloat(jQuery('.disponible').html().replace(",", "."));
                   },
                   error:function(erreur) {console.log('ERREUR' + erreur);},
@@ -1446,14 +1430,14 @@ function ready () {
             });
       }
       function contenu_liste_marchands (nombre, categorie) { // 3eme param pour "a partir de ..." ?
-            $('#liste_marchands_container').html('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            $('#liste-marchands-container').html('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_liste_marchands', 'nombre' : nombre, 'categorie' : categorie},
                   success:function(resultat) {
-                        $('#liste_marchands_container .encours').fadeOut();
-                        $('#liste_marchands_container').html(resultat);
+                        $('#liste-marchands-container .encours').fadeOut();
+                        $('#liste-marchands-container').html(resultat);
                         
                         $( ".mlien" ).on( "click", function(e) {
                               videmarchand(); // vide les infos marchands initiales.
@@ -1501,7 +1485,47 @@ function ready () {
             
       }
 }
+function deconnexion() {
+     
+     //efface les données locales
+     $.each($.cookie(), function( index, value ){
+            if (index.indexOf('wordpress_logged_in_') >= 0) {
+                  $.removeCookie(index);
+            }
+     });
+     F2S_cookie='';
+     $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie);
+     sessionStorage.clear();
+     $('#affichage-token-fb').html('token fb : ');
+     //localStorage.clear();
+     
+     //reset des pages // ne peut pas marcher a cause d'Ajax
+     /*contenu_accueil();
+     contenu_aide();
+     contenu_soutenir(10);
+     contenu_notifications(10, 'toutes');
+     contenu_profil();*/
+     
+     /*$('#accueil-container').html();
+     $('#liste-marchands-container').html();    // pas forcement utile
+     $('#details-marchand').html();             // pas forcement utile
+     $('#aide-container').html();
+     $('#ticket-container').html();             // pas forcement utile
+     $('#soutenir-container').html();
+     $('#don-container').html();           // pas forcement utile
+     $('#planter-container').html();            // pas forcement utile
+     $('#notifications-container').html(); 
+     $('#profil-container').html();
+     */
+     // vider les rouges
+     // les compteurs
+     
+     
+     
+     //retour à la landing page
+     $.mobile.navigate('#landing');
 
+}
 function checkConnection() { // depre ?
       var networkState = navigator.connection.type;
       
@@ -1664,14 +1688,12 @@ function erreur_login (erreur){
       }
 }
 function connexion_facebook() {
-      alert('connexion_facebook');
       openFB.login(
             function(response) {
-                  alert('response');
                   if(response.status === 'connected') {
                         var fb_token = response.authResponse.accessToken;
                         console.log('Facebook login succeeded, got access token: ' + fb_token);
-                        alert(fb_token);
+                        alert('Facebook login succeeded, got access token: ' + fb_token);
                         // genere le cookie en AJAX
                         
                         $.ajax({
@@ -1712,7 +1734,9 @@ function connexion_facebook() {
                                           var cookie=resultat['cookie'];
                                           var cookie_name=resultat['cookie_name'];
                                           $.cookie(cookie_name, cookie, { expires: 365*5, path: '/' });
-                                          
+                                          F2S_cookie = cookie;
+                                          $('#affichage-cookie').html('F2S_cookie (FB): ' + F2S_cookie);
+                                          //$('#affichage-cookie').html();
                                           window.sessionStorage.user_id = resultat['user']['id'];
                                           window.sessionStorage.user_name = resultat['user']['username'];
                                           window.sessionStorage.user_email = resultat['user']['email'];
@@ -1787,4 +1811,17 @@ function logout() {
 }
 function errorHandler(error) {
       alert(error.message);
-}      
+}
+function offline() {
+      $('.connexion-on').hide();
+      $('.connexion-off').show();
+      $.mobile.changePage($('#nointernet'), 'pop', false, true);
+}
+function online() {
+      $('.connexion-off').hide();
+      $('.connexion-on').fadeIn();
+      setTimeout(function() {
+            $.mobile.changePage($('#'+previous));
+      }, 3000);
+}
+
