@@ -1,10 +1,10 @@
 div, p, span, h1, h2, .ui-page-theme-a a,  .ui-page-theme-b a, body, input, select, textarea, button, .ui-btn {font-family:'Roboto', 'Open Sans', 'sans serif'; text-shadow: none !important; text-decoration:none; font-weight: 400;}
-h1 {color:white; font-size:1.2em; font-weight:300; max-width:600px; margin-left:auto; margin-right:auto; text-align:center;}
+h1 {color:white; font-size:1.2em; font-weight:300;margin-left:auto; margin-right:auto; text-align:center;}
 li {list-style-type:none;}
 ul {padding:0; margin:0;}
 h2 {font-weight: 300;    margin-bottom: 0.5em;}
 
-.encours {text-align:center; color:#899ab4;  position: absolute;  top:50%; margin-top:-48px; left: 50%;  margin-left: -24px;z-index: 1000;}
+.encours {text-align:center; color:#899ab4;  position: absolute;  top:50%; margin-top:-34px; left: 50%;  margin-left: -32px;z-index: 1000;}
 .icone-retour {top: 1em; left: .5em; color: white !important; position: absolute; z-index: 1;}
 
 .bouton {font-size: 18px; text-align: center;  border: 0; text-decoration: none; box-sizing: border-box; -webkit-transition: all .5s ease;-moz-transition: all .5s ease;-o-transition: all .5s ease;-ms-transition: all .5s ease; transition: all .5s ease;}
@@ -78,4 +78,8 @@ h2 {font-weight: 300;    margin-bottom: 0.5em;}
     to { opacity: 1.0; }
 }
 .blink { animation:fade 3000ms infinite; -webkit-animation:fade 3000ms infinite;}
+
+
+
+
 

@@ -509,11 +509,16 @@ function ready () {
       // PAGES INIT 
       //***************
       
-      
+      $(document).on('pagebeforeshow', '#connexion',function(){
+            $('#connexion-status').html('');
+            $("#username").val('');
+            $("#password").val('');
+      });
       $(document).on('pageinit', '#accueil', function(){contenu_accueil();});
       $(document).on('pageinit', '#aide', function(){contenu_aide();});
       $(document).on('pageshow', '#details-ticket',function(){
-            $('#details-ticket').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            $("#ticket-container").html('');
+            $("#details-ticket .encours").show();
             var tid=$( ".ticket_actif" ).attr('id');
             $.ajax({ // recupere les infos détaillées du ticket
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
@@ -632,10 +637,10 @@ function ready () {
       $(document).on('pageinit', '#notifications', function(){contenu_notifications(10, 'toutes');});
       $(document).on('pageinit', '#profil', function(){contenu_profil();});
       $(document).on('pageinit', '#details-marchand', function(){
-            $('#details-marchand').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
             $(document).on( 'click', '.marchand-lien-externe', function(e){contenu_accueil();}); // MAJ dernieres visites
       });
       $(document).on('pageshow', '#details-marchand',function(){
+            $('#details-marchand .encours').show();
             var mid = $( ".marchand-lien-externe" ).attr('id'); // recupere l'id du marchand dans le champ ID de mobile bouton
             console.log('mid en cours : ' + mid);
             $.ajax({
@@ -644,16 +649,22 @@ function ready () {
                   dataType: 'json',
                   data: {'action':'am_contenu_details_marchand', 'mid' : mid, 'cookie' : F2S_cookie},
                   success:function(marchand){
-
-                        $("#header-marchand-nom").html(marchand['nom']);
-                        $('#marchand-infos').html(marchand['infos']);
-                        $( ".marchand-lien-externe" ).attr('href', 'http://www.facile2soutenir.fr/go/' + marchand['lien']+ '?webapp='+mid); // weba^pp
+     
+                  // mise à jour du lien affi
+                        user_id=window.sessionStorage.user_id;
+                        $( ".marchand-lien-externe" ).attr('href', 'http://www.facile2soutenir.fr/go/' + marchand['lien']+ '?mobapp='+mid+'&user_id='+user_id);
+                        
+                  // check si le marchand est favori et colorie
                         if (marchand['isfav']==true) $( ".mobile-fav" ).addClass( "marchand-favori" );
                         
+                  // affichage contenu
+                        $("#header-marchand-nom").html(marchand['nom']);
+                        $('#marchand-infos').html(marchand['infos']);
                         $('#details-marchand .encours').fadeOut(function(){ $('#details-marchand .ui-content').fadeIn() });
                         //$('.encours').fadeOut();
                         //$(".marchand-container").fadeIn();
-
+                        
+                  // gestion du clic FAVORI
                         $( ".mobile-fav" ).on( "click", function(e) {
                               if(e.handled !== true) {
                                     e.handled = true;
@@ -703,11 +714,14 @@ function ready () {
       });
       
       function contenu_panel_left() {
+            $('#panel-container').html();
+            $('#menu-left .encours').show();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_panel_left', 'cookie' : F2S_cookie},
                   success:function(resultat) {
+                        $('#menu-left .encours').fadeOut();
                         $('#panel-container').html(resultat);
                   },
                   complete:function() {
@@ -715,6 +729,11 @@ function ready () {
                               var slug=jQuery(this).attr('id');
                               //$( ".liste-marchands" ).attr('id', slug);
                               //$.mobile.navigate('#accueil');
+                              
+//cat = $('.liste-marchands').attr('id');
+                              $('#liste_marchands .titre-liste').text($(this).text());
+                              
+                              
                               contenu_liste_marchands ('', slug);
                         });
                         $( ".mlien" ).on( "click", function(e) {
@@ -726,20 +745,22 @@ function ready () {
             });
       } 
       function contenu_accueil() {
-alert('inside contenu_accueil'); 
             $('#accueil-container').html('');
-            $('#accueil').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            $('#accueil .encours').show();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_accueil', 'cookie' : F2S_cookie},
                   success:function(resultat) {
-                        $('.encours').fadeOut();
+                        $('#accueil .encours').fadeOut();
                         $('#accueil-container').html(resultat);
                   },
                   complete:function() {
                         $( ".lien-categorie" ).on( "click", function(e) {
                               var slug=jQuery(this).attr('id');
+                              
+                              $('#liste_marchands .titre-liste').text($(this).text()); // title aussi
+                              
                               contenu_liste_marchands ('', slug);
                         });
                         $( ".mlien" ).on( "click", function(e) {
@@ -752,13 +773,14 @@ alert('inside contenu_accueil');
             });
       }
       function contenu_aide() {
-            $('#aide').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            $('#aide-container').html();
+            $('#aide .encours').show();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_aide', 'cookie' : F2S_cookie},
                   success:function(resultat) {
-                        $('.encours').fadeOut();
+                        $('#aide .encours').fadeOut();
                         $('#aide-container').html(resultat);
                         $('.nav-aide .number_container').fadeOut();
                         $('.ticket_link').on( "click", function(e){
@@ -818,14 +840,14 @@ alert('inside contenu_accueil');
             });
       }
       function contenu_soutenir(nombre, type) {
-            $('#soutenir').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-            
+            $('#soutenir-container').html();
+            $('#soutenir .encours').show();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_soutenir', 'cookie' : F2S_cookie, 'type' : type, 'nombre' : nombre},
                   success:function(resultat) {
-                        $('.encours').fadeOut();
+                        $('#soutenir .encours').fadeOut();
                         $('#soutenir-container').html(resultat);
                         $('.nav-soutenir .number_container').fadeOut();
                         
@@ -835,14 +857,14 @@ alert('inside contenu_accueil');
             });
       }
       function contenu_notifications(nombre, type) {
-            //$('#notifications').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            $('#notifications-container').html();
             $('#notifications .encours').show();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_notifications', 'cookie' : F2S_cookie, 'type' : type, 'nombre' : nombre},
                   success:function(resultat) {
-                        $('.encours').fadeOut();
+                        $('#notifications .encours').fadeOut();
                         $('#notifications-container').html(resultat);
                         $('.nav-notifications .number_container').fadeOut();
                         $(document).on( "click", "#btn-toutes", function(){
@@ -867,14 +889,15 @@ alert('inside contenu_accueil');
             });
       }      
       function contenu_profil() {
-            $('#profil').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            $('#profil-container').html();
+            $('#profil .encours').show();
             $('.nav-profil .number_container').fadeOut();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_profil', 'cookie' : F2S_cookie},
                   success:function(resultat) {
-                        $('.encours').fadeOut();
+                        $('#profil .encours').fadeOut();
                         $('#profil-container').html(resultat);
                         $('.nav-soutenir .number_container').fadeOut();
                   },
@@ -910,7 +933,7 @@ alert('inside contenu_accueil');
                               $( "#choix-cause-id").val("");
                               if (!value) $('#choix-cause-erreur').hide();
                               if ( value && value.length >= 2 ) {
-                                    jQueryul.append( '<div class="encours"><i class="fas fa-spinner fa-spin fa-2x"></i></div>');
+                                    jQueryul.append( '<div class="encours"><div class="lds-ripple"><div></div><div></div></div></div>');
                                     jQueryul.listview( "refresh" );
                                     $.ajax({
                                           url: "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
@@ -974,7 +997,7 @@ alert('inside contenu_accueil');
                         });
                         
                         
-                        $( "#voirplus" ).on( "click", function(e) {
+                        $( "#profil .voirplus" ).on( "click", function(e) {
                               var i=0;
                               jQuery( "#liste-achats .achat:hidden" ).each(function( index ) {
                                     i++;
@@ -982,7 +1005,7 @@ alert('inside contenu_accueil');
                                           $(this).show('slow');
                                     }
                               });
-                              if (i<10) $( "#voirplus" ).hide();
+                              if (i<10) $( "#profil .voirplus" ).hide();
                         });
                         
                         $( "#deconnexion" ).on( "click", function(e) {
@@ -1029,15 +1052,14 @@ alert('inside contenu_accueil');
             });
       }
       function contenu_don() {
-            $('#don').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-            // VIRER PREPEND
-            
+            $('#don-container').html();
+            $('#don .encours').show();            
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_don', 'cookie' : F2S_cookie},
                   success:function(resultat) {
-                        $('.encours').fadeOut();
+                        $('#don .encours').fadeOut();
                         $('#don-container').html(resultat);
                         window.dispo = parseFloat(jQuery('.disponible').html().replace(",", "."));
                   },
@@ -1045,7 +1067,7 @@ alert('inside contenu_accueil');
                   complete:function(){
                         $( '#mform-choix-cause-don' ).trigger('create');
                         $( '#choix-cause-input-don' ).textinput({clearBtn: true});
-                        $( '#mform-choix-cause-don .ui-input-search' ).append ('<div class="spinner-1" style="display:none;"><i class="fas fa-spinner fa-spin fa-lg"></i></div>');
+                        $( '#mform-choix-cause-don .ui-input-search' ).append ('<div class="spinner-1" style="display:none;"><div class="loader-bleu-gris loader-quadri"></div></div>');
 
                         // ************** LISTENER liste des asso
                         $( "#liste-causes-don" ).on( "filterablebeforefilter", function ( e, data ) {
@@ -1234,14 +1256,16 @@ alert('pas de valeur incorrecte');
       }
       function contenu_planter() {
             //jQuery('#combier-planter').slider().textinput();
-            $('#planter popup-mid').remove();
+            $('#planter-container').html();
+            $('#planter .encours').show();
             
+            $('#planter .popup-mid').remove();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_planter', 'cookie' : F2S_cookie},
                   success:function(resultat) {
-                        $('.encours').fadeOut();
+                        $('#planter .encours').fadeOut();
                         $('#planter-container').html(resultat);
                         //window.dispo = parseFloat(jQuery('.disponible').html().replace(",", "."));
                   },
@@ -1400,13 +1424,15 @@ alert('pas de valeur incorrecte');
             });
       }
       function contenu_liste_marchands (nombre, categorie) { // 3eme param pour "a partir de ..." ?
-            $('#liste-marchands-container').html('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            
+            $('#liste-marchands-container').html('');
+            $('#liste_marchands .encours').show();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_liste_marchands', 'nombre' : nombre, 'categorie' : categorie},
                   success:function(resultat) {
-                        $('#liste-marchands-container .encours').fadeOut();
+                        $('#liste_marchands .encours').fadeOut();
                         $('#liste-marchands-container').html(resultat);
                         
                         $( ".mlien" ).on( "click", function(e) {
@@ -1416,6 +1442,23 @@ alert('pas de valeur incorrecte');
                               //console.log('mid recupere : ' + mid)
                               $( ".marchand-lien-externe" ).attr('id', mid); // positionne l'ID du marchand dans le champ ID de mobile bouton pour que la page mobile marchand puisse le recuperer
                         });
+                        
+                        
+                        $( "#liste_marchands .voirplus" ).on( "click", function(e) {
+                              var i=0;
+                              jQuery( ".liste-marchands li:hidden" ).each(function( index ) {
+                                    i++;
+                                    if (i<=10) {
+                                          $(this).show('slow');
+                                    }
+                              });
+                              if (i<10) $( "#liste_marchands .voirplus" ).hide();
+                        });
+                        
+                        
+                        
+                        
+                        
                   },
                   error:function(erreur) {console.log('ERREUR' + erreur);}
             });
@@ -1577,10 +1620,9 @@ function login(){
       var username = $("#username").val();
       var password = $("#password").val();
       var dataString = "username="+username+"&password="+password+"&insecure=cool"; // insecure=cool pour connection over http
-      var url;
       if ( username== "") {erreur_login ('usernamevide'); return false; }
       if ( password== "") {erreur_login ('passwordvide'); return false; }
-      $('#connexion-status').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+      $('#connexion-status').prepend('<div class="encours"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>');
       $.ajax({
             type: "POST",
             url:"http://www.facile2soutenir.fr/json/user/generate_auth_cookie/?",
@@ -1592,9 +1634,14 @@ function login(){
                         var cookie_value=data.cookie;
                         var cookie_name=data.cookie_name;
                         var user_id=data.user.id;
-                        url = 'http://www.facile2soutenir.fr/mobile/?user_id=' + user_id + '&cookie_name=' + encodeURIComponent(cookie_name) + '&cookie=' + encodeURIComponent(cookie_value);
                         Cookies.set(cookie_name, cookie_value, { expires: 365*5, path: '/' });
                         F2S_cookie = cookie_value;
+
+                        window.sessionStorage.user_id = data.user.id
+                        window.sessionStorage.user_name = data.user.username
+                        window.sessionStorage.user_email = data.user.email
+                        window.sessionStorage.user_avatar = data.user.avatar
+
                         $.mobile.navigate('#accueil');
                   } else {
                         erreur_login ('mdp');
@@ -1618,8 +1665,7 @@ function mdp_perdu() {
                   $('#connexion-status .mdp-redirection').fadeOut(function(){ $('#connexion-status .mdp-redirection').remove();});
                   //window.location.href = "http://www.facile2soutenir.fr/accueil/reinitialisation/";
             }
-      },1000);
-      
+      },1000);   
 }
 function inscription() {
 
