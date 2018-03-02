@@ -401,7 +401,6 @@ var app = {
        });
     }
 };
-
 function ready () {
 
       openFB.init({appId: '204764659934740'});
@@ -410,7 +409,7 @@ function ready () {
       $.mobile.crossDomainPages  = true;
       
       // gestion du cookie
-            $.each($.cookie(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {F2S_cookie = value;}});
+            $.each(Cookies.get(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {F2S_cookie = value;}});
             $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie.substring(0,10));
             
       //mise en page
@@ -426,34 +425,18 @@ function ready () {
       // gestion connexion
             $(document).on( "click", ".btn-connexion", function(e){
                   e.preventDefault();
-                  var logged_in=false;
-                  $.each($.cookie(), function( index, value ){
-                        if (index.indexOf('wordpress_logged_in_') >= 0) {
-                              url = 'http://www.facile2soutenir.fr/mobile/?cookie_name=' + encodeURIComponent(index) + '&cookie=' + encodeURIComponent(value);
-                              logged_in = true;
-                              $.mobile.navigate('#accueil');
-                        } 
-                  });
-                  
-                  if (logged_in == false) {
-                        console.log('not logged in');
-                        $('body').pagecontainer('change', '#connexion');
-                  }
+                  if (F2S_cookie.trim()) $('body').pagecontainer('change', '#accueil');      // trim pour ignorer les espaces
+                  else $('body').pagecontainer('change', '#connexion');
             });
       
       // Ajout des nombres rouges
             maj_nombres_rouges();
       
-      $.event.special.tap.tapholdThreshold = 2000;
-      $.event.special.tap.emitTapOnTaphold=false
-      $(document).on( "taphold", function( event ) { 
-            deconnexion();        
-      });
-      
-      
+      // Deconnexion si tap > 2 sec
+            $.event.special.tap.tapholdThreshold = 2000;
+            $.event.special.tap.emitTapOnTaphold=false
+            $(document).on( "taphold", function( event ) {deconnexion();});
 
-      
-      
       
       //***************
       //GESTION DE LA RECHERCHE AJAX
@@ -650,20 +633,12 @@ function ready () {
       $(document).on('pageinit', '#profil', function(){contenu_profil();});
       $(document).on('pageinit', '#details-marchand', function(){
             $('#details-marchand').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-            $(document).on( 'click', '.marchand-lien-externe', function(e){contenu_accueil();});
+            $(document).on( 'click', '.marchand-lien-externe', function(e){contenu_accueil();}); // MAJ dernieres visites
       });
       $(document).on('pageshow', '#details-marchand',function(){
             var mid = $( ".marchand-lien-externe" ).attr('id'); // recupere l'id du marchand dans le champ ID de mobile bouton
             console.log('mid en cours : ' + mid);
-      // colorie l'icone favori
-            /*if (jQuery.inArray( mid, marchands_favoris )>-1) {
-                  jQuery( ".mobile-fav" ).addClass('favori');
-            } else {
-                  jQuery( ".mobile-fav" ).removeClass('favori');
-            }*/
-      
-      	
-            $.ajax({ // recupere les infos détaillées du marchand
+            $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache: false,
                   dataType: 'json',
@@ -683,12 +658,13 @@ function ready () {
                               if(e.handled !== true) {
                                     e.handled = true;
                                     jQuery( this ).toggleClass( "marchand-favori" );
-                                    mid = $( ".marchand-lien-externe" ).attr('id');
+                                    mid = $( ".marchand-lien-externe" ).attr('id');                                  
                                     jQuery.ajax({
                                           url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                                           data: {
                                                 'action':'am_toggle_marchand_favori',
-                                                'mid' : mid
+                                                'mid' : mid,
+                                                'cookie' : F2S_cookie
                                           },
                                           success:function(resultat) {
                                                 var nb = parseInt($.trim($('#nb_marchands_favoris').html()));                                              
@@ -713,12 +689,9 @@ function ready () {
             });
       });
       $(document).on('pagebeforeshow', '#nointernet', function (e, data) {
-      previous=data.prevPage.attr('id');
-      console.log('previous : ' + previous);
-            //contenu_nointernet(data);}
-      });
-      //$(document).on('pageshow', '#nointernet', function(){contenu_nointernet();});
-      
+            previous=data.prevPage.attr('id');
+            console.log('previous : ' + previous);
+      });      
       $(document).on( 'click', '#get_accueil', function(e){contenu_accueil();});
       $(document).on( 'click', '#get_aide', function(e){contenu_aide();});
       $(document).on( 'click', '#get_soutenir', function(e){contenu_soutenir(10);});
@@ -727,7 +700,7 @@ function ready () {
       $(document).on( 'click', '#contenu_don', function(e){contenu_don();});
       $(document).on( 'click', '.test-internet', function () {
             $.mobile.navigate('#nointernet');
-       });
+      });
       
       function contenu_panel_left() {
             $.ajax({
@@ -753,6 +726,7 @@ function ready () {
             });
       } 
       function contenu_accueil() {
+alert('inside contenu_accueil'); 
             $('#accueil-container').html('');
             $('#accueil').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
             $.ajax({
@@ -779,7 +753,6 @@ function ready () {
       }
       function contenu_aide() {
             $('#aide').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-            alert(F2S_cookie);
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
@@ -972,9 +945,7 @@ function ready () {
                         });
                         
                         $( "#choix-cause-input" ).blur(function() {
-                              if (!$( "#choix-cause-id").val()) {
-                                    //jQuery('#mform-choix-cause .ui-input-search').addClass("cause-incorrecte");
-                                    
+                              if (!$( "#choix-cause-id").val()) {                                    
                                     if ($(this).val()) $('#choix-cause-erreur').show();
                                     $("#btn-choix-cause").removeClass('btn-choix-cause-actif');
                               } else {
@@ -1050,19 +1021,10 @@ function ready () {
                                           'auto' : 'oui',
                                           'cookie' : F2S_cookie,
                                     },
-                                    success:function(data) {
-                                          //console.log('update_don_auto ok');
-                                          //console.log(data);
-                                    }
+                                    success:function(data) {}
                               });
                               
                         }
-                        
-                        
-                        
-                        
-                        
-                        
                   }
             });
       }
@@ -1217,7 +1179,9 @@ function ready () {
                        $(document).on('click', '.btn-don-actif', function() {    
                               //var data = jQuery("#mform-don").serialize();
                               //console.log(data);
+alert('click don');                              
                               if ( !$("#don-montant").hasClass("valeur-incorrecte")) {
+alert('pas de valeur incorrecte');                                     
                                     var montant=$('#don-montant').val();
                                     var effectues = $('#don .effectues').html();
                                     $.ajax({
@@ -1228,7 +1192,8 @@ function ready () {
                                           data: {
                                                 action : 'am_faire_un_don',
                                                 montant : montant,
-                                                user_id : $('#choix-cause-user-don').val(),
+                                                cookie : F2S_cookie,
+                                                user_id : $('#choix-cause-user-don').val(), // sert a rien
                                                 cause_id : $('#choix-cause-id-don').val(),
                                                 //formData : data // Convert a form to a JSON string representation
                                           },            
@@ -1402,10 +1367,11 @@ function ready () {
                                     dataType: 'json',
                                     cache: false,
                                     data: {
-                                            "action":"planter_arbre",
+                                            "action":"am_planter_arbre",
                                             "lieu": lieu,
                                             "couleur": couleur,
                                             "forme": forme,
+                                            "cookie" : F2S_cookie,
                                     },
                                     success:function(resultat) {
                                           
@@ -1493,9 +1459,9 @@ function ready () {
 function deconnexion() {
      
      //efface les données locales
-     $.each($.cookie(), function( index, value ){
+     $.each(Cookies.get(), function( index, value ){
             if (index.indexOf('wordpress_logged_in_') >= 0) {
-                  $.removeCookie(index);
+                  Cookies.remove(index);
             }
      });
      F2S_cookie = '';
@@ -1622,26 +1588,17 @@ function login(){
             crossDomain: true,
             cache: false,
             success: function(data){
-                  //console.log(data);
                   if (data.status=="ok") {
-                        var cookie=data.cookie;
+                        var cookie_value=data.cookie;
                         var cookie_name=data.cookie_name;
                         var user_id=data.user.id;
-                        url = 'http://www.facile2soutenir.fr/mobile/?user_id=' + user_id + '&cookie_name=' + encodeURIComponent(cookie_name) + '&cookie=' + encodeURIComponent(cookie);
-                        $.cookie(cookie_name, cookie, { expires: 365*5, path: '/' });
-// F2S_cookie = cookie; marche pas
-                        //console.log(cookie);
-                        //console.log(encodeURIComponent(cookie));
-
+                        url = 'http://www.facile2soutenir.fr/mobile/?user_id=' + user_id + '&cookie_name=' + encodeURIComponent(cookie_name) + '&cookie=' + encodeURIComponent(cookie_value);
+                        Cookies.set(cookie_name, cookie_value, { expires: 365*5, path: '/' });
+                        F2S_cookie = cookie_value;
                         $.mobile.navigate('#accueil');
-                        //$('body').pagecontainer('change', '#accueil');
-                        //url = 'http://www.facile2soutenir.fr/test';
-                        //document.location.href=url;
-                        //window.open(url, '_blank', 'location=yes');
                   } else {
                         erreur_login ('mdp');
                   }
-                  
             },
             complete: function () {
                   $('#connexion-status .encours').remove();
@@ -1676,7 +1633,7 @@ function inscription() {
             if(parseInt(i.innerHTML) <= 0) {
                   clearInterval(downloadTimer);
                   $('#connexion-status .inscription-redirection').fadeOut(function(){ $('#connexion-status .inscription-redirection').remove();});
-                  //window.location.href = "http://www.facile2soutenir.fr/accueil/inscription/"; // orig = appmobile ?
+                  //window.location.href = "http://www.facile2soutenir.fr/accueil/inscription/"; // orig = appmobile ? // attention à inapp
             }
       },1000);
       
@@ -1692,7 +1649,94 @@ function erreur_login (erreur){
             $('#connexion-status').prepend('<div class="erreur"><p>Je suis navr&#233;, mais je risque de me faire gronder si je vous laisse entrer sans mot de passe...</p></div>');
       }
 }
+function offline() { // ne fonctionne pas si placé dans ready
+      $('.connexion-on').hide();
+      $('.connexion-off').show();
+      $.mobile.changePage($('#nointernet'), 'pop', false, true);
+}
+function online() { // ne fonctionne pas si placé dans ready
+      $('.connexion-off').hide();
+      $('.connexion-on').fadeIn();
+      setTimeout(function() {
+            $.mobile.changePage($('#'+previous));
+      }, 3000);
+}
+function show_cookie() { // ne fonctionne pas si placé dans ready
+            $.each(Cookies.get(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {alert ('logged_in : ' + value);}});
+      }
+function show_F2S_cookie() { // ne fonctionne pas si placé dans ready
+            alert ('F2S_cookie : ' + F2S_cookie);
+      }
+      
+function connexion_facebook() {
+      openFB.login(
+            function(response) {
+                  if(response.status === 'connected') {
+                        var fb_token = response.authResponse.accessToken;
+                        console.log('Facebook login succeeded, got access token: ' + fb_token);
+                        alert('Facebook login succeeded, got access token: ' + fb_token);                       
+                        $.ajax({
+                              url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                              cache:false,
+                              dataType: "json",
+                              data: {
+                                    'action':'am_connexion_facebook',
+                                    'fb_token' : fb_token,
+                                    //'fields' : 'id,name,email,picture,link,locale,first_name,last_name'
+                              },
+                              success:function(resultat) {
 
+                                    if('error' in resultat) {
+                                    //if(jQuery.inArray("error", resultat) !== -1) {
+                                          
+                                          if (resultat['error']=='unregistered') {
+                                                //$('#landing-status').prepend('<div class="connexion-info"><p>Les informations transmises par Facebook ne nous ont pas permis de vous retrouver... </p><p>Peut-etre n\'etes vous pas encoer inscrit(e) ? Dans ce cas cela vous prendra quelques secondes en cliquant ici : <a href="bouton bouton-oragne">inscription</a></p></div>');
+                                                $('#landing-status').prepend("<div class='connexion-info'><p>A priori vous n'etes pas encore inscrit sur le site. Nous vous redirigeons vers la bonne page <i class='fas fa-smile fa-lg'></i></p></div><p class='count' id='fb-inscription-count'>5</p>");
+                                                      var i = document.getElementById('fb-inscription-count');
+                                                      var downloadTimer = setInterval(function(){
+                                                            i.innerHTML = parseInt(i.innerHTML)-1;
+                                                            if(parseInt(i.innerHTML) <= 0) {
+                                                                  clearInterval(downloadTimer);
+                                                                  //$('#landing-status .connexion-info').fadeOut(function(){ $('#landing-status .connexion-info').remove();});
+                                                                  //window.location.href = "http://www.facile2soutenir.fr/accueil/inscription/"; // orig = appmobile ?
+                                                            }
+                                                      },1000);
+                                          }
+                                          if (resultat['error']=='email') {
+                                                $('#landing-status').prepend('<div class="erreur"><p>Oups...<br>Facebook ne nous a pas transmis votre adresse email : nous ne pouvons donc pas vous identifier.</p><p></p></div>');
+                                          }
+                                          if (resultat['error']=='token') {
+                                                $('#landing-status').prepend('<div class="erreur"><p>Oups... Une erreur s\'est produite.</p><p>Cela vous ennuie-t-il de r&#233;essayer ?</p>')
+                                          }
+                                          
+                                    } else {
+                                          var cookie_value=resultat['cookie_value'];
+                                          var cookie_name=resultat['cookie_name'];
+                                          Cookies.set(cookie_name, cookie_value, { expires: 365*5, path: '/' });
+                                          F2S_cookie = cookie_value;
+                                          $('#affichage-cookie').html('F2S_cookie (FB): ' + F2S_cookie.substring(0,10));
+                                          window.sessionStorage.user_id = resultat['user']['id'];
+                                          window.sessionStorage.user_name = resultat['user']['username'];
+                                          window.sessionStorage.user_email = resultat['user']['email'];
+                                          window.sessionStorage.user_avatar = resultat['user']['avatar'];
+                                          $.mobile.navigate('#accueil');
+                                    }                                    
+                              },
+                              complete : function() {      
+                              }
+                              
+                        });
+                        
+                        //getInfo();
+                        
+                  } else {
+                        alert('Facebook login failed: ' + response.error);
+                  }
+            },
+            {scope: 'email'}
+      );
+}
+/////////////
 function getInfo() {
       openFB.api({
             path: '/me',
@@ -1746,96 +1790,3 @@ function logout() {
 function errorHandler(error) {
       alert(error.message);
 }
-function offline() {
-      $('.connexion-on').hide();
-      $('.connexion-off').show();
-      $.mobile.changePage($('#nointernet'), 'pop', false, true);
-}
-function online() {
-      $('.connexion-off').hide();
-      $('.connexion-on').fadeIn();
-      setTimeout(function() {
-            $.mobile.changePage($('#'+previous));
-      }, 3000);
-}
-
-      function show_cookie() {
-            $.each($.cookie(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {alert ('logged_in : ' + value);}});
-      }
-      function show_F2S_cookie() {
-            alert ('F2S_cookie : ' + F2S_cookie);
-      }
-      
-            function connexion_facebook() {
-            openFB.login(
-                  function(response) {
-                        if(response.status === 'connected') {
-                              var fb_token = response.authResponse.accessToken;
-                              console.log('Facebook login succeeded, got access token: ' + fb_token);
-                              alert('Facebook login succeeded, got access token: ' + fb_token);
-                              // genere le cookie en AJAX
-                              
-                              $.ajax({
-                                    url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
-                                    cache:false,
-                                    dataType: "json",
-                                    data: {
-                                          'action':'am_connexion_facebook',
-                                          'fb_token' : fb_token,
-                                          //'fields' : 'id,name,email,picture,link,locale,first_name,last_name'
-                                    },
-                                    success:function(resultat) {
-      
-                                          if('error' in resultat) {
-                                          //if(jQuery.inArray("error", resultat) !== -1) {
-                                                
-                                                if (resultat['error']=='unregistered') {
-                                                      //$('#landing-status').prepend('<div class="connexion-info"><p>Les informations transmises par Facebook ne nous ont pas permis de vous retrouver... </p><p>Peut-etre n\'etes vous pas encoer inscrit(e) ? Dans ce cas cela vous prendra quelques secondes en cliquant ici : <a href="bouton bouton-oragne">inscription</a></p></div>');
-                                                      $('#landing-status').prepend("<div class='connexion-info'><p>A priori vous n'etes pas encore inscrit sur le site. Nous vous redirigeons vers la bonne page <i class='fas fa-smile fa-lg'></i></p></div><p class='count' id='fb-inscription-count'>5</p>");
-                                                            var i = document.getElementById('fb-inscription-count');
-                                                            var downloadTimer = setInterval(function(){
-                                                                  i.innerHTML = parseInt(i.innerHTML)-1;
-                                                                  if(parseInt(i.innerHTML) <= 0) {
-                                                                        clearInterval(downloadTimer);
-                                                                        //$('#landing-status .connexion-info').fadeOut(function(){ $('#landing-status .connexion-info').remove();});
-                                                                        //window.location.href = "http://www.facile2soutenir.fr/accueil/inscription/"; // orig = appmobile ?
-                                                                  }
-                                                            },1000);
-                                                }
-                                                if (resultat['error']=='email') {
-                                                      $('#landing-status').prepend('<div class="erreur"><p>Oups...<br>Facebook ne nous a pas transmis votre adresse email : nous ne pouvons donc pas vous identifier.</p><p></p></div>');
-                                                }
-                                                if (resultat['error']=='token') {
-                                                      $('#landing-status').prepend('<div class="erreur"><p>Oups... Une erreur s\'est produite.</p><p>Cela vous ennuie-t-il de r&#233;essayer ?</p>')
-                                                }
-                                                
-                                          } else {
-                                                var cookie=resultat['cookie'];
-                                                var cookie_name=resultat['cookie_name'];
-                                                $.cookie(cookie_name, cookie, { expires: 365*5, path: '/' });
-                                                F2S_cookie = cookie;
-                                                $('#affichage-cookie').html('F2S_cookie (FB): ' + F2S_cookie.substring(0,10));
-                                                //$('#affichage-cookie').html();
-                                                window.sessionStorage.user_id = resultat['user']['id'];
-                                                window.sessionStorage.user_name = resultat['user']['username'];
-                                                window.sessionStorage.user_email = resultat['user']['email'];
-                                                window.sessionStorage.user_avatar = resultat['user']['avatar'];
-                                                $.mobile.navigate('#accueil');
-                                          }
-                                          
-                                    },
-                                    complete : function() {
-            
-                                    }
-                                    
-                              });
-                              
-                              getInfo();
-                        } else {
-                              alert('Facebook login failed: ' + response.error);
-                        }
-                  },
-                  {scope: 'email'}
-            );
-      }
-
