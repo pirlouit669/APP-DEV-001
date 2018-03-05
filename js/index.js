@@ -463,7 +463,8 @@ function ready () {
                   jQuery('.recherche_reponse').html('');
             }
       });    
-      $('#marchands').on( "click", ".recherche_fermer", function(e){ // ????
+      $('document').on( "click", ".recherche_fermer", function(e){ // ????
+            console.log('clic femer');
             $(this).toggleClass('form-container-actif');
             $(this).toggleClass('form-container-inactif');
             $('.recherche_fermer').hide();
@@ -514,7 +515,8 @@ function ready () {
             $("#username").val('');
             $("#password").val('');
       });
-      $(document).on('pageinit', '#accueil', function(){contenu_accueil();});
+      $(document).on('pageinit', '#accueil', function(){
+            contenu_accueil();});
       $(document).on('pageinit', '#aide', function(){contenu_aide();});
       $(document).on('pageshow', '#details-ticket',function(){
             $("#ticket-container").html('');
@@ -754,8 +756,14 @@ function ready () {
                   success:function(resultat) {
                         $('#accueil .encours').fadeOut();
                         $('#accueil-container').html(resultat);
+                        
                   },
                   complete:function() {
+                        $( "#accueil-navbar" ).navbar();
+                        $("#accueil-tabs" ).tabs({heightStyle: "auto"});
+                        
+                        
+                        
                         $( ".lien-categorie" ).on( "click", function(e) {
                               var slug=jQuery(this).attr('id');
                               
@@ -1497,49 +1505,49 @@ alert('pas de valeur incorrecte');
             else block.find('.number_container').hide();
             
       }
-
+      function deconnexion() {
+           
+           //efface les données locales
+           $.each(Cookies.get(), function( index, value ){
+                  if (index.indexOf('wordpress_logged_in_') >= 0) {
+                        Cookies.remove(index);
+                  }
+           });
+           F2S_cookie = '';
+           $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie);
+           sessionStorage.clear();
+           $('#affichage-token-fb').html('token fb : ');
+           //localStorage.clear();
+           
+           //reset des pages // ne peut pas marcher a cause d'Ajax
+           contenu_accueil();
+           contenu_aide();
+           contenu_soutenir(10);
+           contenu_notifications(10, 'toutes');
+           contenu_profil();
+           
+           /*$('#accueil-container').html();
+           $('#liste-marchands-container').html();    // pas forcement utile
+           $('#details-marchand').html();             // pas forcement utile
+           $('#aide-container').html();
+           $('#ticket-container').html();             // pas forcement utile
+           $('#soutenir-container').html();
+           $('#don-container').html();           // pas forcement utile
+           $('#planter-container').html();            // pas forcement utile
+           $('#notifications-container').html(); 
+           $('#profil-container').html();
+           */
+           // vider les rouges
+           // les compteurs
+           
+           
+           
+           //retour à la landing page
+           $.mobile.navigate('#landing');
+      
+      }
 }
-function deconnexion() {
-     
-     //efface les données locales
-     $.each(Cookies.get(), function( index, value ){
-            if (index.indexOf('wordpress_logged_in_') >= 0) {
-                  Cookies.remove(index);
-            }
-     });
-     F2S_cookie = '';
-     $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie);
-     sessionStorage.clear();
-     $('#affichage-token-fb').html('token fb : ');
-     //localStorage.clear();
-     
-     //reset des pages // ne peut pas marcher a cause d'Ajax
-     /*contenu_accueil();
-     contenu_aide();
-     contenu_soutenir(10);
-     contenu_notifications(10, 'toutes');
-     contenu_profil();*/
-     
-     /*$('#accueil-container').html();
-     $('#liste-marchands-container').html();    // pas forcement utile
-     $('#details-marchand').html();             // pas forcement utile
-     $('#aide-container').html();
-     $('#ticket-container').html();             // pas forcement utile
-     $('#soutenir-container').html();
-     $('#don-container').html();           // pas forcement utile
-     $('#planter-container').html();            // pas forcement utile
-     $('#notifications-container').html(); 
-     $('#profil-container').html();
-     */
-     // vider les rouges
-     // les compteurs
-     
-     
-     
-     //retour à la landing page
-     $.mobile.navigate('#landing');
 
-}
 function checkConnection() { // depre ?
       var networkState = navigator.connection.type;
       
@@ -1737,16 +1745,16 @@ function connexion_facebook() {
                                           
                                           if (resultat['error']=='unregistered') {
                                                 //$('#landing-status').prepend('<div class="connexion-info"><p>Les informations transmises par Facebook ne nous ont pas permis de vous retrouver... </p><p>Peut-etre n\'etes vous pas encoer inscrit(e) ? Dans ce cas cela vous prendra quelques secondes en cliquant ici : <a href="bouton bouton-oragne">inscription</a></p></div>');
-                                                $('#landing-status').prepend("<div class='connexion-info'><p>A priori vous n'etes pas encore inscrit sur le site. Nous vous redirigeons vers la bonne page <i class='fas fa-smile fa-lg'></i></p></div><p class='count' id='fb-inscription-count'>5</p>");
-                                                      var i = document.getElementById('fb-inscription-count');
-                                                      var downloadTimer = setInterval(function(){
-                                                            i.innerHTML = parseInt(i.innerHTML)-1;
-                                                            if(parseInt(i.innerHTML) <= 0) {
-                                                                  clearInterval(downloadTimer);
-                                                                  //$('#landing-status .connexion-info').fadeOut(function(){ $('#landing-status .connexion-info').remove();});
-                                                                  //window.location.href = "http://www.facile2soutenir.fr/accueil/inscription/"; // orig = appmobile ?
-                                                            }
-                                                      },1000);
+                                                $('#landing-status').prepend("<div class='connexion-info'><p>A priori vous n'etes pas encore inscrit sur le site. Nous vous redirigeons vers la bonne page <i class='fas fa-smile fa-lg'></i></p><p class='count' id='fb-inscription-count'>5</p></div>");
+                                                var i = document.getElementById('fb-inscription-count');
+                                                var downloadTimer = setInterval(function(){
+                                                      i.innerHTML = parseInt(i.innerHTML)-1;
+                                                      if(parseInt(i.innerHTML) <= 0) {
+                                                            clearInterval(downloadTimer);
+                                                            //$('#landing-status .connexion-info').fadeOut(function(){ $('#landing-status .connexion-info').remove();});
+                                                            //window.location.href = "http://www.facile2soutenir.fr/accueil/inscription/"; // orig = appmobile ?
+                                                      }
+                                                },1000);
                                           }
                                           if (resultat['error']=='email') {
                                                 $('#landing-status').prepend('<div class="erreur"><p>Oups...<br>Facebook ne nous a pas transmis votre adresse email : nous ne pouvons donc pas vous identifier.</p><p></p></div>');
