@@ -328,7 +328,7 @@ var app = {
                         "sound": true,
                         "vibration": true,
                         //alert: true,
-                        //badge: true,
+                        //"badge": true,
                         //icon: 'icon', // icon is the name of an .png image file in the Android res/drawable. Ex : platforms/android/res/drawable/phonegap.png
                         //iconColor :'', //#RRGGBB or #AARRGGBB 
                   },
@@ -338,7 +338,7 @@ var app = {
                         "fcmSandbox": false,
                         "sound": true,
                         "vibration": true,
-                        "badge": true,
+                        /*"badge": true,
                         "categories": {
                               "invite": {
                                     "yes": {
@@ -359,7 +359,7 @@ var app = {
                                           "callback": "cancel", "title": "Cancel", "foreground": true, "destructive": false
                                     }
                               }
-                        }
+                        }*/
                   },
                   "windows": {}
             });
@@ -376,7 +376,7 @@ var app = {
             
             push.on('registration', function(data) {
                   var rid = data.registrationId;
-                  //console.log('registration event: ' + rid);
+alert ('registration event: ' + rid);
                   var oldRegId = localStorage.getItem('registrationId');
                   if (oldRegId !== rid) {
                         // Save new registration ID
@@ -1542,7 +1542,7 @@ alert('pas de valeur incorrecte');
            $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie);
            sessionStorage.clear();
            $('#affichage-token-fb').html('token fb : ');
-           //localStorage.clear();
+           localStorage.clear();
            
            //reset des pages
            contenu_accueil();
@@ -1669,7 +1669,7 @@ function login(){
                         var user_id=data.user.id;
                         Cookies.set(cookie_name, cookie_value, { expires: 365*5, path: '/' });
                         F2S_cookie = cookie_value;
-                        
+                        $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie.substring(0,10));
                         if(typeof localStorage!='undefined') {                      
                               localStorage.setItem('user_id', data.user.id);
                               localStorage.setItem('user_name', data.user.username);
