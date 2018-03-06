@@ -375,7 +375,13 @@
 
       <script src="js/js.cookie.js"></script>
       <!--<script src="js/index.js"></script>-->
-      <script src="http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/js/index_remote.js"></script>
+      <script>
+      var my_script = document.createElement('script');
+      my_script.setAttribute('src','http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/js/index_remote.js?ver=' + uniqueNum);
+      document.head.appendChild(my_script);
+      </script>
+      <!-- <script src="http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/js/index_remote.js"></script> -->
+      
       <!--<script type="text/javascript">app.initialize();</script>-->
       <!--<script src="js/openfb.js"></script>
       <script>//openFB.init({appId: '204764659934740'});</script>-->
