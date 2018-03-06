@@ -323,7 +323,6 @@ var app = {
             }
       },
       setupPush: function() {
-            alert ('setup push');
             var push = PushNotification.init({
                   "android": {
                         "senderID": "1005363421918",
@@ -413,11 +412,17 @@ alert ('registration event: ' + rid);
             push.on('notification', function(data) {
                   //console.log('notification event');
                   navigator.notification.alert(
+                      'le message',         // message
+                      null,                 // callback
+                      'le title',           // title
+                      'Oui'                  // buttonName
+                  );  
+                  /*navigator.notification.alert(
                       data.message,         // message
                       null,                 // callback
                       data.title,           // title
-                      'Ok'                  // buttonName
-                  );
+                      'Oui'                  // buttonName
+                  );*/
             });
       }
 };
@@ -1790,6 +1795,7 @@ function connexion_facebook() {
                                           }
                                           if (resultat['error']=='email') {
                                                 $('#landing-status').prepend('<div class="erreur"><p>Oups...<br>Facebook ne nous a pas transmis votre adresse email : nous ne pouvons donc pas vous identifier.</p><p></p></div>');
+                                                // a developper et mettre le message dans ajax
                                           }
                                           if (resultat['error']=='token') {
                                                 $('#landing-status').prepend('<div class="erreur"><p>Oups... Une erreur s\'est produite.</p><p>Cela vous ennuie-t-il de r&#233;essayer ?</p>')
