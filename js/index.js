@@ -313,6 +313,7 @@ var app = {
       },
       onDeviceReady: function() { // deviceready Event Handler: The scope of 'this' is the event. In order to call the 'receivedEvent' function, we must explicitly call 'app.receivedEvent(...);'
             //app.setupPush();
+            alert ('device ready');
             document.addEventListener("offline", offline, false);
             document.addEventListener("online", online, false);
             ready();
@@ -322,6 +323,7 @@ var app = {
             }
       },
       setupPush: function() {
+            alert ('setup push');
             var push = PushNotification.init({
                   "android": {
                         "senderID": "1005363421918",
@@ -363,7 +365,7 @@ var app = {
                   },
                   "windows": {}
             });
-            
+            /*
             push.on('accept', (data) => {
                   // do something with the notification data
               
@@ -373,7 +375,7 @@ var app = {
                       console.log('accept callback failed');
                   }, data.additionalData.notId);
             });
-            
+            */
             push.on('registration', function(data) {
                   var rid = data.registrationId;
 alert ('registration event: ' + rid);
@@ -420,7 +422,7 @@ alert ('registration event: ' + rid);
       }
 };
 function ready () {
-
+      alert ('inside ready');
       openFB.init({appId: '204764659934740'});
       window.dispo = 0;
 
@@ -428,6 +430,7 @@ function ready () {
       
       // si user a le cookie
             $.each(Cookies.get(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {
+                  alert ('y a un cookie');
                   F2S_cookie = value;
                   app.setupPush();
                   //$('body').pagecontainer('change', '#accueil');
