@@ -1672,6 +1672,8 @@ function login(){
                         var user_id=data.user.id;
                         Cookies.set(cookie_name, cookie_value, { expires: 365*5, path: '/' });
                         F2S_cookie = cookie_value;
+                        app.setupPush();
+                        
                         $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie.substring(0,10));
                         if(typeof localStorage!='undefined') {                      
                               localStorage.setItem('user_id', data.user.id);
@@ -1800,6 +1802,8 @@ function connexion_facebook() {
                                           var cookie_name=resultat['cookie_name'];
                                           Cookies.set(cookie_name, cookie_value, { expires: 365*5, path: '/' });
                                           F2S_cookie = cookie_value;
+                                          app.setupPush();
+                                          
                                           $('#affichage-cookie').html('F2S_cookie (FB): ' + F2S_cookie.substring(0,10));
                                           if(typeof localStorage!='undefined') {
                                                 alert('ok local storage');
