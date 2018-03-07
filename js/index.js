@@ -29,7 +29,6 @@ var app = {
       push.on('registration', function(data) {
             var rid = data.registrationId;
             alert('registration event: ' + rid);
-            alert('registration type: ' + data.registrationType);
             
             var oldRegId = localStorage.getItem('registrationId');
             if (oldRegId !== rid) {
@@ -53,7 +52,7 @@ var app = {
         });
 
         push.on('notification', function(data) {
-            console.log('notification event');
+                  alert(JSON.stringify(data));
             navigator.notification.alert(
                 data.message,         // message
                 null,                 // callback
