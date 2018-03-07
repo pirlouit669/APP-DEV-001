@@ -37,7 +37,7 @@
 </head>
 
 <body>
-    <div data-role="page" id="landing" class="bg-image bg3" data-enhance="false">
+      <div data-role="page" id="landing" class="bg-image bg3" data-enhance="false">
             <div id="affichage-rid"></div>
             <div id="affichage-token-fb">pas de token</div>
             <div id="affichage-cookie">pas de cookie</div>
@@ -54,6 +54,7 @@
             </div>
             <div onclick="show_cookie()" class="bouton-test" style="background:#6be49c !important; right:90px;">logged</div>
             <div onclick="show_F2S_cookie()" class="bouton-test" style="background:#ff5151 !important; right:40px;">F2S</div>
+            <div onclick="window.location.reload()" class="bouton-test" style="background:#ff8040 !important; right:40px; top:70px;">Reload</div>
       </div> 
         
       <div data-role="page" id="connexion">
@@ -374,8 +375,15 @@
       </div>
 
       <script src="js/js.cookie.js"></script>
-      <script src="js/index.js"></script>
-      <script type="text/javascript">app.initialize();</script>
+      <!--<script src="js/index.js"></script>-->
+      <script>
+      var my_script = document.createElement('script');
+      my_script.setAttribute('src','http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/js/index_remote.js?ver=' + uniqueNum);
+      document.head.appendChild(my_script);
+      </script>
+      <!-- <script src="http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/js/index_remote.js"></script> -->
+      
+      <!--<script type="text/javascript">app.initialize();</script>-->
       <!--<script src="js/openfb.js"></script>
       <script>//openFB.init({appId: '204764659934740'});</script>-->
 </body>

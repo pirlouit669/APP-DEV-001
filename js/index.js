@@ -305,16 +305,15 @@ $('#affichage-token-fb').html('token fb : ' + obj['access_token'].substring(0,10
 
 }());
 var app = {
-    
       initialize: function() { // Application Constructor
             this.bindEvents();
       },
       bindEvents: function() { // Bind Event Listeners : Bind any events that are required on startup. Common events are: 'load', 'deviceready', 'offline', and 'online'.
             document.addEventListener('deviceready', this.onDeviceReady, false);
-            
       },
       onDeviceReady: function() { // deviceready Event Handler: The scope of 'this' is the event. In order to call the 'receivedEvent' function, we must explicitly call 'app.receivedEvent(...);'
-            app.setupPush();
+            //app.setupPush();
+            alert ('device ready');
             document.addEventListener("offline", offline, false);
             document.addEventListener("online", online, false);
             ready();
@@ -329,6 +328,10 @@ var app = {
                         "senderID": "1005363421918",
                         "sound": true,
                         "vibration": true,
+                        //alert: true,
+                        //"badge": true,
+                        //icon: 'icon', // icon is the name of an .png image file in the Android res/drawable. Ex : platforms/android/res/drawable/phonegap.png
+                        //iconColor :'', //#RRGGBB or #AARRGGBB 
                   },
                   "browser": {},
                   "ios": {
@@ -336,8 +339,8 @@ var app = {
                         "fcmSandbox": false,
                         "sound": true,
                         "vibration": true,
-                        "badge": true,
-                        /*"categories": {
+                        /*"badge": true,
+                        "categories": {
                               "invite": {
                                     "yes": {
                                           "callback": "accept", "title": "D\'accord", "foreground": true, "destructive": false
@@ -361,55 +364,82 @@ var app = {
                   },
                   "windows": {}
             });
-        
-      push.on('registration', function(data) {
-            var rid = data.registrationId;
-            console.log('registration event: ' + rid);
-            
-            
-            var oldRegId = localStorage.getItem('registrationId');
-            if (oldRegId !== rid) {
-                  // Save new registration ID
-                  localStorage.setItem('registrationId', rid);
-                  // Post registrationId to your app server as the value has changed
-                  // mise à jour dans la database
+            /*
+            push.on('accept', (data) => {
+                  // do something with the notification data
+              
+                  push.finish(() => {
+                      console.log('accept callback finished');
+                  }, () => {
+                      console.log('accept callback failed');
+                  }, data.additionalData.notId);
+            });
+            */
+            push.on('registration', function(data) {
+                  var rid = data.registrationId;
+alert ('registration event: ' + rid);
+                  var oldRegId = localStorage.getItem('registrationId');
+                  if (oldRegId !== rid) {
+                        // Save new registration ID
+                        localStorage.setItem('registrationId', rid);
+                        var user_id = localStorage.getItem('user_id'); // double check cote serveur avec le cookie
+                        
+                        // Post registrationId to your app server as the value has changed
+                        // mise à jour dans la database
+                        $.ajax({
+                              url: "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                              data: {
+                                    //'action':'am_test_push',
+                                    'action':'am_registration_push',
+                                    'rid': rid,
+                                    'cookie' : F2S_cookie,
+                                    'user_id' : user_id
+                              },
+                        });
+                  }
+            });
+            push.on('error', function(e) {
+                  console.log("push error = " + e.message);
                   $.ajax({
                         url: "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                         data: {
-                              //'action':'am_test_push',
-                              'action':'am_registration_push',
-                              'rid': rid,
+                              'action':'am_error_log',
+                              'cookie' : F2S_cookie,
+                              'error' : e.message
                         },
-                  });
-            }
-      });
-
-
-        push.on('error', function(e) {
-            console.log("push error = " + e.message);
-            // balancer dans database error
-        });
-
-        push.on('notification', function(data) {
-            console.log('notification event');
-            navigator.notification.alert(
-                data.message,         // message
-                null,                 // callback
-                data.title,           // title
-                'Ok'                  // buttonName
-            );
-       });
-    }
+                  });  
+            });
+            push.on('notification', function(data) {
+                  //console.log('notification event');
+                  navigator.notification.alert(
+                      'le message',         // message
+                      null,                 // callback
+                      'le title',           // title
+                      'Oui'                  // buttonName
+                  );  
+                  /*navigator.notification.alert(
+                      data.message,         // message
+                      null,                 // callback
+                      data.title,           // title
+                      'Oui'                  // buttonName
+                  );*/
+            });
+      }
 };
 function ready () {
-
+      alert ('inside ready');
       openFB.init({appId: '204764659934740'});
       window.dispo = 0;
 
       $.mobile.crossDomainPages  = true;
       
-      // gestion du cookie
-            $.each(Cookies.get(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {F2S_cookie = value;}});
+      // si user a le cookie
+            $.each(Cookies.get(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {
+                  alert ('y a un cookie');
+                  F2S_cookie = value;
+                  app.setupPush();
+                  //$('body').pagecontainer('change', '#accueil');
+            }});
             $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie.substring(0,10));
             
       //mise en page
@@ -422,12 +452,7 @@ function ready () {
       // check internet       //try{checkConnection();}catch (e) {alert("Oupps une erreur c'est produite : "+e);}
             checkConnection(); // depre ?
       
-      // gestion connexion
-            $(document).on( "click", ".btn-connexion", function(e){
-                  e.preventDefault();
-                  if (F2S_cookie.trim()) $('body').pagecontainer('change', '#accueil');      // trim pour ignorer les espaces
-                  else $('body').pagecontainer('change', '#connexion');
-            });
+      
       
       // Ajout des nombres rouges
             maj_nombres_rouges();
@@ -514,6 +539,14 @@ function ready () {
             $('#connexion-status').html('');
             $("#username").val('');
             $("#password").val('');
+      });
+      $(document).on('pageinit', '#landing', function(){
+            // gestion connexion
+            $(document).on( "click", ".btn-connexion", function(e){
+                  e.preventDefault();
+                  if (F2S_cookie.trim()) $('body').pagecontainer('change', '#accueil');      // trim pour ignorer les espaces
+                  else $('body').pagecontainer('change', '#connexion');
+            });      
       });
       $(document).on('pageinit', '#accueil', function(){
             contenu_accueil();});
@@ -1517,9 +1550,9 @@ alert('pas de valeur incorrecte');
            $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie);
            sessionStorage.clear();
            $('#affichage-token-fb').html('token fb : ');
-           //localStorage.clear();
+           localStorage.clear();
            
-           //reset des pages // ne peut pas marcher a cause d'Ajax
+           //reset des pages
            contenu_accueil();
            contenu_aide();
            contenu_soutenir(10);
@@ -1644,11 +1677,15 @@ function login(){
                         var user_id=data.user.id;
                         Cookies.set(cookie_name, cookie_value, { expires: 365*5, path: '/' });
                         F2S_cookie = cookie_value;
-
-                        window.sessionStorage.user_id = data.user.id
-                        window.sessionStorage.user_name = data.user.username
-                        window.sessionStorage.user_email = data.user.email
-                        window.sessionStorage.user_avatar = data.user.avatar
+                        app.setupPush();
+                        
+                        $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie.substring(0,10));
+                        if(typeof localStorage!='undefined') {                      
+                              localStorage.setItem('user_id', data.user.id);
+                              localStorage.setItem('user_name', data.user.username);
+                              localStorage.setItem('user_email', data.user.email);
+                              localStorage.setItem('user_avatar', data.user.avatar);
+                        }
 
                         $.mobile.navigate('#accueil');
                   } else {
@@ -1758,21 +1795,30 @@ function connexion_facebook() {
                                           }
                                           if (resultat['error']=='email') {
                                                 $('#landing-status').prepend('<div class="erreur"><p>Oups...<br>Facebook ne nous a pas transmis votre adresse email : nous ne pouvons donc pas vous identifier.</p><p></p></div>');
+                                                // a developper et mettre le message dans ajax
                                           }
                                           if (resultat['error']=='token') {
                                                 $('#landing-status').prepend('<div class="erreur"><p>Oups... Une erreur s\'est produite.</p><p>Cela vous ennuie-t-il de r&#233;essayer ?</p>')
                                           }
                                           
                                     } else {
+                                          
+                                          uid=resultat['user']['id'];
                                           var cookie_value=resultat['cookie_value'];
                                           var cookie_name=resultat['cookie_name'];
                                           Cookies.set(cookie_name, cookie_value, { expires: 365*5, path: '/' });
                                           F2S_cookie = cookie_value;
+                                          app.setupPush();
+                                          
                                           $('#affichage-cookie').html('F2S_cookie (FB): ' + F2S_cookie.substring(0,10));
-                                          window.sessionStorage.user_id = resultat['user']['id'];
-                                          window.sessionStorage.user_name = resultat['user']['username'];
-                                          window.sessionStorage.user_email = resultat['user']['email'];
-                                          window.sessionStorage.user_avatar = resultat['user']['avatar'];
+                                          if(typeof localStorage!='undefined') {
+                                                alert('ok local storage');
+                                                localStorage.setItem('user_id', uid);
+                                                localStorage.setItem('user_name', resultat['user']['username']);
+                                                localStorage.setItem('user_email', resultat['user']['email']);
+                                                localStorage.setItem('user_avatar', resultat['user']['avatar']);
+                                                
+                                          }
                                           $.mobile.navigate('#accueil');
                                     }                                    
                               },
@@ -1799,9 +1845,13 @@ function getInfo() {
             },
             success: function(data) {
                   //console.log(JSON.stringify(data));
-                  window.sessionStorage.user_name = data.name;
+                                
+                  localStorage.setItem('user_id', user_id);
+                  localStorage.setItem('user_name', user_name);
+                  localStorage.setItem('user_email', user_email);
+                  /*window.sessionStorage.user_name = data.name;
                   window.sessionStorage.user_email = data.email;
-                  window.sessionStorage.user_avatar = data.picture.data.url;
+                  window.sessionStorage.user_avatar = data.picture.data.url;*/
             },
             error: errorHandler});
 }
