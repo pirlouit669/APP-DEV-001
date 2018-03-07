@@ -10,6 +10,7 @@ function checkConnection() { // depre ?
       states[Connection.CELL_4G]  = 'Connexion 4G';
       states[Connection.NONE]     = 'Pas de Connexion';
       
+      
       console.log('Connexion : ' + states[networkState]);
       
       if (networkState== 'Connection.NONE') {
@@ -18,4 +19,10 @@ function checkConnection() { // depre ?
       } else {
             return states[networkState];
       } 
+}
+
+
+document.addEventListener('deviceready', readylocal, false);
+function readylocal () {
+      alert('local ready');
 }
