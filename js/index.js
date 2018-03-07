@@ -66,7 +66,6 @@ var app = {
 function ready () {
       
       window.dispo = 0;
-
       $.mobile.crossDomainPages  = true;
       
       // gestion du cookie
