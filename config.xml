@@ -106,7 +106,7 @@
         <variable name="SENDER_ID" value="XXXXXXX" />
     </plugin>
     <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
-    <plugin name="cordova-plugin-facebook4" spec="^1.9.1">
+    <plugin name="cordova-plugin-facebook4" spec="^1.7.4">
         <variable name="APP_ID" value="204764659934740" />
         <variable name="APP_NAME" value="Connexion Facile2Soutenir" />
     </plugin>
