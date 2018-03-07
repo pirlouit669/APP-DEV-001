@@ -1,5 +1,310 @@
-var app = {
+var previous="connexion";
+var runinphonegap = navigator.userAgent.match(/(ios|iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/);
+var F2S_cookie = '';
+//alert (runinphonegap);
+
+var openFB = (function () {
+
+      var loginURL = 'https://www.facebook.com/dialog/oauth',
+          logoutURL = 'https://www.facebook.com/logout.php',
+
+    // By default we store fbtoken in sessionStorage. This can be overridden in init()
+            tokenStore = window.sessionStorage,
+
+    // The Facebook App Id. Required. Set using init().
+            fbAppId,
+
+            context = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/")),
+
+            baseURL = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + context,
+
+    // Default OAuth redirect URL. Can be overriden in init()
+            oauthRedirectURL = baseURL + '/oauthcallback.html',
+
+    // Default Cordova OAuth redirect URL. Can be overriden in init()
+            cordovaOAuthRedirectURL = "https://www.facebook.com/connect/login_success.html",
+
+    // Default Logout redirect URL. Can be overriden in init()
+            logoutRedirectURL = baseURL + '/logoutcallback.html',
+
+    // Because the OAuth login spans multiple processes, we need to keep the login callback function as a variable
+    // inside the module instead of keeping it local within the login function.
+            loginCallback,
+
+    // Indicates if the app is running inside Cordova
+            runningInCordova,
+
+    // Used in the exit event handler to identify if the login has already been processed elsewhere (in the oauthCallback function)
+            loginProcessed;
+            
+            runningInCordova=runinphonegap;
+    /*
+            
+    document.addEventListener("deviceready", function () {
+            runningInCordova = true;
+    }, false);
+    */
+
+    /**
+     * Initialize the OpenFB module. You must use this function and initialize the module with an appId before you can
+     * use any other function.
+     * @param params - init paramters
+     *  appId: (Required) The id of the Facebook app,
+     *  tokenStore: (optional) The store used to save the Facebook token. If not provided, we use sessionStorage.
+     *  loginURL: (optional) The OAuth login URL. Defaults to https://www.facebook.com/dialog/oauth.
+     *  logoutURL: (optional) The logout URL. Defaults to https://www.facebook.com/logout.php.
+     *  oauthRedirectURL: (optional) The OAuth redirect URL. Defaults to [baseURL]/oauthcallback.html.
+     *  cordovaOAuthRedirectURL: (optional) The OAuth redirect URL. Defaults to https://www.facebook.com/connect/login_success.html.
+     *  logoutRedirectURL: (optional) The logout redirect URL. Defaults to [baseURL]/logoutcallback.html.
+     *  accessToken: (optional) An already authenticated access token.
+     */
+    function init(params) {
+//alert('OpenFB init');      
+            if (params.appId) {
+                  fbAppId = params.appId;
+            } else {
+                  throw 'appId parameter not set in init()';
+            }
     
+            if (params.tokenStore) {
+                  tokenStore = params.tokenStore;
+            }
+    
+            if (params.accessToken) {
+                  tokenStore.fbAccessToken = params.accessToken;
+            }
+    
+            loginURL = params.loginURL || loginURL;
+            logoutURL = params.logoutURL || logoutURL;
+            oauthRedirectURL = params.oauthRedirectURL || oauthRedirectURL;
+            cordovaOAuthRedirectURL = params.cordovaOAuthRedirectURL || cordovaOAuthRedirectURL;
+            logoutRedirectURL = params.logoutRedirectURL || logoutRedirectURL;
+
+    }
+
+    /**
+     * Checks if the user has logged in with openFB and currently has a session api token.
+     * @param callback the function that receives the loginstatus
+     */
+      function getLoginStatus(callback) {
+            var token = tokenStore.fbAccessToken,
+                  loginStatus = {};
+            if (token) {
+                  loginStatus.status = 'connected';
+                  loginStatus.authResponse = {accessToken: token};
+            } else {
+                  loginStatus.status = 'unknown';
+            }
+            if (callback) callback(loginStatus);
+      }
+
+    /**
+     * Login to Facebook using OAuth. If running in a Browser, the OAuth workflow happens in a a popup window.
+     * If running in Cordova container, it happens using the In-App Browser. Don't forget to install the In-App Browser
+     * plugin in your Cordova project: cordova plugins add org.apache.cordova.inappbrowser.
+     *
+     * @param callback - Callback function to invoke when the login process succeeds
+     * @param options - options.scope: The set of Facebook permissions requested
+     * @returns {*}
+     */
+      function login(callback, options) {
+
+            var loginWindow,
+                startTime,
+                scope = '',
+                redirectURL = runningInCordova ? cordovaOAuthRedirectURL : oauthRedirectURL;
+               
+                
+            if (!fbAppId) {
+                  return callback({status: 'unknown', error: 'Facebook App Id not set.'});
+            }
+
+        // Inappbrowser load start handler: Used when running in Cordova only
+            function loginWindow_loadStartHandler(event) {
+                  var url = event.url;                
+                  if (url.indexOf("access_token=") > 0 || url.indexOf("error=") > 0) {
+                        // When we get the access token fast, the login window (inappbrowser) is still opening with animation
+                        // in the Cordova app, and trying to close it while it's animating generates an exception. Wait a little...
+                        var timeout = 600 - (new Date().getTime() - startTime);
+                        setTimeout(function () {
+                              loginWindow.close();
+                        }, timeout > 0 ? timeout : 0);
+                        oauthCallback(url);
+                  }
+            }
+
+        // Inappbrowser exit handler: Used when running in Cordova only
+            function loginWindow_exitHandler() {
+                  console.log('exit and remove listeners');
+                  // Handle the situation where the user closes the login window manually before completing the login process
+                  if (loginCallback && !loginProcessed) loginCallback({status: 'user_cancelled'});
+                  loginWindow.removeEventListener('loadstop', loginWindow_loadStopHandler);
+                  loginWindow.removeEventListener('exit', loginWindow_exitHandler);
+                  loginWindow = null;
+                  console.log('done removing listeners');
+            }
+
+            if (options && options.scope) {
+                  scope = options.scope;
+            }
+
+            loginCallback = callback;
+            loginProcessed = false;
+    
+            startTime = new Date().getTime();
+            loginWindow = window.open(loginURL + '?client_id=' + fbAppId + '&redirect_uri=' + redirectURL +
+                '&response_type=token&scope=' + scope, '_blank', 'location=no,clearcache=yes');
+    
+            // If the app is running in Cordova, listen to URL changes in the InAppBrowser until we get a URL with an access_token or an error
+            if (runningInCordova) {
+                  loginWindow.addEventListener('loadstart', loginWindow_loadStartHandler);
+                  loginWindow.addEventListener('exit', loginWindow_exitHandler);
+            }
+            // Note: if the app is running in the browser the loginWindow dialog will call back by invoking the
+            // oauthCallback() function. See oauthcallback.html for details.
+    
+      }
+
+      /**
+      * Called either by oauthcallback.html (when the app is running the browser) or by the loginWindow loadstart event
+      * handler defined in the login() function (when the app is running in the Cordova/PhoneGap container).
+      * @param url - The oautchRedictURL called by Facebook with the access_token in the querystring at the ned of the
+      * OAuth workflow.
+      */
+      function oauthCallback(url) {
+            // Parse the OAuth data received from Facebook
+            var queryString,
+                  obj;
+
+            loginProcessed = true;
+            if (url.indexOf("access_token=") > 0) {
+                  queryString = url.substr(url.indexOf('#') + 1);
+                  obj = parseQueryString(queryString);
+                  tokenStore.fbAccessToken = obj['access_token'];
+                  if (loginCallback) loginCallback({status: 'connected', authResponse: {accessToken: obj['access_token']}});
+                  
+$('#affichage-token-fb').html('token fb : ' + obj['access_token'].substring(0,10));
+
+            } else if (url.indexOf("error=") > 0) {
+                  queryString = url.substring(url.indexOf('?') + 1, url.indexOf('#'));
+                  obj = parseQueryString(queryString);
+                  if (loginCallback) loginCallback({status: 'not_authorized', error: obj.error});
+            } else {
+                  if (loginCallback) loginCallback({status: 'not_authorized'});
+            }
+      }
+
+    /**
+     * Logout from Facebook, and remove the token.
+     * IMPORTANT: For the Facebook logout to work, the logoutRedirectURL must be on the domain specified in "Site URL" in your Facebook App Settings
+     *
+     */
+    function logout(callback) {
+        var logoutWindow,
+            token = tokenStore.fbAccessToken;
+
+        /* Remove token. Will fail silently if does not exist */
+        tokenStore.removeItem('fbtoken');
+
+        if (token) {
+            logoutWindow = window.open(logoutURL + '?access_token=' + token + '&next=' + logoutRedirectURL, '_blank', 'location=no,clearcache=yes');
+            if (runningInCordova) {
+                setTimeout(function() {
+                    logoutWindow.close();
+                }, 700);
+            }
+        }
+
+        if (callback) {
+            callback();
+        }
+
+    }
+
+    /**
+     * Lets you make any Facebook Graph API request.
+     * @param obj - Request configuration object. Can include:
+     *  method:  HTTP method: GET, POST, etc. Optional - Default is 'GET'
+     *  path:    path in the Facebook graph: /me, /me.friends, etc. - Required
+     *  params:  queryString parameters as a map - Optional
+     *  success: callback function when operation succeeds - Optional
+     *  error:   callback function when operation fails - Optional
+     */
+    function api(obj) {
+
+        var method = obj.method || 'GET',
+            params = obj.params || {},
+            xhr = new XMLHttpRequest(),
+            url;
+
+        params['access_token'] = tokenStore.fbAccessToken;
+
+        url = 'https://graph.facebook.com' + obj.path + '?' + toQueryString(params);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    if (obj.success) obj.success(JSON.parse(xhr.responseText));
+                } else {
+                    var error = xhr.responseText ? JSON.parse(xhr.responseText).error : {message: 'An error has occurred'};
+                    if (obj.error) obj.error(error);
+                }
+            }
+        };
+
+        xhr.open(method, url, true);
+        xhr.send();
+    }
+
+    /**
+     * Helper function to de-authorize the app
+     * @param success
+     * @param error
+     * @returns {*}
+     */
+    function revokePermissions(success, error) {
+        return api({method: 'DELETE',
+            path: '/me/permissions',
+            success: function () {
+                success();
+            },
+            error: error});
+    }
+
+    function parseQueryString(queryString) {
+        var qs = decodeURIComponent(queryString),
+            obj = {},
+            params = qs.split('&');
+        params.forEach(function (param) {
+            var splitter = param.split('=');
+            obj[splitter[0]] = splitter[1];
+        });
+        return obj;
+    }
+
+    function toQueryString(obj) {
+        var parts = [];
+        for (var i in obj) {
+            if (obj.hasOwnProperty(i)) {
+                parts.push(encodeURIComponent(i) + "=" + encodeURIComponent(obj[i]));
+            }
+        }
+        return parts.join("&");
+    }
+
+    // The public API
+    return {
+        init: init,
+        login: login,
+        logout: logout,
+        revokePermissions: revokePermissions,
+        api: api,
+        oauthCallback: oauthCallback,
+        getLoginStatus: getLoginStatus
+    }
+
+}());
+var app = {
       initialize: function() { // Application Constructor
             this.bindEvents();
       },
@@ -7,24 +312,59 @@ var app = {
             document.addEventListener('deviceready', this.onDeviceReady, false);
       },
       onDeviceReady: function() { // deviceready Event Handler: The scope of 'this' is the event. In order to call the 'receivedEvent' function, we must explicitly call 'app.receivedEvent(...);'
-            app.setupPush();
+            //app.setupPush();
+            alert ('device ready');
+            document.addEventListener("offline", offline, false);
+            document.addEventListener("online", online, false);
             ready();
+            if (!runinphonegap) {
+                  delete window.open; // a cause de inapp browser qui override window.open ce qui fait planter le login facebook
+                  window.open = browserDefault;
+            }
       },
       setupPush: function() {
             var push = PushNotification.init({
                   "android": {
-                        "senderID": "1005363421918"
+                        "senderID": "1005363421918",
+                        "sound": true,
+                        "vibration": true,
+                        //alert: true,
+                        //"badge": true,
+                        //icon: 'icon', // icon is the name of an .png image file in the Android res/drawable. Ex : platforms/android/res/drawable/phonegap.png
+                        //iconColor :'', //#RRGGBB or #AARRGGBB 
                   },
                   "browser": {},
                   "ios": {
-                        "senderID": "1005363421918",
+                        "senderID": "1005363421918",// macdonst : if you don't provide the GCM Sender ID to the ios options then it will use APNS by default.
                         "fcmSandbox": false,
                         "sound": true,
                         "vibration": true,
-                        "badge": true
+                        /*"badge": true,
+                        "categories": {
+                              "invite": {
+                                    "yes": {
+                                          "callback": "accept", "title": "D\'accord", "foreground": true, "destructive": false
+                                    },
+                                    "no": {
+                                          "callback": "reject", "title": "Non merci", "foreground": true, "destructive": false
+                                    },
+                                    "maybe": {
+                                          "callback": "maybe", "title": "Peut-être", "foreground": true, "destructive": false
+                                    }
+                              },
+                              "delete": {
+                                    "yes": {
+                                          "callback": "doDelete", "title": "Delete", "foreground": true, "destructive": true
+                                    },
+                                    "no": {
+                                          "callback": "cancel", "title": "Cancel", "foreground": true, "destructive": false
+                                    }
+                              }
+                        }*/
                   },
                   "windows": {}
             });
+<<<<<<< HEAD
         // macdonst : if you don't provide the GCM Sender ID to the ios options then it will use APNS by default.
       push.on('registration', function(data) {
             var rid = data.registrationId;
@@ -36,12 +376,52 @@ var app = {
                   localStorage.setItem('registrationId', rid);
                   // Post registrationId to your app server as the value has changed
                   // mise à jour dans la database
+=======
+            /*
+            push.on('accept', (data) => {
+                  // do something with the notification data
+              
+                  push.finish(() => {
+                      console.log('accept callback finished');
+                  }, () => {
+                      console.log('accept callback failed');
+                  }, data.additionalData.notId);
+            });
+            */
+            push.on('registration', function(data) {
+                  var rid = data.registrationId;
+alert ('registration event: ' + rid);
+                  var oldRegId = localStorage.getItem('registrationId');
+                  if (oldRegId !== rid) {
+                        // Save new registration ID
+                        localStorage.setItem('registrationId', rid);
+                        var user_id = localStorage.getItem('user_id'); // double check cote serveur avec le cookie
+                        
+                        // Post registrationId to your app server as the value has changed
+                        // mise à jour dans la database
+                        $.ajax({
+                              url: "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                              data: {
+                                    //'action':'am_test_push',
+                                    'action':'am_registration_push',
+                                    'rid': rid,
+                                    'cookie' : F2S_cookie,
+                                    'user_id' : user_id
+                              },
+                        });
+                  }
+            });
+            push.on('error', function(e) {
+                  console.log("push error = " + e.message);
+>>>>>>> d573056a03eb11a56d5f52c0e0e3f172eb419e97
                   $.ajax({
                         url: "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                         data: {
-                              'action':'am_test_push',
-                              'rid': rid,
+                              'action':'am_error_log',
+                              'cookie' : F2S_cookie,
+                              'error' : e.message
                         },
+<<<<<<< HEAD
                   });
             }
       });
@@ -61,18 +441,43 @@ var app = {
             );
        });
     }
+=======
+                  });  
+            });
+            push.on('notification', function(data) {
+                  //console.log('notification event');
+                  navigator.notification.alert(
+                      'le message',         // message
+                      null,                 // callback
+                      'le title',           // title
+                      'Oui'                  // buttonName
+                  );  
+                  /*navigator.notification.alert(
+                      data.message,         // message
+                      null,                 // callback
+                      data.title,           // title
+                      'Oui'                  // buttonName
+                  );*/
+            });
+      }
+>>>>>>> d573056a03eb11a56d5f52c0e0e3f172eb419e97
 };
-
 function ready () {
-      
+      alert ('inside ready');
+      openFB.init({appId: '204764659934740'});
       window.dispo = 0;
 
       $.mobile.crossDomainPages  = true;
       
-      // gestion du cookie
-            var F2S_cookie = '';
-            $.each($.cookie(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {F2S_cookie = value;}});
-      
+      // si user a le cookie
+            $.each(Cookies.get(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {
+                  alert ('y a un cookie');
+                  F2S_cookie = value;
+                  app.setupPush();
+                  //$('body').pagecontainer('change', '#accueil');
+            }});
+            $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie.substring(0,10));
+            
       //mise en page
             $.mobile.ignoreContentEnabled = true;      //$.mobile.keepNative = "select,input";
       
@@ -81,32 +486,18 @@ function ready () {
             $("#menu-left").panel().enhanceWithin();
       
       // check internet       //try{checkConnection();}catch (e) {alert("Oupps une erreur c'est produite : "+e);}
-            checkConnection();
+            checkConnection(); // depre ?
       
-      // gestion connexion
-            $(document).on( "click", ".btn-connexion", function(e){
-                  e.preventDefault();
-                  var logged_in=false;
-                  $.each($.cookie(), function( index, value ){
-                        if (index.indexOf('wordpress_logged_in_') >= 0) {
-                              url = 'http://www.facile2soutenir.fr/mobile/?cookie_name=' + encodeURIComponent(index) + '&cookie=' + encodeURIComponent(value);
-                              logged_in = true;
-                              $.mobile.navigate('#accueil');
-                        } 
-                  });
-                  console.log('not logged in');
-                  if (logged_in == false) $('body').pagecontainer('change', '#connexion');
-            });
+      
       
       // Ajout des nombres rouges
             maj_nombres_rouges();
       
-      
-      
-      $('#details-marchand').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-      
-      
-      $(".landing-intro").append('<br>7');
+      // Deconnexion si tap > 2 sec
+            $.event.special.tap.tapholdThreshold = 2000;
+            $.event.special.tap.emitTapOnTaphold=false
+            $(document).on( "taphold", function( event ) {deconnexion();});
+
       
       //***************
       //GESTION DE LA RECHERCHE AJAX
@@ -133,7 +524,8 @@ function ready () {
                   jQuery('.recherche_reponse').html('');
             }
       });    
-      $('#marchands').on( "click", ".recherche_fermer", function(e){ // ????
+      $('document').on( "click", ".recherche_fermer", function(e){ // ????
+            console.log('clic femer');
             $(this).toggleClass('form-container-actif');
             $(this).toggleClass('form-container-inactif');
             $('.recherche_fermer').hide();
@@ -179,10 +571,25 @@ function ready () {
       // PAGES INIT 
       //***************
       
-      $(document).on('pageinit', '#accueil', function(){contenu_accueil();});
+      $(document).on('pagebeforeshow', '#connexion',function(){
+            $('#connexion-status').html('');
+            $("#username").val('');
+            $("#password").val('');
+      });
+      $(document).on('pageinit', '#landing', function(){
+            // gestion connexion
+            $(document).on( "click", ".btn-connexion", function(e){
+                  e.preventDefault();
+                  if (F2S_cookie.trim()) $('body').pagecontainer('change', '#accueil');      // trim pour ignorer les espaces
+                  else $('body').pagecontainer('change', '#connexion');
+            });      
+      });
+      $(document).on('pageinit', '#accueil', function(){
+            contenu_accueil();});
       $(document).on('pageinit', '#aide', function(){contenu_aide();});
       $(document).on('pageshow', '#details-ticket',function(){
-            $('#details-ticket').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            $("#ticket-container").html('');
+            $("#details-ticket .encours").show();
             var tid=$( ".ticket_actif" ).attr('id');
             $.ajax({ // recupere les infos détaillées du ticket
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
@@ -199,6 +606,7 @@ function ready () {
                         $('#submit_nouvelle_reponse').on('click', {ticket_id: tid, cookie: F2S_cookie}, nouvelle_reponse);
                         
                         function nouvelle_reponse(event){
+                              console.log ('nouvelle reponse');
                               if(event.handled !== true) {
                                     event.handled = true;
                                     if($('#contenu_nouvelle_reponse').val().length > 0 ){
@@ -221,13 +629,15 @@ function ready () {
                                                       // hide ajax spinner
                                                 },
                                                 success: function (result) {
+                                                      // manque test contenu result (status = ok ?)
+                                                      console.log(result);
                                                       $('#ticket_nouvelle_reponse_msg').html('<div class="ticket_message"><p>Merci pour votre message.</p><p>Nous reviendrons vers vous aussi vite que possible !</p></div>');
                                                       ligne = '<tr class="wpas-reply-single new-reply" style="display:none;" valign="top"><td><div class="wpas-user-profile">'+result['avatar']+'</div></td>';
                                                       ligne += '<td> <div class="wpas-reply-meta">';
                                                       ligne += '<div class="wpas-reply-user"><span class="wpas-profilename">'+result['login']+'</span></div>';
                                                       ligne += '<div class="wpas-reply-time"><span class="wpas-human-date">'+result['date']+'</span></div>';
                                                       ligne += '</div>';
-                                                      ligne += '<div class="wpas-reply-content">' + texte + '</div></td></tr>';
+                                                      ligne += '<div class="wpas-reply-content">' + contenu + '</div></td></tr>';
                                                       $('#details-ticket #table-replies tbody').append(ligne);
                                                       $('.new-reply').fadeIn(1000, function () {
                                                             $('#ticket_nouvelle_reponse').fadeOut(function(){ $('#ticket_nouvelle_reponse_msg').fadeIn() });
@@ -294,64 +704,76 @@ function ready () {
       });
       $(document).on('pageinit', '#soutenir', function(){contenu_soutenir(10);});
       $(document).on('pageinit', '#don', function(){contenu_don();});
+      $(document).on('pageinit', '#planter', function(){contenu_planter();});
       $(document).on('pageinit', '#notifications', function(){contenu_notifications(10, 'toutes');});
       $(document).on('pageinit', '#profil', function(){contenu_profil();});
+      $(document).on('pageinit', '#details-marchand', function(){
+            $(document).on( 'click', '.marchand-lien-externe', function(e){contenu_accueil();}); // MAJ dernieres visites
+      });
       $(document).on('pageshow', '#details-marchand',function(){
+            $('#details-marchand .encours').show();
             var mid = $( ".marchand-lien-externe" ).attr('id'); // recupere l'id du marchand dans le champ ID de mobile bouton
-        
-      // colorie l'icone favori
-            /*if (jQuery.inArray( mid, marchands_favoris )>-1) {
-                  jQuery( ".mobile-fav" ).addClass('favori');
-            } else {
-                  jQuery( ".mobile-fav" ).removeClass('favori');
-            }*/
-      
-      	
-            $.ajax({ // recupere les infos détaillées du marchand
+            console.log('mid en cours : ' + mid);
+            $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
-                  dataType: 'json',
                   cache: false,
-                  data: {
-                        'action':'am_get_marchand_info',
-                        'mid' : mid
-                  },
+                  dataType: 'json',
+                  data: {'action':'am_contenu_details_marchand', 'mid' : mid, 'cookie' : F2S_cookie},
                   success:function(marchand){
+     
+                  // mise à jour du lien affi
+                        user_id=window.sessionStorage.user_id;
+                        $( ".marchand-lien-externe" ).attr('href', 'http://www.facile2soutenir.fr/go/' + marchand['lien']+ '?mobapp='+mid+'&user_id='+user_id);
                         
+                  // check si le marchand est favori et colorie
+                        if (marchand['isfav']==true) $( ".mobile-fav" ).addClass( "marchand-favori" );
+                        
+                  // affichage contenu
                         $("#header-marchand-nom").html(marchand['nom']);
-                        $("#marchand-details-logo").attr('src', marchand['logo']);
-                        $( ".marchand-lien-externe" ).attr('href', 'http://www.facile2soutenir.fr/go/' + marchand['lien']+ '?webapp='+mid); // weba^pp
-                        if (marchand['conditions']!='') {      
-                              $(".marchand-warning").html(marchand['conditions']);
-                              $(".marchand-warning").show();
-                        } else {
-                              $(".marchand-warning").hide();
-                        } 
-                        $(".marchand-collecte").html(marchand['collecte']);
-                        
+                        $('#marchand-infos').html(marchand['infos']);
                         $('#details-marchand .encours').fadeOut(function(){ $('#details-marchand .ui-content').fadeIn() });
                         //$('.encours').fadeOut();
                         //$(".marchand-container").fadeIn();
                         
-                        
+                  // gestion du clic FAVORI
                         $( ".mobile-fav" ).on( "click", function(e) {
-                              jQuery( this ).toggleClass( "marchand-favori" );
-                              jQuery.ajax({
-                                    url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
-                                    data: {
-                                          'action':'am_toggle_marchand_favori',
-                                          'mid' : mid
-                                    },
-                                    success:function(resultat) {},
-                              });
+                              if(e.handled !== true) {
+                                    e.handled = true;
+                                    jQuery( this ).toggleClass( "marchand-favori" );
+                                    mid = $( ".marchand-lien-externe" ).attr('id');                                  
+                                    jQuery.ajax({
+                                          url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                                          data: {
+                                                'action':'am_toggle_marchand_favori',
+                                                'mid' : mid,
+                                                'cookie' : F2S_cookie
+                                          },
+                                          success:function(resultat) {
+                                                var nb = parseInt($.trim($('#nb_marchands_favoris').html()));                                              
+                                                if ($( ".mobile-fav" ).hasClass( "marchand-favori" ))  { // ajout
+                                                      /*nb2=nb+1;
+                                                      $('#nb_marchands_favoris').html(nb2);
+                                                      nouveau='<li><a title="' + marchand['nom'] + '" class="mlien mbloc-2" id="' + mid + '" href="#details-marchand" data-transition="slide"  data-role="button"><div class="logo-container"><img src="' + $('#marchand-details-logo').attr('src') + '"></div></a></li>';
+                                                      $('#liste-marchands-favoris').append(nouveau);*/
+                                                      contenu_accueil();
+                                    
+                                                } else {// retrait
+                                                      nb2=nb-1;
+                                                      $('#liste-marchands-favoris #' +mid).remove();                                                
+                                                      $('#nb_marchands_favoris').html(nb2);
+                                                }
+                                          },
+                                    });
+                              }
                         });
                   },
                   error:function(erreur) {console.log('ERREUR' + erreur);},
-                  
             });
       });
-      $(document).on('pagebeforeshow', '#nointernet', function (e, data) {contenu_nointernet(data);});
-      //$(document).on('pageshow', '#nointernet', function(){contenu_nointernet();});
-      
+      $(document).on('pagebeforeshow', '#nointernet', function (e, data) {
+            previous=data.prevPage.attr('id');
+            console.log('previous : ' + previous);
+      });      
       $(document).on( 'click', '#get_accueil', function(e){contenu_accueil();});
       $(document).on( 'click', '#get_aide', function(e){contenu_aide();});
       $(document).on( 'click', '#get_soutenir', function(e){contenu_soutenir(10);});
@@ -360,14 +782,17 @@ function ready () {
       $(document).on( 'click', '#contenu_don', function(e){contenu_don();});
       $(document).on( 'click', '.test-internet', function () {
             $.mobile.navigate('#nointernet');
-       });
+      });
       
       function contenu_panel_left() {
+            $('#panel-container').html();
+            $('#menu-left .encours').show();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_panel_left', 'cookie' : F2S_cookie},
                   success:function(resultat) {
+                        $('#menu-left .encours').fadeOut();
                         $('#panel-container').html(resultat);
                   },
                   complete:function() {
@@ -375,6 +800,11 @@ function ready () {
                               var slug=jQuery(this).attr('id');
                               //$( ".liste-marchands" ).attr('id', slug);
                               //$.mobile.navigate('#accueil');
+                              
+//cat = $('.liste-marchands').attr('id');
+                              $('#liste_marchands .titre-liste').text($(this).text());
+                              
+                              
                               contenu_liste_marchands ('', slug);
                         });
                         $( ".mlien" ).on( "click", function(e) {
@@ -387,18 +817,27 @@ function ready () {
       } 
       function contenu_accueil() {
             $('#accueil-container').html('');
-            $('#accueil').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            $('#accueil .encours').show();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_accueil', 'cookie' : F2S_cookie},
                   success:function(resultat) {
-                        $('.encours').fadeOut();
+                        $('#accueil .encours').fadeOut();
                         $('#accueil-container').html(resultat);
+                        
                   },
                   complete:function() {
+                        $( "#accueil-navbar" ).navbar();
+                        $("#accueil-tabs" ).tabs({heightStyle: "auto"});
+                        
+                        
+                        
                         $( ".lien-categorie" ).on( "click", function(e) {
                               var slug=jQuery(this).attr('id');
+                              
+                              $('#liste_marchands .titre-liste').text($(this).text()); // title aussi
+                              
                               contenu_liste_marchands ('', slug);
                         });
                         $( ".mlien" ).on( "click", function(e) {
@@ -410,74 +849,25 @@ function ready () {
                   }
             });
       }
-      function contenu_soutenir(nombre, type) {
-            $('#soutenir').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-            
-            $.ajax({
-                  url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
-                  cache:false,
-                  data: {'action':'am_contenu_soutenir', 'cookie' : F2S_cookie, 'type' : type, 'nombre' : nombre},
-                  success:function(resultat) {
-                        $('.encours').fadeOut();
-                        $('#soutenir-container').html(resultat);
-                        $('.nav-soutenir .number_container').fadeOut();
-                        
-                        
-                  },
-                  error:function(erreur) {console.log('ERREUR' + erreur);}
-            });
-      }
-      function contenu_notifications(nombre, type) {
-            $('#notifications').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-            
-            $.ajax({
-                  url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
-                  cache:false,
-                  data: {'action':'am_contenu_notifications', 'cookie' : F2S_cookie, 'type' : type, 'nombre' : nombre},
-                  success:function(resultat) {
-                        $('.encours').fadeOut();
-                        $('#notifications-container').html(resultat);
-                        $('.nav-notifications .number_container').fadeOut();
-                        $(document).on( "click", "#btn-toutes", function(){
-                              /*$(this).addClass('bouton-bleu').removeClass('bouton-inverse');
-                              $('#btn-achats').addClass('bouton-inverse').removeClass('bouton-bleu');
-                              $('#btn-actus').addClass('bouton-inverse').removeClass('bouton-bleu');*/
-                              contenu_notifications(10, 'toutes');
-                        });              
-                        $(document).on( "click", "#btn-achats", function(){
-                              /*$(this).addClass('bouton-bleu').removeClass('bouton-inverse');
-                              $('#btn-toutes').addClass('bouton-inverse').removeClass('bouton-bleu');
-                              $('#btn-actus').addClass('bouton-inverse').removeClass('bouton-bleu');*/
-                              contenu_notifications(10, 'achats');
-                        });
-                        $(document).on( "click", "#btn-actus", function(){
-                              /*$(this).addClass('bouton-bleu').removeClass('bouton-inverse');
-                              $('#btn-toutes').addClass('bouton-inverse').removeClass('bouton-bleu');
-                              $('#btn-achats').addClass('bouton-inverse').removeClass('bouton-bleu');*/
-                              contenu_notifications(10, 'actus');
-                        });
-                  }
-            });
-      }
       function contenu_aide() {
-            $('#aide').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-            
+            $('#aide-container').html();
+            $('#aide .encours').show();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_aide', 'cookie' : F2S_cookie},
                   success:function(resultat) {
-                        $('.encours').fadeOut();
+                        $('#aide .encours').fadeOut();
                         $('#aide-container').html(resultat);
                         $('.nav-aide .number_container').fadeOut();
-                        $(".ticket_link").on( "click", function(e){
+                        $('.ticket_link').on( "click", function(e){
                               $(this).parents().find('a').removeClass("ticket_actif");
                               videticket();
                               $(this).addClass('ticket_actif');
                               $('.ticket-titre').text($(this).text());
                         });
                         
-                        $( "#form_nouvelle_demande" ).trigger('create');
+                        $('#form_nouvelle_demande' ).trigger('create');
                         $('#submit_nouvelle_demande').on('click', {cookie: F2S_cookie}, nouvelle_demande);
                         
                         function nouvelle_demande(event){
@@ -525,17 +915,67 @@ function ready () {
                         }   
                   }
             });
-      }   
+      }
+      function contenu_soutenir(nombre, type) {
+            $('#soutenir-container').html();
+            $('#soutenir .encours').show();
+            $.ajax({
+                  url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                  cache:false,
+                  data: {'action':'am_contenu_soutenir', 'cookie' : F2S_cookie, 'type' : type, 'nombre' : nombre},
+                  success:function(resultat) {
+                        $('#soutenir .encours').fadeOut();
+                        $('#soutenir-container').html(resultat);
+                        $('.nav-soutenir .number_container').fadeOut();
+                        
+                        
+                  },
+                  error:function(erreur) {console.log('ERREUR' + erreur);}
+            });
+      }
+      function contenu_notifications(nombre, type) {
+            $('#notifications-container').html();
+            $('#notifications .encours').show();
+            $.ajax({
+                  url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                  cache:false,
+                  data: {'action':'am_contenu_notifications', 'cookie' : F2S_cookie, 'type' : type, 'nombre' : nombre},
+                  success:function(resultat) {
+                        $('#notifications .encours').fadeOut();
+                        $('#notifications-container').html(resultat);
+                        $('.nav-notifications .number_container').fadeOut();
+                        $(document).on( "click", "#btn-toutes", function(){
+                              /*$(this).addClass('bouton-bleu').removeClass('bouton-inverse');
+                              $('#btn-achats').addClass('bouton-inverse').removeClass('bouton-bleu');
+                              $('#btn-actus').addClass('bouton-inverse').removeClass('bouton-bleu');*/
+                              contenu_notifications(10, 'toutes');
+                        });              
+                        $(document).on( "click", "#btn-achats", function(){
+                              /*$(this).addClass('bouton-bleu').removeClass('bouton-inverse');
+                              $('#btn-toutes').addClass('bouton-inverse').removeClass('bouton-bleu');
+                              $('#btn-actus').addClass('bouton-inverse').removeClass('bouton-bleu');*/
+                              contenu_notifications(10, 'achats');
+                        });
+                        $(document).on( "click", "#btn-actus", function(){
+                              /*$(this).addClass('bouton-bleu').removeClass('bouton-inverse');
+                              $('#btn-toutes').addClass('bouton-inverse').removeClass('bouton-bleu');
+                              $('#btn-achats').addClass('bouton-inverse').removeClass('bouton-bleu');*/
+                              contenu_notifications(10, 'actus');
+                        });
+                  }
+            });
+      }      
       function contenu_profil() {
-            $('#profil').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            $('#profil-container').html();
+            $('#profil .encours').show();
             $('.nav-profil .number_container').fadeOut();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_profil', 'cookie' : F2S_cookie},
                   success:function(resultat) {
-                        $('.encours').fadeOut();
-                        $('#user-profil').html(resultat);
+                        $('#profil .encours').fadeOut();
+                        $('#profil-container').html(resultat);
                         $('.nav-soutenir .number_container').fadeOut();
                   },
                   error:function(erreur) {console.log('ERREUR' + erreur);},
@@ -570,7 +1010,7 @@ function ready () {
                               $( "#choix-cause-id").val("");
                               if (!value) $('#choix-cause-erreur').hide();
                               if ( value && value.length >= 2 ) {
-                                    jQueryul.append( '<div class="encours"><i class="fas fa-spinner fa-spin fa-2x"></i></div>');
+                                    jQueryul.append( '<div class="encours"><div class="lds-ripple"><div></div><div></div></div></div>');
                                     jQueryul.listview( "refresh" );
                                     $.ajax({
                                           url: "https://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
@@ -605,9 +1045,7 @@ function ready () {
                         });
                         
                         $( "#choix-cause-input" ).blur(function() {
-                              if (!$( "#choix-cause-id").val()) {
-                                    //jQuery('#mform-choix-cause .ui-input-search').addClass("cause-incorrecte");
-                                    
+                              if (!$( "#choix-cause-id").val()) {                                    
                                     if ($(this).val()) $('#choix-cause-erreur').show();
                                     $("#btn-choix-cause").removeClass('btn-choix-cause-actif');
                               } else {
@@ -636,7 +1074,7 @@ function ready () {
                         });
                         
                         
-                        $( "#voirplus" ).on( "click", function(e) {
+                        $( "#profil .voirplus" ).on( "click", function(e) {
                               var i=0;
                               jQuery( "#liste-achats .achat:hidden" ).each(function( index ) {
                                     i++;
@@ -644,9 +1082,12 @@ function ready () {
                                           $(this).show('slow');
                                     }
                               });
-                              if (i<10) $( "#voirplus" ).hide();
+                              if (i<10) $( "#profil .voirplus" ).hide();
                         });
                         
+                        $( "#deconnexion" ).on( "click", function(e) {
+                              deconnexion();
+                        });
                         
                         function maj_affichage_favorite() {
                               //console.log($('#choix-cause-user').val());
@@ -680,38 +1121,30 @@ function ready () {
                                           'auto' : 'oui',
                                           'cookie' : F2S_cookie,
                                     },
-                                    success:function(data) {
-                                          //console.log('update_don_auto ok');
-                                          //console.log(data);
-                                    }
+                                    success:function(data) {}
                               });
                               
                         }
-                        
-                        
-                        
-                        
-                        
-                        
                   }
             });
       }
       function contenu_don() {
-            $('#don').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            $('#don-container').html();
+            $('#don .encours').show();            
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_don', 'cookie' : F2S_cookie},
                   success:function(resultat) {
-                        $('.encours').fadeOut();
-                        $('#user-don-container').html(resultat);
+                        $('#don .encours').fadeOut();
+                        $('#don-container').html(resultat);
                         window.dispo = parseFloat(jQuery('.disponible').html().replace(",", "."));
                   },
                   error:function(erreur) {console.log('ERREUR' + erreur);},
                   complete:function(){
                         $( '#mform-choix-cause-don' ).trigger('create');
                         $( '#choix-cause-input-don' ).textinput({clearBtn: true});
-                        $( '#mform-choix-cause-don .ui-input-search' ).append ('<div class="spinner-1" style="display:none;"><i class="fas fa-spinner fa-spin fa-lg"></i></div>');
+                        $( '#mform-choix-cause-don .ui-input-search' ).append ('<div class="spinner-1" style="display:none;"><div class="loader-bleu-gris loader-quadri"></div></div>');
 
                         // ************** LISTENER liste des asso
                         $( "#liste-causes-don" ).on( "filterablebeforefilter", function ( e, data ) {
@@ -765,6 +1198,8 @@ function ready () {
                         function check_montant_don() {
                               don = $( '#don-montant' ).val();
                               console.log('montant : ' + don);
+                              
+                              
                               if (!$.isNumeric(don))  {
                                      $('#don-montant' ).addClass("valeur-incorrecte");
                                      $('#montant-erreur-don').text('Oups... la valeur du don est incorrecte').show();
@@ -795,9 +1230,8 @@ function ready () {
 
                         
                         $( "#choix-cause-input-don" ).blur(function() {
-                              console.log('blur');
                               if ($( "#choix-cause-id-don").val()>0) {
-                                    console.log('cause OK');
+                                    //console.log('cause OK');
                                     $(this).removeClass("cause-incorrecte");
                                     $('#cause-erreur-don').hide().text('Oups...');
                                     
@@ -838,15 +1272,17 @@ function ready () {
                                           }
                                     }
                               }*/
-                              
-                              
-                              
+
                         });
                         
                        $(document).on('click', '.btn-don-actif', function() {    
                               //var data = jQuery("#mform-don").serialize();
                               //console.log(data);
+alert('click don');                              
                               if ( !$("#don-montant").hasClass("valeur-incorrecte")) {
+alert('pas de valeur incorrecte');                                     
+                                    var montant=$('#don-montant').val();
+                                    var effectues = $('#don .effectues').html();
                                     $.ajax({
                                           type: 'POST', 
                                           url: 'https://www.facile2soutenir.fr/wp-admin/admin-ajax.php',
@@ -854,23 +1290,29 @@ function ready () {
                                           cache:false,
                                           data: {
                                                 action : 'am_faire_un_don',
-                                                montant : jQuery('#don-montant').val(),
-                                                user_id : jQuery('#choix-cause-user-don').val(),
-                                                cause_id : jQuery('#choix-cause-id-don').val(),
+                                                montant : montant,
+                                                cookie : F2S_cookie,
+                                                user_id : $('#choix-cause-user-don').val(), // sert a rien
+                                                cause_id : $('#choix-cause-id-don').val(),
                                                 //formData : data // Convert a form to a JSON string representation
                                           },            
                                           complete: function() { // This callback function will trigger on data sent/received complete
                                                 //console.log('complete');
                                           },
                                           success: function (resultat) {
+                                                // affichage remerciements
                                                 $('.remerciements-message').html(resultat['message']);
                                                 $('.remerciements-don').show('slow');
-                                                $('.disponible').html(resultat['disponible']);
-                                                window.dispo=resultat['disponible'];
-                                                 
                                                 var targetOffset = jQuery(".remerciements-don").offset().top;
                                                 $('html, body').animate({ scrollTop: targetOffset }, 1000);
                                     
+                                                // Maj des pages de l'appli
+                                                $('.disponible').html(resultat['disponible']); // maj des valeurs affichées  DISPONIBLE
+                                                $('.effectues').html(parseFloat(montant) + parseFloat(effectues)); // maj des valeurs affichées DONS EFFECTUES
+                                                window.dispo=resultat['disponible'];
+                                                contenu_soutenir(10); // ajoute ligne sur la page soutenir
+                                                
+                                                //reset du formulaire
                                                 $('#remerciements-logo').attr('src', resultat['logo']);
                                                 $('#don-montant').val('');
                                                 $('#choix-cause-input-don').val('');
@@ -889,15 +1331,186 @@ function ready () {
                   }
             });
       }
+      function contenu_planter() {
+            //jQuery('#combier-planter').slider().textinput();
+            $('#planter-container').html();
+            $('#planter .encours').show();
+            
+            $('#planter .popup-mid').remove();
+            $.ajax({
+                  url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                  cache:false,
+                  data: {'action':'am_contenu_planter', 'cookie' : F2S_cookie},
+                  success:function(resultat) {
+                        $('#planter .encours').fadeOut();
+                        $('#planter-container').html(resultat);
+                        //window.dispo = parseFloat(jQuery('.disponible').html().replace(",", "."));
+                  },
+                  error:function(erreur) {console.log('ERREUR' + erreur);},
+                  complete:function(){
+                        
+                        
+                        if (parseFloat($('.disponible').html())<1) {
+                              //var solde_insuffisant_planter = "<div class='popup-mid' style='display:none;'><p>Malheureusement, nous ne pouvez pas encore planter d'arbre.</p><p>Vous devez disposer d'au moins 1 euro disponible pour planter un arbre.</p></div>";                            
+                              //$('#planter .popup-mid').fadeIn();
+                              var solde_insuffisant_planter = "<div id='popup-solde-insuffisant-planter' data-role='popup' data-transition='slidedown' ><p>Malheureusement, nous ne pouvez pas encore planter d'arbre.</p><p>Vous devez disposer d'au moins 1 euro disponible pour planter un arbre.</p></div>";                            
+                              $('#planter .ui-content').prepend(solde_insuffisant_planter);
+                              $('#popup-solde-insuffisant-planter' ).popup({
+                                    afterclose: function( event, ui ) {
+                                          //$.mobile.navigate('#soutenir');
+                                          $( ":mobile-pagecontainer" ).pagecontainer( "change", "#soutenir", { transition: "slide", reverse:true } );
+                                    }
+                                  });
+                              $( '#myPopup' ).popup('open');     
+                        }
+
+                        $( "#apres-plantation" ).popup();
+                        $( "#combier-planter" ).slider();
+                        
+                        /*$( "<input type='number' data-type='range' min='0' max='100' step='1' value='17'>" )
+                                .appendTo( "#dynamic-slider-form" )
+                                .slider()
+                                .textinput()*/
+                        
+                        
+                        // ************** CLIC PAYS
+                        
+                        $(".pays-container-actif .choix-pays").on( "click", function(){
+                              var pays = jQuery(this).attr('id');
+                        
+                              $(this).addClass('choix-pays-actif');                                          // ajout de la classe actif sur le pays selectionné
+                              $(this).siblings().each(function(){                                            // retrait de la classe active sur les autres pays
+                                    $(this).removeClass('choix-pays-actif') ;
+                              });
+                              //jQuery(".choix-arbre-actif").removeClass('background-madagascar').removeClass('background-indonesie').removeClass('background-mali') ;
+                              //jQuery(".choix-arbre-actif").addClass('background-' + pays);                        // Mise à jour du background sur l'arbre actif
+                              $(".formearbre-container").addClass('formearbre-container-actif').removeClass('formearbre-container-inactif'); // activation etape 2
+                              $(".arbre-container-a-planter").removeClass('bg-madagascar').removeClass('bg-indonesie');
+                              $(".arbre-container-a-planter").addClass('bg-' + pays);
+                        });
+                        
+                        // **************  CLIC FORME
+                        $(document).on( "click", ".formearbre-container-actif .choix-arbre", function(){ 
+                  
+                              var forme = $(this).attr('id');
+                              $(this).addClass('choix-arbre-actif');                                         // ajout de la classe actif
+                              var pays = $(".choix-pays-actif").attr('id');
+                              //if (typeof pays !=='undefined') {jQuery(this).addClass('background-' + pays);}      // chargement du background si pays est actif
+                              var couleur = $('.couleur-active').attr('id');                                 // chargement de la couleur si couleur active
+                              if (typeof couleur !== "undefined") {
+                                    source = "https://www.facile2soutenir.fr/wp-content/uploads/2018/01/" + forme + '-' + couleur + '.png' ;
+                                    $(this).children('img').attr('src', source);
+                                    $(".arbre-a-planter").attr('src', source);                               // changement de la source de l'image sur l'arbre à planter  
+                              }
+                              
+                              $(this).siblings().each(function(){
+                                    $(this).removeClass('choix-arbre-actif') ;                               // retrait de la classe active sur les autres
+                                    //jQuery(this).removeClass('background-madagascar').removeClass('background-indonesie').removeClass('background-mali') ;  // retrait des backgrounds sur les autre
+                                    var forme=$(this).attr('id');
+                                    var source = "https://www.facile2soutenir.fr/wp-content/uploads/2018/01/" + forme + '-generique.png' ;
+                                    $(this).children('img').attr('src', source);                             // on remet les sources génériques sur les autres
+                              });
+                              
+                              $(".color-picker").addClass('color-picker-actif');                             // activation etape 3
+                              $(".color-picker").removeClass('color-picker-inactif'); 
+                        });
+                        
+                  // **************  CLIC COULEUR
+                        $(document).on( "click", ".color-picker-actif .choix-couleur li", function(){
+                              jQuery(this).addClass('couleur-active');                                            // ajout de la classe actif
+                              jQuery(this).siblings().each(function(){jQuery(this).removeClass('couleur-active') ;});   // retrait de la classe actif sur les autres
+                              var couleur = jQuery(this).attr('id');
+                              var forme = jQuery(".choix-arbre-actif").attr('id');
+                              var source = "https://www.facile2soutenir.fr/wp-content/uploads/2018/01/" + forme + '-' + couleur + '.png' ;
+                              jQuery(".choix-arbre-actif > img").attr('src', source);                             // changement de la source de l'image sur l'arbre actif
+                              jQuery(".arbre-a-planter").attr('src', source);                                     // changement de la source de l'image sur l'arbre à planter
+                              jQuery(".btn-planter").addClass('btn-planter-actif');                             // activation etape 3
+                              jQuery(".btn-planter").removeClass('btn-planter-inactif'); 
+                              jQuery(".arbre-container-a-planter").removeClass('grey-background');
+                        });
+                        
+                  // ************** CLIC PLANTER
+                        $(document).on( "click", ".btn-planter-actif", function(){
+                              var container=$(this).closest(".arbre-container");
+                  
+                  
+                              container.addClass("arbre-actif");                 
+                              //container.addClass("background-" + lieu); 
+                              
+                              // recup lieu-forme-couleur
+                              var lieu = $(".choix-pays-actif").attr('id');
+                              if (lieu == 'indonesie') lieu_display='Indon&#233;sie';
+                              if (lieu == 'mali') lieu_display='Mali';
+                              if (lieu == 'madagascar') lieu_display='Madagascar';
+                              var couleur = $('.couleur-active').attr('id');
+                              var forme = $(".choix-arbre-actif").attr('id');
+                  
+                              container.find(".arbre-lieu").html(lieu_display);
+                              $(this).fadeOut(500, function() {
+                                    $(".arbre-a-planter").slideDown( 2000 , function() {
+                                          $(".arbre-legende").show();
+                                          setTimeout(  function() {    
+                                                $(".arbre-date").animate({width: '100%'}, 1500, function() {});
+                                          }, 1000);
+                                          setTimeout(  function() {  
+                                                $(".arbre-lieu").animate({width: '100%'}, 1500, function() {});
+                                          }, 2000);
+                                          setTimeout(  function() { 
+                                                //jQuery(".arbre-remerciement").effect( 'puff', 3500);
+                                                //jQuery.mobile.changePage( "#partagez", { role: "dialog" } );
+                                                $( "#apres-plantation" ).popup( "open");
+                                          }, 3500);
+                                    }).removeClass('arbre-a-planter').addClass('arbre-plante') ;  
+                              });
+                              
+                              $.ajax({
+                                    url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                                    dataType: 'json',
+                                    cache: false,
+                                    data: {
+                                            "action":"am_planter_arbre",
+                                            "lieu": lieu,
+                                            "couleur": couleur,
+                                            "forme": forme,
+                                            "cookie" : F2S_cookie,
+                                    },
+                                    success:function(resultat) {
+                                          
+                                          $(".message_nb_arbres").html(resultat['message']);
+                                          
+                                          // MAJ des pages de l'appli
+                                          $(".nb_arbres_plantes").html(resultat['nb_arbres_plantes']); // maj des valeurs affichees NB ARBRES PLANTES
+                                          $(".disponible").html(resultat['disponible']); // maj des valeurs affichees  DISPONIBLE
+                                          contenu_soutenir(10); // ajoute ligne sur la page soutenir
+                                          
+                                          //maj_plantation(resultat['id'], forme, couleur, resultat['date'], lieu);
+                                          //jQuery("#arbres-restants").html(Math.floor(parseFloat(resultat['disponible'])));
+                                          
+                                    },
+                                    error:function(erreur) {console.log('ERREUR : '+ erreur);}
+                              });
+                  
+                        });
+                        
+                        
+                        $(document).on( "click", ".refus-partage", function(){
+                              $( "#apres-plantation" ).popup( "close");
+                        });
+
+                  } // fin complete
+            });
+      }
       function contenu_liste_marchands (nombre, categorie) { // 3eme param pour "a partir de ..." ?
-            $('#liste_marchands_container').html('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+            
+            $('#liste-marchands-container').html('');
+            $('#liste_marchands .encours').show();
             $.ajax({
                   url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
                   cache:false,
                   data: {'action':'am_contenu_liste_marchands', 'nombre' : nombre, 'categorie' : categorie},
                   success:function(resultat) {
-                        $('#liste_marchands_container .encours').fadeOut();
-                        $('#liste_marchands_container').html(resultat);
+                        $('#liste_marchands .encours').fadeOut();
+                        $('#liste-marchands-container').html(resultat);
                         
                         $( ".mlien" ).on( "click", function(e) {
                               videmarchand(); // vide les infos marchands initiales.
@@ -906,6 +1519,23 @@ function ready () {
                               //console.log('mid recupere : ' + mid)
                               $( ".marchand-lien-externe" ).attr('id', mid); // positionne l'ID du marchand dans le champ ID de mobile bouton pour que la page mobile marchand puisse le recuperer
                         });
+                        
+                        
+                        $( "#liste_marchands .voirplus" ).on( "click", function(e) {
+                              var i=0;
+                              jQuery( ".liste-marchands li:hidden" ).each(function( index ) {
+                                    i++;
+                                    if (i<=10) {
+                                          $(this).show('slow');
+                                    }
+                              });
+                              if (i<10) $( "#liste_marchands .voirplus" ).hide();
+                        });
+                        
+                        
+                        
+                        
+                        
                   },
                   error:function(erreur) {console.log('ERREUR' + erreur);}
             });
@@ -944,25 +1574,50 @@ function ready () {
             else block.find('.number_container').hide();
             
       }
-      function contenu_nointernet(data) {
-            var previous = data.prevPage.attr('id');
-            vibre();
-            var refreshIntervalId = setInterval(function () {
-                  if (checkConnection()!=false) {
-                        clearInterval(refreshIntervalId);
-                        $('.connexion-off').hide();
-                        $('.connexion-on').fadeIn();
-                        setTimeout(function() {
-                              $.mobile.changePage($('#'+previous));
-                        }, 3000);
+      function deconnexion() {
+           
+           //efface les données locales
+           $.each(Cookies.get(), function( index, value ){
+                  if (index.indexOf('wordpress_logged_in_') >= 0) {
+                        Cookies.remove(index);
                   }
-                  //connectionStatus = navigator.onLine ? 'online' : 'offline';
-            }, 5000);
-      } 
-
+           });
+           F2S_cookie = '';
+           $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie);
+           sessionStorage.clear();
+           $('#affichage-token-fb').html('token fb : ');
+           localStorage.clear();
+           
+           //reset des pages
+           contenu_accueil();
+           contenu_aide();
+           contenu_soutenir(10);
+           contenu_notifications(10, 'toutes');
+           contenu_profil();
+           
+           /*$('#accueil-container').html();
+           $('#liste-marchands-container').html();    // pas forcement utile
+           $('#details-marchand').html();             // pas forcement utile
+           $('#aide-container').html();
+           $('#ticket-container').html();             // pas forcement utile
+           $('#soutenir-container').html();
+           $('#don-container').html();           // pas forcement utile
+           $('#planter-container').html();            // pas forcement utile
+           $('#notifications-container').html(); 
+           $('#profil-container').html();
+           */
+           // vider les rouges
+           // les compteurs
+           
+           
+           
+           //retour à la landing page
+           $.mobile.navigate('#landing');
+      
+      }
 }
 
-function checkConnection() {
+function checkConnection() { // depre ?
       var networkState = navigator.connection.type;
       
       var states = {};
@@ -977,18 +1632,15 @@ function checkConnection() {
       console.log('Connexion : ' + states[networkState]);
       
       if (networkState== 'Connection.NONE') {
-            $.mobile.changePage($('#nointernet'), 'flip', false, true);
+            $.mobile.changePage($('#nointernet'), 'pop', false, true); //flip
             return false;
       } else {
             return states[networkState];
-      }
-      
-      
+      } 
 }
 function vibre () {
       navigator.vibrate(1000);
 }
-
 function fetch_posts(requete){
       var dataString = "";
       $('#news-container').html('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
@@ -1028,6 +1680,7 @@ function videmarchand(){// vide les infos marchands initiales.
       $("#marchand-details-logo").attr('src', '');
       $('#details-marchand .ui-content').hide();
       $('#details-marchand .encours').show();
+      $( ".mobile-fav" ).removeClass( "marchand-favori" );
       //$(".marchand-container").hide();
       //$('#details-marchand').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
       
@@ -1040,14 +1693,13 @@ function videticket(){// vide les infos ticket initiales.
       //$('#ticket-container').hide();
 }
 function login(){
-      $('.status .erreur').remove();
+      $('#connexion-status .erreur').remove();
       var username = $("#username").val();
       var password = $("#password").val();
       var dataString = "username="+username+"&password="+password+"&insecure=cool"; // insecure=cool pour connection over http
-      var url;
       if ( username== "") {erreur_login ('usernamevide'); return false; }
       if ( password== "") {erreur_login ('passwordvide'); return false; }
-      $('.status').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
+      $('#connexion-status').prepend('<div class="encours"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>');
       $.ajax({
             type: "POST",
             url:"http://www.facile2soutenir.fr/json/user/generate_auth_cookie/?",
@@ -1055,72 +1707,226 @@ function login(){
             crossDomain: true,
             cache: false,
             success: function(data){
-                  //console.log(data);
                   if (data.status=="ok") {
-                        var cookie=data.cookie;
+                        var cookie_value=data.cookie;
                         var cookie_name=data.cookie_name;
                         var user_id=data.user.id;
-                        url = 'http://www.facile2soutenir.fr/mobile/?user_id=' + user_id + '&cookie_name=' + encodeURIComponent(cookie_name) + '&cookie=' + encodeURIComponent(cookie);
-                        $.cookie(cookie_name, cookie, { expires: 365*5, path: '/' });
-// F2S_cookie = cookie; marche pas
-                        //console.log(cookie);
-                        //console.log(encodeURIComponent(cookie));
+                        Cookies.set(cookie_name, cookie_value, { expires: 365*5, path: '/' });
+                        F2S_cookie = cookie_value;
+                        app.setupPush();
+                        
+                        $('#affichage-cookie').html('F2S_cookie : ' + F2S_cookie.substring(0,10));
+                        if(typeof localStorage!='undefined') {                      
+                              localStorage.setItem('user_id', data.user.id);
+                              localStorage.setItem('user_name', data.user.username);
+                              localStorage.setItem('user_email', data.user.email);
+                              localStorage.setItem('user_avatar', data.user.avatar);
+                        }
 
                         $.mobile.navigate('#accueil');
-                        //$('body').pagecontainer('change', '#accueil');
-                        //url = 'http://www.facile2soutenir.fr/test';
-                        //document.location.href=url;
-                        //window.open(url, '_blank', 'location=yes');
                   } else {
                         erreur_login ('mdp');
                   }
-                  
             },
             complete: function () {
-                  $('.status .encours').remove();
+                  $('#connexion-status .encours').remove();
             }
       });
 }
+function mdp_perdu() {
+      $('#connexion-status').html('');
+      $('#connexion-status').prepend('<div class="mdp-redirection" style="display:none;"><p class="msg-redirection">Vous allez etre redirig&#233; vers notre site web ou vous pourrez tr&#232;s facilement g&#233;n&#233;rer un nouveau mot de passe.</p><p class="count" id="mdp-count">5</p></div>');
+      $('#connexion-status .mdp-redirection').fadeIn();
+      
+      var i = document.getElementById('mdp-count');
+      var downloadTimer = setInterval(function(){
+            i.innerHTML = parseInt(i.innerHTML)-1;
+            if(parseInt(i.innerHTML) <= 0) {
+                  clearInterval(downloadTimer);
+                  $('#connexion-status .mdp-redirection').fadeOut(function(){ $('#connexion-status .mdp-redirection').remove();});
+                  //window.location.href = "http://www.facile2soutenir.fr/accueil/reinitialisation/";
+            }
+      },1000);   
+}
+function inscription() {
+
+      $('#connexion-status').html('');
+      $('#connexion-status').prepend('<div class="inscription-redirection" style="display:none;"><p class="msg-redirection">Vous allez etre redirig&#233; vers notre site web ou vous pourrez tr&#232;s facilement cr&#233;er un compte.</p><p class="count" id="inscription-count">5</p></div>');
+      $('#connexion-status .inscription-redirection').fadeIn();
+      
+      var i = document.getElementById('inscription-count');
+      var downloadTimer = setInterval(function(){
+            i.innerHTML = parseInt(i.innerHTML)-1;
+            if(parseInt(i.innerHTML) <= 0) {
+                  clearInterval(downloadTimer);
+                  $('#connexion-status .inscription-redirection').fadeOut(function(){ $('#connexion-status .inscription-redirection').remove();});
+                  //window.location.href = "http://www.facile2soutenir.fr/accueil/inscription/"; // orig = appmobile ? // attention à inapp
+            }
+      },1000);
+      
+}
 function erreur_login (erreur){
       if (erreur=='mdp') {
-            $('.status').prepend('<div class="erreur"><p>Oups...<br>Votre email ou votre mot de passe semble incorrect</p><p><i class="fas fa-frown"></p></div>');
+            $('#connexion-status').prepend('<div class="erreur"><p>Oups...<br>Votre email ou votre mot de passe semble incorrect</p><p><i class="fas fa-frown"></p></div>');
       }
       if (erreur=='usernamevide') {
-            $('.status').prepend('<div class="erreur"><p>Ca ne serait pas plus sympa si nous faisions connaissance ?</p></div>');
+            $('#connexion-status').prepend('<div class="erreur"><p>Ca ne serait pas plus sympa si nous faisions connaissance ?</p></div>');
       }
       if (erreur=='passwordvide') {
-            $('.status').prepend('<div class="erreur"><p>Je suis navr&#233;, mais je risque de me faire gronder si je vous laisse entrer sans mot de passe...</p></div>');
+            $('#connexion-status').prepend('<div class="erreur"><p>Je suis navr&#233;, mais je risque de me faire gronder si je vous laisse entrer sans mot de passe...</p></div>');
       }
 }
-
-
-
-      /*
-       *$(document).on('pageinit', '#liste_marchands', function(){contenu_liste_marchands (10);});
-      $(document).on( 'click', '#contenu_liste_marchands', function(e){contenu_liste_marchands (4);});
+function offline() { // ne fonctionne pas si placé dans ready
+      $('.connexion-on').hide();
+      $('.connexion-off').show();
+      $.mobile.changePage($('#nointernet'), 'pop', false, true);
+}
+function online() { // ne fonctionne pas si placé dans ready
+      $('.connexion-off').hide();
+      $('.connexion-on').fadeIn();
+      setTimeout(function() {
+            $.mobile.changePage($('#'+previous));
+      }, 3000);
+}
+function show_cookie() { // ne fonctionne pas si placé dans ready
+            $.each(Cookies.get(), function( index, value ){if (index.indexOf('wordpress_logged_in_') >= 0) {alert ('logged_in : ' + value);}});
+      }
+function show_F2S_cookie() { // ne fonctionne pas si placé dans ready
+            alert ('F2S_cookie : ' + F2S_cookie);
+      }
       
-      $(document).on('pagebeforeshow', '#news-detail', function(){clean_newsdetail();});
-      $(document).on('pageshow', '#news-detail',function(){
-            var post_id = $( ".news-active .lien-news-detail" ).attr('id');
-            linkurl = "http://www.facile2soutenir.fr/json/get_post/?id=" + post_id;
-                  $.ajax({
-                  type: "POST",
-                  url:linkurl,
-                  crossDomain: true,
-                  cache: false,
-                  success: function(data){
-                        $('.encours').hide();
-                        var post = data['post'];
-                        var post_id = post['id'];
-                        var titre = post['title'];
-                        var date = post['date'];
-                        var img = post['thumbnail_images']['full']['url'];
-                        var content = post['content'];
-                        $('#news-detail-title').html(titre);
-                        $('#news-detail-date').html(date);
-                        $('#news-detail-contenu').html(content);
-                        $('#news-detail .news-main-top').css('background-image', 'linear-gradient( rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75) ), url('+ img +')');		
-                  },
-            });
+function connexion_facebook() {
+      openFB.login(
+            function(response) {
+                  if(response.status === 'connected') {
+                        var fb_token = response.authResponse.accessToken;
+                        console.log('Facebook login succeeded, got access token: ' + fb_token);
+                        alert('Facebook login succeeded, got access token: ' + fb_token);                       
+                        $.ajax({
+                              url: "http://www.facile2soutenir.fr/wp-admin/admin-ajax.php",
+                              cache:false,
+                              dataType: "json",
+                              data: {
+                                    'action':'am_connexion_facebook',
+                                    'fb_token' : fb_token,
+                                    //'fields' : 'id,name,email,picture,link,locale,first_name,last_name'
+                              },
+                              success:function(resultat) {
+
+                                    if('error' in resultat) {
+                                    //if(jQuery.inArray("error", resultat) !== -1) {
+                                          
+                                          if (resultat['error']=='unregistered') {
+                                                //$('#landing-status').prepend('<div class="connexion-info"><p>Les informations transmises par Facebook ne nous ont pas permis de vous retrouver... </p><p>Peut-etre n\'etes vous pas encoer inscrit(e) ? Dans ce cas cela vous prendra quelques secondes en cliquant ici : <a href="bouton bouton-oragne">inscription</a></p></div>');
+                                                $('#landing-status').prepend("<div class='connexion-info'><p>A priori vous n'etes pas encore inscrit sur le site. Nous vous redirigeons vers la bonne page <i class='fas fa-smile fa-lg'></i></p><p class='count' id='fb-inscription-count'>5</p></div>");
+                                                var i = document.getElementById('fb-inscription-count');
+                                                var downloadTimer = setInterval(function(){
+                                                      i.innerHTML = parseInt(i.innerHTML)-1;
+                                                      if(parseInt(i.innerHTML) <= 0) {
+                                                            clearInterval(downloadTimer);
+                                                            //$('#landing-status .connexion-info').fadeOut(function(){ $('#landing-status .connexion-info').remove();});
+                                                            //window.location.href = "http://www.facile2soutenir.fr/accueil/inscription/"; // orig = appmobile ?
+                                                      }
+                                                },1000);
+                                          }
+                                          if (resultat['error']=='email') {
+                                                $('#landing-status').prepend('<div class="erreur"><p>Oups...<br>Facebook ne nous a pas transmis votre adresse email : nous ne pouvons donc pas vous identifier.</p><p></p></div>');
+                                                // a developper et mettre le message dans ajax
+                                          }
+                                          if (resultat['error']=='token') {
+                                                $('#landing-status').prepend('<div class="erreur"><p>Oups... Une erreur s\'est produite.</p><p>Cela vous ennuie-t-il de r&#233;essayer ?</p>')
+                                          }
+                                          
+                                    } else {
+                                          
+                                          uid=resultat['user']['id'];
+                                          var cookie_value=resultat['cookie_value'];
+                                          var cookie_name=resultat['cookie_name'];
+                                          Cookies.set(cookie_name, cookie_value, { expires: 365*5, path: '/' });
+                                          F2S_cookie = cookie_value;
+                                          app.setupPush();
+                                          
+                                          $('#affichage-cookie').html('F2S_cookie (FB): ' + F2S_cookie.substring(0,10));
+                                          if(typeof localStorage!='undefined') {
+                                                alert('ok local storage');
+                                                localStorage.setItem('user_id', uid);
+                                                localStorage.setItem('user_name', resultat['user']['username']);
+                                                localStorage.setItem('user_email', resultat['user']['email']);
+                                                localStorage.setItem('user_avatar', resultat['user']['avatar']);
+                                                
+                                          }
+                                          $.mobile.navigate('#accueil');
+                                    }                                    
+                              },
+                              complete : function() {      
+                              }
+                              
+                        });
+                        
+                        //getInfo();
+                        
+                  } else {
+                        alert('Facebook login failed: ' + response.error);
+                  }
+            },
+            {scope: 'email'}
+      );
+}
+/////////////
+function getInfo() {
+      openFB.api({
+            path: '/me',
+            params: {
+                  fields : 'id,name,email,picture,link,locale,first_name,last_name'
+            },
+            success: function(data) {
+                  //console.log(JSON.stringify(data));
+                                
+                  localStorage.setItem('user_id', user_id);
+                  localStorage.setItem('user_name', user_name);
+                  localStorage.setItem('user_email', user_email);
+                  /*window.sessionStorage.user_name = data.name;
+                  window.sessionStorage.user_email = data.email;
+                  window.sessionStorage.user_avatar = data.picture.data.url;*/
+            },
+            error: errorHandler});
+}
+function share() {
+      openFB.api({
+            method: 'POST',
+            path: '/me/feed',
+            params: {
+                message: document.getElementById('Message').value || 'Testing Facebook APIs'
+            },
+            success: function() {
+                alert('the item was posted on Facebook');
+            },
+            error: errorHandler});
+  }
+function readPermissions() {
+      openFB.api({
+            method: 'GET',
+            path: '/me/permissions',
+            success: function(result) {
+                  alert(JSON.stringify(result.data));
+            },
+            error: errorHandler
       });
-      */
+}
+function revoke() {
+      openFB.revokePermissions(
+            function() {
+                  alert('Permissions revoked');
+            },
+            errorHandler);
+}
+function logout() {
+      openFB.logout(
+            function() {
+                  alert('Logout successful');
+            },
+            errorHandler);
+}
+function errorHandler(error) {
+      alert(error.message);
+}
