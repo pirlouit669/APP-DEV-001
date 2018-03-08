@@ -27,7 +27,7 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
-    <plugin spec="https://github.com/EddyVerbruggen/phonegap-facebook-plugin" source="git">   
+    <plugin spec="https://github.com//phonegap-facebook-plugin" source="git">   
         <param name="APP_ID" value="204764659934740" />
         <param name="APP_NAME" value="Connexion Facile2Soutenir" />
     </plugin>
