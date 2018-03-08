@@ -46,9 +46,12 @@
                   <div class="landing-logo"><img src="img/facile2soutenir120.png"></div>
                   <div class="landing-intro"><H1>Soutenez les causes qui vous tiennent &#224; coeur gr&#226;ce &#224; vos achats en ligne.</H1></div>
                   <div class="landing-liens">
+
                         <a href="#connexion" data-role="none" style="" class="bouton bouton-moyen bouton-bleu bouton-block bouton-form btn-connexion">Connexion</a>
                         <p class="oubien">ou bien</p>
                         <a href="#" onclick="connexion_facebook();" data-role="none" class="bouton bouton-moyen bouton-facebook bouton-block bouton-moyen bouton-form" id="btn-connexion-fb" >Connexion Facebook</a>
+<fb:login-button scope="public_profile,email" onlogin="checkLoginState();"></fb:login-button>
+<div id="status" style="color:white;"></div>
                         <div id="landing-status" class="status"></div>
                   </div>
             </div>
