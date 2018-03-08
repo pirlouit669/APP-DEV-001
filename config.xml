@@ -101,7 +101,7 @@
     <plugin name="cordova-plugin-network-information" spec="~2.0.1" />
     <plugin name="cordova-plugin-dialogs" spec="~2.0.1" />
     <plugin name="cordova-plugin-vibration" spec="~2.1.5" />
-    <gap:plugin name="cordova-plugin-facebook4" source="npm" spec="1.7.4">
+    <gap:plugin name="cordova-plugin-facebook4" source="npm" spec="1.9.1">
     <param name="APP_ID" value="204764659934740" />
     <param name="APP_NAME" value="Connexion Facile2Soutenir" />
     </gap:plugin>
