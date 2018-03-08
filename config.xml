@@ -102,10 +102,7 @@
     <plugin name="cordova-plugin-dialogs" spec="~2.0.1" />
     <plugin name="cordova-plugin-inappbrowser" spec="~2.0.2" />
     <plugin name="cordova-plugin-vibration" spec="~2.1.5" />
-<plugin name="phonegap-facebook-plugin" spec="0.12.0" source="npm">
-    <param name="APP_ID" value="204764659934740" />
-    <param name="APP_NAME" value="Connexion Facile2Soutenir" />
-</plugin>
+    <plugin spec="https://github.com/Wizcorp/phonegap-facebook-plugin.git" source="git" />
     <plugin name="phonegap-plugin-push" spec="~1.8.0">
         <variable name="SENDER_ID" value="XXXXXXX" />
     </plugin>
