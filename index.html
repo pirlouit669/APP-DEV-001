@@ -46,11 +46,10 @@
                   <div class="landing-logo"><img src="img/facile2soutenir120.png"></div>
                   <div class="landing-intro"><H1>Soutenez les causes qui vous tiennent &#224; coeur gr&#226;ce &#224; vos achats en ligne.</H1></div>
                   <div class="landing-liens">
-
                         <a href="#connexion" data-role="none" style="" class="bouton bouton-moyen bouton-bleu bouton-block bouton-form btn-connexion">Connexion</a>
                         <p class="oubien">ou bien</p>
                         <a href="#" onclick="connexion_facebook();" data-role="none" class="bouton bouton-moyen bouton-facebook bouton-block bouton-moyen bouton-form" id="btn-connexion-fb" >Connexion Facebook</a>
-<fb:login-button scope="public_profile,email" onlogin="checkLoginState();"></fb:login-button>
+
 <div id="status" style="color:white;">SDK non charge</div>
                         <div id="landing-status" class="status"></div>
                   </div>
@@ -376,14 +375,20 @@
             <div class="encours vcenter"><div class="lds-ripple"><div></div><div></div></div></div>
             <div id="panel-container"></div>
       </div>
+      
       <div id="fb-root"></div>
       <script src="js/js.cookie.js"></script>
-      <script src="js/index.js"></script>
+      <!--<script src="js/index.js"></script>-->
       <script>
       var my_script = document.createElement('script');
-      my_script.setAttribute('src','http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/js/index_remote_v4.js?ver=' + uniqueNum);
+      my_script.setAttribute('src','http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/js/index_remote.js?ver=' + uniqueNum);
       document.head.appendChild(my_script);
       </script>
+      <!-- <script src="http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/js/index_remote.js"></script> -->
+      
+      <!--<script type="text/javascript">app.initialize();</script>-->
+      <!--<script src="js/openfb.js"></script>
+      <script>//openFB.init({appId: '204764659934740'});</script>-->
 </body>
 
 </html>
