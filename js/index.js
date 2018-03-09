@@ -4,9 +4,27 @@ var F2S_cookie = '';
 document.addEventListener('deviceready', ready_local, false);
 
 
+
+
 function ready_local() {
       maj_nombres_rouges();         // Ajout des nombres rouges
       checkConnection();            // check internet       //try{checkConnection();}catch (e) {alert("Oupps une erreur c'est produite : "+e);}
+      $(document).on('pageinit', '#landing', function(){
+            // gestion connexion
+            $(document).on( "click", ".btn-connexion", function(e){
+                  e.preventDefault();
+                  if (F2S_cookie.trim()) $('body').pagecontainer('change', '#accueil');      // trim pour ignorer les espaces
+                  else $('body').pagecontainer('change', '#connexion');
+            });
+            $(document).on( "click", ".bouton-facebook", function(e){
+                  connexion_facebook();
+            }); 
+      });
+      $(document).on('pageinit', '#connexion',function(){
+            $(document).on( "click", "#btn-login", function(e){ login();});
+            $(document).on( "click", "#btn-mdp-perdu", function(e){ mdp_perdu();});
+            $(document).on( "click", "#btn-inscription", function(e){ inscription();});
+      });
 }
 function offline() { // ne fonctionne pas si placé dans ready
       $('.connexion-on').hide();

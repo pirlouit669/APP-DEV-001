@@ -38,9 +38,6 @@
 
 <body>
       <div data-role="page" id="landing" class="bg-image bg3" data-enhance="false">
-            <div id="affichage-rid"></div>
-            <div id="affichage-token-fb">pas de token</div>
-            <div id="affichage-cookie">pas de cookie</div>
             <a href="#accueil" data-role="none" id="lien-visite" class=""><p>Acc&#232;s visiteur</p><i class="fas fa-sign-in-alt fa-lg"></i></a>
             <div data-role="main" class="ui-content">
                   <div class="landing-logo"><img src="img/facile2soutenir120.png"></div>
@@ -48,13 +45,10 @@
                   <div class="landing-liens">
                         <a href="#connexion" data-role="none" style="" class="bouton bouton-moyen bouton-bleu bouton-block bouton-form btn-connexion">Connexion</a>
                         <p class="oubien">ou bien</p>
-                        <a href="#" onclick="connexion_facebook();" data-role="none" class="bouton bouton-moyen bouton-facebook bouton-block bouton-moyen bouton-form" id="btn-connexion-fb" >Connexion Facebook</a>
+                        <a href="#" data-role="none" class="bouton bouton-moyen bouton-facebook bouton-block bouton-moyen bouton-form" id="btn-connexion-fb" >Connexion Facebook</a>
                         <div id="landing-status" class="status"></div>
                   </div>
             </div>
-            <div onclick="show_cookie()" class="bouton-test" style="background:#6be49c !important; right:90px;">logged</div>
-            <div onclick="show_F2S_cookie()" class="bouton-test" style="background:#ff5151 !important; right:40px;">F2S</div>
-            <div onclick="window.location.reload()" class="bouton-test" style="background:#ff8040 !important; right:40px; top:70px;">Reload</div>
       </div> 
         
       <div data-role="page" id="connexion">
@@ -65,9 +59,9 @@
                         <img src="img/F2S-icon-120.png">
                         <input id="username" type="text" value="" placeholder="Adresse email" data-role="none" style="">
                         <input id="password" type="password" value="" placeholder="Mot de passe" data-role="none" >
-                        <button onclick="login();" data-role="none" class="bouton bouton-moyen bouton-bleu bouton-block bouton-moyen bouton-form" id="" >Connexion</button>
-                        <button onclick="mdp_perdu();" data-role="none" class="bouton bouton-transparent bouton-block bouton-form" id="btn-mdp-perdu">Mot de passe perdu</button>
-                        <button onclick="inscription();" data-role="none" class="bouton bouton-transparent bouton-block bouton-form" id="btn-inscription">Pas encore inscrit ?</button>
+                        <button data-role="none" class="bouton bouton-moyen bouton-bleu bouton-block bouton-moyen bouton-form" id="btn-login" >Connexion</button>
+                        <button data-role="none" class="bouton bouton-transparent bouton-block bouton-form" id="btn-mdp-perdu">Mot de passe perdu</button>
+                        <button data-role="none" class="bouton bouton-transparent bouton-block bouton-form" id="btn-inscription">Pas encore inscrit ?</button>
                         <div id="connexion-status" class="status"></div>
                   </div>                
             </div>
@@ -86,7 +80,6 @@
                         </div>
                         <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
-                  <div class="bouton-test refresh" id="get_accueil">refresh</div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
@@ -176,7 +169,6 @@
                         </div>
                         <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
-                  <div class="bouton-test refresh" id="get_aide">refresh</div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
@@ -234,7 +226,6 @@
                         </div>
                         <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
-                  <div class="bouton-test refresh" id="get_soutenir">refresh</div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="recherche_reponse"></div>
@@ -308,7 +299,6 @@
                         </div>
                         <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
-                  <div class="bouton-test refresh" id="get_notifications">refresh</div>
             </div>
             <div data-role="main" class="ui-content">
                   <div class="encours vcenter"><div class="lds-ripple"><div></div><div></div></div></div>
@@ -330,8 +320,6 @@
       <div data-role="page" id="profil">
             <div data-role="main" class="ui-content">
                   <div id="profil-container"></div>
-                  <div class="bouton-test refresh" id="get_profil">refresh</div>
-                  <div class="bouton-test" id="deconnexion" href="#">Deconnexion</div>
             </div>
             <div data-role="footer" data-id="footer-1" data-position="fixed" >
                 <div data-role="navbar">
@@ -347,9 +335,6 @@
             <div id="user_info"><div class="encours vcenter"><div class="lds-ripple"><div></div><div></div></div></div></div>
       </div>
       <div data-role="page" id="nointernet" data-overlay-theme="b" data-position-fixed="true" data-display="overlay" data-theme="a">
-            
-                  <div onclick="online()" class="bouton-test" style="background:#6be49c !important; right:90px;">on</div>
-                  <div onclick="offline()" class="bouton-test" style="background:#ff5151 !important; right:40px;">off</div>
             <div id="nointernet-container">
                   <div class="message-connexion connexion-off">
                         <h1>Votre appareil n'est plus connect&#233; &#224; Internet</h1>
