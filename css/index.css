@@ -1,21 +1,10 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+/*tests */
+#affichage-rid {position: absolute; left: 0; color: white; top:1em; font-size:10px;}
+#affichage-token-fb {position: absolute; left: 0; color: white; top:1em; font-size:10px;}
+#affichage-cookie {position: absolute; left: 0; color: white; top:4em; font-size:10px;}
+
+
+
 * {
     -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
 }
@@ -24,92 +13,98 @@ body {
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
     -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
     -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
-    background-color:#E4E4E4;
-    background-image:linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);
-    background-image:-webkit-linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);
-    background-image:-ms-linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);
-    background-image:-webkit-gradient(
-        linear,
-        left top,
-        left bottom,
-        color-stop(0, #A7A7A7),
-        color-stop(0.51, #E4E4E4)
-    );
-    background-attachment:fixed;
     font-family:'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
-    font-size:12px;
-    height:100%;
-    margin:0px;
-    padding:0px;
-    text-transform:uppercase;
-    width:100%;
-}
 
-/* Portrait layout (default) */
-.app {
-    background:url(../img/logo.png) no-repeat center top; /* 170px x 200px */
-    position:absolute;             /* position in the center of the screen */
-    left:50%;
-    top:50%;
-    height:50px;                   /* text area height */
-    width:225px;                   /* text area width */
-    text-align:center;
-    padding:180px 0px 0px 0px;     /* image height is 200px (bottom 20px are overlapped with text) */
-    margin:-115px 0px 0px -112px;  /* offset vertical: half of image height and text area height */
-                                   /* offset horizontal: half of text area width */
 }
 
 /* Landscape layout (with min-width) */
+@media screen and (min-aspect-ratio: 1/1) and (min-width:400px) { }
+
+
+
+
+div, p, span, h1, h2, .ui-page-theme-a a,  .ui-page-theme-b a, body, input, select, textarea, button, .ui-btn {font-family:'Roboto', 'Open Sans', 'sans serif'; text-shadow: none !important; text-decoration:none; font-weight: 400;}
+h1 {color:white; font-size:1.2em; font-weight:300;margin-left:auto; margin-right:auto; text-align:center;}
+li {list-style-type:none;}
+ul {padding:0; margin:0;}
+h2 {font-weight: 300;    margin-bottom: 0.5em;}
+
+.icone-retour {top: 1em; left: .5em; color: white !important; position: absolute; z-index: 1;}
+
+.bouton {font-size: 1em; text-align: center;  border: 0; text-decoration: none; box-sizing: border-box; -webkit-transition: all .5s ease;-moz-transition: all .5s ease;-o-transition: all .5s ease;-ms-transition: all .5s ease; transition: all .5s ease;}
+.bouton:hover{cursor:pointer;}
+.bouton-rond {border-radius:100em;}
+.bouton-inline {display:inline-block; vertical-align:middle;}
+.bouton-block {display:block; vertical-align:middle;}
+.bouton-moyen {padding: 0.5em .8em; margin: .5em;}
+.bouton-majuscules {font-size:.75em; text-transform:uppercase;}
+.bouton-form {width: 230px; margin-left:auto; margin-right:auto;}
+.bouton-transparent {color: #eee !important; background-color:transparent;}
+.bouton-orange {color: white !important; background-color: #FF8800 !important;;}
+.bouton-orange:hover {background-color: #ca6a00 !important;}
+.bouton-bleu {color: white !important; background-color: #118af5; }
+.bouton-bleu:hover { background-color: #0e79d8; }
+.bouton-inverse {color: white !important; background-color:rgba(0,0,0,0.3);}
+.bouton-inverse:hover{background-color:rgba(0,0,0,0.5);}
+.bouton-twitter {background: #56BDF2;  }
+.bouton-twitter:hover {background:#129ce7; }
+.bouton-facebook {background: #3B5998;color: white !important;}
+.bouton-facebook:hover {background:#283e68; }
+
+.ui-overlay-a, .ui-page-theme-a, .ui-page-theme-a .ui-panel-wrapper { background-color: #f0f0f5; }
+.bg-image {background-size: cover;background-repeat:no-repeat;background-position:center center;background-attachment:scroll;}
+.bg3 {background-image: url(../img/background3.jpg);}
+.blur-bg {background-size: cover;  background-repeat:no-repeat;  background-position:center center;  background-attachment:scroll;  -webkit-filter: blur(15px);  -moz-filter: blur(15px);  -o-filter: blur(15px);  -ms-filter: blur(15px);  filter: blur(15px);  position: fixed;  width: 100%;  height: 100%;  top: 0;  left: 0;  z-index: 0;}
+
+.ui-content{background: transparent;padding:0; overflow: visible; }
+.ui-btn:focus {box-shadow: none !important;}
+
+
+/* LANDING */
+#landing .ui-content {flex-direction: column;  min-height: 100vh;  display: flex;  align-items: center;  justify-content: center; text-align:center;}
+.landing-logo{margin-top:-40px;}
+.landing-intro{max-width: 90%;}
+.landing-liens {margin:20px auto; position: relative;}
+
+.oubien {position:relative;  color: #c5c5c5; font-size: .8em;margin: 0.5em; }
+.oubien:after{content:''; border-bottom:1px solid #c5c5c5; position:absolute; top: 50%; width: 25%; right: 10%; }
+.oubien:before{content:''; border-bottom:1px solid #c5c5c5; position:absolute; top: 50%;    width: 25%;    left: 10%; }
+
+#landing-status {position: absolute; left: 0; color: white; top:170px; width:300px; margin:-35px; }
+#landing-status .count {padding: 0.1em; border-color: #ffffff; color: #ffffff; font-size: 30px; margin: .3em; background: rgba(255, 255, 255, 0.1);}
+.connexion-info {margin: 10px auto 0; color: #ffffff; border-top: 1px solid #ffffff; padding: 0.5em; background: rgba(255, 255, 255, 0.2);}
+.connexion-info p {font-weight: 300; font-size: 14px; text-align: center; margin: 0; }
+
+#lien-visite {bottom: 1em; right: .5em; color: #ddd; font-size:.9em; position: absolute; z-index: 1;}
+#lien-visite p {margin: 0 7px 0 0; font-weight: 300;  display: inline-block;}
+
+/* NO INTERNET */
+
+.message-connexion {position:absolute;text-align:center;width:280px;left:50%;margin-left:-140px;top:50%;}
+.connexion-off {margin-top: -180px;}
+.connexion-on { margin-top: -160px;}
+.message-connexion h1 {color:#656565;}
+
 @media screen and (min-aspect-ratio: 1/1) and (min-width:400px) {
-    .app {
-        background-position:left center;
-        padding:75px 0px 75px 170px;  /* padding-top + padding-bottom + text area = image height */
-        margin:-90px 0px 0px -198px;  /* offset vertical: half of image height */
-                                      /* offset horizontal: half of image width and text area width */
-    }
+    .message-connexion {display: block;position: inherit;margin:30px auto;width:auto;}
 }
-
-h1 {
-    font-size:24px;
-    font-weight:normal;
-    margin:0px;
-    overflow:visible;
-    padding:0px;
-    text-align:center;
-}
-
-.event {
-    border-radius:4px;
-    -webkit-border-radius:4px;
-    color:#FFFFFF;
-    font-size:12px;
-    margin:0px 30px;
-    padding:2px 0px;
-}
-
-.event.waiting {
-    background-color:#333333;
-    display:block;
-}
-
-.event.received {
-    background-color:#4B946A;
-    display:none;
-}
-
+.message-attente { border-radius:4px; -webkit-border-radius:4px; color:#FFFFFF; max-width: 300px; font-size:16px; margin: 10px auto; padding:5px; display:block; text-align: center;}
+.connexion-off .message-attente {background-color:#f7574b;}
+.connexion-on .message-attente {background-color:#00b050;}
 @keyframes fade {
     from { opacity: 1.0; }
     50% { opacity: 0.4; }
     to { opacity: 1.0; }
 }
-
+ 
 @-webkit-keyframes fade {
     from { opacity: 1.0; }
     50% { opacity: 0.4; }
     to { opacity: 1.0; }
 }
+.blink { animation:fade 3000ms infinite; -webkit-animation:fade 3000ms infinite;}
 
-.blink {
-    animation:fade 3000ms infinite;
-    -webkit-animation:fade 3000ms infinite;
-}
+
+
+
+
