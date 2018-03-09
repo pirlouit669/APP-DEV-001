@@ -2,7 +2,7 @@ var previous="connexion";
 var runinphonegap = navigator.userAgent.match(/(ios|iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/);
 var F2S_cookie = '';
 document.addEventListener('deviceready', ready_local, false);
-app.initialize();
+
 
 function ready_local() {
       maj_nombres_rouges();         // Ajout des nombres rouges
