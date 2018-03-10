@@ -14,7 +14,7 @@ function ready_local() {
       $(document).on( "click", "#btn-connexion-fb", function(e){
             connexion_facebook();
       }); 
-      $(document).on('pageinit', '#connexion',function(){
+      $(document).on('pagecreate', '#connexion',function(){
             $(document).on( "click", "#btn-login", function(e){ login();});
             $(document).on( "click", "#btn-mdp-perdu", function(e){ mdp_perdu();});
             $(document).on( "click", "#btn-inscription", function(e){ inscription();});
