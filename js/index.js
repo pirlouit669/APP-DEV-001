@@ -3,6 +3,8 @@ var previous="connexion";
 var runinphonegap = navigator.userAgent.match(/(ios|iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/);
 var F2S_cookie = '';
 function ready_local() {
+      document.addEventListener("offline", offline, false);
+      document.addEventListener("online", online, false);
       maj_nombres_rouges();
       $(document).on( "click", ".btn-connexion", function(e){
             e.preventDefault();
