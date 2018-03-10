@@ -28,14 +28,7 @@ function ready_local() {
             $.mobile.navigate('#landing');
             window.location.reload();
       });
-      $(document).on('pageinit', '#accueil', function(){
-            contenu_accueil();
-            contenu_panel_left();
-            $("#menu-left").panel().enhanceWithin();
-      });
-      $(document).on('pageinit', '#aide', function(){contenu_aide();});
-      $(document).on('pageinit', '#soutenir', function(){contenu_soutenir(10);});
-      $(document).on('pageinit', '#profil', function(){contenu_profil();});
+      
 
 }
 function offline() {
