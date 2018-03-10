@@ -4,18 +4,16 @@ var runinphonegap = navigator.userAgent.match(/(ios|iPhone|iPod|iPad|Android|Bla
 var F2S_cookie = '';
 var ready_ok = false;
 function ready_local() {
-      // gestion connexion au lancement de l'app
+      // gestion connectivite au lancement de l'app
       var networkState = navigator.connection.type;
-      console.log('state : ' + networkState);
       if (networkState != 'none') { first_load(); }
       else {$.mobile.changePage($('#nointernet'), 'pop', false, true);}
-      // gestion de la deconnexion / reconnexion
+      // gestion de la deco / reco
       document.addEventListener("online", online, false);
       document.addEventListener("offline", offline, false);
 }
 
 function first_load() {
-      console.log('first load');
       maj_nombres_rouges();
       $(document).on( "click", ".btn-connexion", function(e){
             e.preventDefault();
