@@ -1,32 +1,49 @@
+document.addEventListener('deviceready', ready_local, false);
 var previous="connexion";
 var runinphonegap = navigator.userAgent.match(/(ios|iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/);
 var F2S_cookie = '';
-document.addEventListener('deviceready', ready_local, false);
-
-
-
-
 function ready_local() {
-      maj_nombres_rouges();         // Ajout des nombres rouges
-      checkConnection();            // check internet       //try{checkConnection();}catch (e) {alert("Oupps une erreur c'est produite : "+e);}
+      maj_nombres_rouges();
       $(document).on( "click", ".btn-connexion", function(e){
             e.preventDefault();
-            if (F2S_cookie.trim()) $('body').pagecontainer('change', '#accueil');      // trim pour ignorer les espaces
+            if (F2S_cookie.trim()) $('body').pagecontainer('change', '#accueil');
             else $('body').pagecontainer('change', '#connexion');
       });
-      $(document).on( "click", "#btn-connexion-fb", function(e){connexion_facebook();}); 
+      $(document).on( "click", "#btn-connexion-fb", function(e){
+            connexion_facebook();
+      }); 
       $(document).on('pageinit', '#connexion',function(){
             $(document).on( "click", "#btn-login", function(e){ login();});
             $(document).on( "click", "#btn-mdp-perdu", function(e){ mdp_perdu();});
             $(document).on( "click", "#btn-inscription", function(e){ inscription();});
       });
+      $(document).on('pagebeforeshow', '#nointernet', function (e, data) {
+            previous=data.prevPage.attr('id');
+      }); 
+      $(document).on('pagebeforeshow', '#connexion',function(){
+            $('#connexion-status').html('');
+      });    
+      $(document).on( "click", ".retour-landing", function(e){
+            e.preventDefault();
+            $.mobile.navigate('#landing');
+            window.location.reload();
+      });
+      $(document).on('pageinit', '#accueil', function(){
+            contenu_accueil();
+            contenu_panel_left();
+            $("#menu-left").panel().enhanceWithin();
+      });
+      $(document).on('pageinit', '#aide', function(){contenu_aide();});
+      $(document).on('pageinit', '#soutenir', function(){contenu_soutenir(10);});
+      $(document).on('pageinit', '#profil', function(){contenu_profil();});
+
 }
-function offline() { // ne fonctionne pas si placé dans ready
+function offline() {
       $('.connexion-on').hide();
       $('.connexion-off').show();
       $.mobile.changePage($('#nointernet'), 'pop', false, true);
 }
-function online() { // ne fonctionne pas si placé dans ready
+function online() {
       $('.connexion-off').hide();
       $('.connexion-on').fadeIn();
       setTimeout(function() {
@@ -56,8 +73,6 @@ function maj_nombres_rouges(){
                   update_nr('notifications', nombre['notifications']);
                   update_nr('profil', nombre['transactions']);
             },
-            error: function(erreur){
-            }
       });  
 }
 function videmarchand(){// vide les infos marchands initiales.
@@ -66,37 +81,12 @@ function videmarchand(){// vide les infos marchands initiales.
       $('#details-marchand .ui-content').hide();
       $('#details-marchand .encours').show();
       $( ".mobile-fav" ).removeClass( "marchand-favori" );
-      //$(".marchand-container").hide();
-      //$('#details-marchand').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
-      
 }
 function videticket(){// vide les infos ticket initiales.
       $('#ticket-details').prepend('<div class="encours"><i class="fas fa-spinner fa-spin fa-3x"></i></div>');
       $('#ticket_nouvelle_reponse').show();
       $('ticket_nouvelle_reponse_msg').hide();
       $('#ticket-container').html('');
-      //$('#ticket-container').hide();
-}
-function checkConnection() { // depre ?
-      var networkState = navigator.connection.type;
-      
-      var states = {};
-      states[Connection.UNKNOWN]  = 'Connexion inconnue';
-      states[Connection.ETHERNET] = 'Connexion filaire';
-      states[Connection.WIFI]     = 'Connexion Wifi';
-      states[Connection.CELL_2G]  = 'Connexion 2G';
-      states[Connection.CELL_3G]  = 'Connexion 3G';
-      states[Connection.CELL_4G]  = 'Connexion 4G';
-      states[Connection.NONE]     = 'Pas de Connexion';
-      
-      console.log('Connexion : ' + states[networkState]);
-      
-      if (networkState== 'Connection.NONE') {
-            $.mobile.changePage($('#nointernet'), 'pop', false, true); //flip
-            return false;
-      } else {
-            return states[networkState];
-      } 
 }
 function vibre () {
       navigator.vibrate(1000);

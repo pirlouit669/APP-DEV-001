@@ -6,19 +6,14 @@
       <meta name="format-detection" content="telephone=no" />
       <meta name="msapplication-tap-highlight" content="no" />
       <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
-      <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
-      <!-- <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" /> -->
-      <!-- Good default declaration:
-      * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
-      * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
-      * Disables use of eval() and inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
-          * Enable inline JS: add 'unsafe-inline' to default-src
-          * Enable eval(): add 'unsafe-eval' to default-src
-      * Create your own at http://cspisawesome.com
-      -->
-      <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
-
-      
+      <meta http-equiv="Content-Security-Policy"
+            content="default-src 'self' data: gap: 'unsafe-inline' *.facile2soutenir.fr  https://ssl.gstatic.com; 
+                       style-src 'self' 'unsafe-inline' *.facile2soutenir.fr *.jquery.com https://fonts.googleapis.com https://cdn.jsdelivr.net;
+                        font-src 'self' *.gstatic.com;
+                         img-src * 'self' data:;
+                     connect-src *;
+                       media-src * 'self';
+                      script-src 'self' 'unsafe-inline' *.facile2soutenir.fr *.jquery.com *.fontawesome.com ;" />
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400|Roboto:100,300,400" >
       <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">  
       <link rel="stylesheet" type="text/css" href="css/index.css" />
@@ -35,7 +30,6 @@
       </script>
       <title>Facile2Soutenir</title>
 </head>
-
 <body>
       <div data-role="page" id="landing" class="bg-image bg3" data-enhance="false">
             <a href="#accueil" data-role="none" id="lien-visite" class=""><p>Acc&#232;s visiteur</p><i class="fas fa-sign-in-alt fa-lg"></i></a>
@@ -50,7 +44,6 @@
                   </div>
             </div>
       </div> 
-        
       <div data-role="page" id="connexion">
             <div class="blur-bg bg3"></div>
             <a href="#landing" data-role="none" class="icone-retour"><i class="fas fa-times fa-lg"></i></a>
@@ -98,13 +91,17 @@
                   </div>
             </div>
       </div>
-      
-      
       <div data-role="page" id="liste_marchands">
             <div data-role="header" data-position="fixed">
                   <div class="top-menu-left"><a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a></div>
-                  <div class="top-menu-middle">
-                        <h1 class="ui-title titre-liste" tabindex="0" role="heading" aria-level="1">liste marchands</h1>
+                  <div class="top-menu-middle"><h1 class="ui-title titre-liste" tabindex="0" role="heading" aria-level="1">liste marchands</h1></div>
+                  <div class="form-container form-container-inactif">
+                        <div class="recherche_icones">
+                              <div class="recherche_loupe"><i class="fas fa-search fa-lg"></i></div>
+                              <div class="recherche_encours" style="display:none;"><i class="fas fa-circle-notch fa-spin fa-lg"></i></div>
+                              <div class="recherche_fermer" style="display:none;"><i class="fas fa-circle-notch fa-times-circle fa-lg"></i></div>
+                        </div>
+                        <input type="text" data-role="none" placeholder="marchand" value="" name="recherche" class="recherche_input">
                   </div>
             </div>
             <div data-role="main" class="ui-content">
@@ -124,7 +121,6 @@
                   </div>
             </div>
       </div>
-      
       <div data-role="page" id="details-marchand" data-add-back-btn="true" data-back-btn-text="retour">
             <div data-role="header" data-position="fixed" data-add-back-btn="true" data-back-btn-text="retour">
                   <div class="top-menu-middle">
@@ -154,9 +150,6 @@
                   </div>
             </div>
       </div>
-            
-            
-            
       <div data-role="page" id="aide">
             <div data-role="header" data-position="fixed">
                   <div class="top-menu-left"><a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a></div>
@@ -186,8 +179,7 @@
                         </ul>
                   </div>
             </div>
-      </div>
-      
+      </div>      
       <div data-role="page" id="details-ticket" data-add-back-btn="true" data-back-btn-text="retour">
             <div data-role="header" data-position="fixed" data-add-back-btn="true" data-back-btn-text="retour">
                   <div class="top-menu-middle">
@@ -210,11 +202,7 @@
                   </div>
             </div>
       </div>
-      
-      
-      
       <div data-role="page" id="soutenir">
-            
             <div data-role="header" data-position="fixed">
                   <div class="top-menu-left"><a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a></div>
                   <div class="top-menu-middle"><h1 class="ui-title" tabindex="0" role="heading" aria-level="1">Soutenir ma cause</h1></div>
@@ -243,8 +231,7 @@
                         </ul>
                   </div>
             </div>
-      </div>
-      
+      </div>      
       <div data-role="page" id="don">     
             <div data-role="header" data-position="fixed" data-add-back-btn="true" data-back-btn-text="">
                   <div class="top-menu-middle"><h1 class="ui-title" tabindex="0" role="heading" aria-level="1">Faire un don</h1></div>
@@ -265,7 +252,6 @@
                   </div>
             </div>
       </div>
-
       <div data-role="page" id="planter">     
             <div data-role="header" data-position="fixed" data-add-back-btn="true" data-back-btn-text="">
                   <div class="top-menu-middle"><h1 class="ui-title" tabindex="0" role="heading" aria-level="1">Planter un arbre</h1></div>
@@ -285,8 +271,7 @@
                         </ul>
                   </div>
             </div>
-      </div>
-      
+      </div>      
       <div data-role="page" id="notifications">
             <div data-role="header" data-position="fixed">
                   <div class="top-menu-left"><a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a></div>
@@ -368,7 +353,4 @@
             document.head.appendChild(my_script);
       </script>
 </body>
-
 </html>
-
-
