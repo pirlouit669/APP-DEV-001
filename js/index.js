@@ -1,10 +1,21 @@
 document.addEventListener('deviceready', ready_local, false);
-var previous="connexion";
+var previous="landing";
 var runinphonegap = navigator.userAgent.match(/(ios|iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/);
 var F2S_cookie = '';
+var ready_ok = false;
 function ready_local() {
-      document.addEventListener("offline", offline, false);
+      // gestion connexion au lancement de l'app
+      var networkState = navigator.connection.type;
+      console.log('state : ' + networkState);
+      if (networkState != 'none') { first_load(); }
+      else {$.mobile.changePage($('#nointernet'), 'pop', false, true);}
+      // gestion de la deconnexion / reconnexion
       document.addEventListener("online", online, false);
+      document.addEventListener("offline", offline, false);
+}
+
+function first_load() {
+      console.log('first load');
       maj_nombres_rouges();
       $(document).on( "click", ".btn-connexion", function(e){
             e.preventDefault();
@@ -30,9 +41,9 @@ function ready_local() {
             $.mobile.navigate('#landing');
             window.location.reload();
       });
-      
-
+      ready_ok=true;
 }
+
 function offline() {
       $('.connexion-on').hide();
       $('.connexion-off').show();
@@ -41,9 +52,15 @@ function offline() {
 function online() {
       $('.connexion-off').hide();
       $('.connexion-on').fadeIn();
-      setTimeout(function() {
+      if (!ready_ok) {
             $.mobile.changePage($('#'+previous));
-      }, 3000);
+            window.location.reload();
+      }
+      else {
+            setTimeout(function() {
+                  $.mobile.changePage($('#'+previous));
+            }, 3000);
+      }
 }
 function update_nr(type, nombre){
             block=$('.nav-'+type);
