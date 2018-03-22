@@ -8,11 +8,18 @@ function ready_local() {
       var networkState = navigator.connection.type;
       if (networkState != 'none') { first_load(); }
       else {$.mobile.changePage($('#nointernet'), 'pop', false, true);}
+      
       // gestion de la deco / reco
       document.addEventListener("online", online, false);
       document.addEventListener("offline", offline, false);
+      
+      //initialisation du swipe de la landing page
+      var mySwiper = new Swiper ('.swiper-container', {
+            pagination: {
+              el: '.swiper-pagination',
+            },
+      });
 }
-
 function first_load() {
       maj_nombres_rouges();
       $(document).on( "click", ".btn-connexion", function(e){
@@ -41,7 +48,6 @@ function first_load() {
       });
       ready_ok=true;
 }
-
 function offline() {
       $('.connexion-on').hide();
       $('.connexion-off').show();
