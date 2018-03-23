@@ -28,15 +28,20 @@ h2 {font-weight: 300; font-size:1.4em; text-align:center; margin-bottom: 0.5em;}
 .bouton-form {width: 14em; margin-left:auto; margin-right:auto;}
 .bouton-transparent {color: #eee !important; background-color:transparent;}
 .bouton-orange {color: white !important; background-color: #FF8800 !important;}
-.bouton-orange:hover {background-color: #ca6a00 !important;}
+.bouton-orange:hover,
+.bouton-orange:active {background-color: #ca6a00 !important;}
 .bouton-bleu {color: white !important; background-color: #118af5; }
-.bouton-bleu:hover { background-color: #0e79d8; }
+.bouton-bleu:hover, 
+.bouton-bleu:active { background-color: #0e79d8; }
 .bouton-inverse {color: white !important; background-color:rgba(0,0,0,0.3);}
-.bouton-inverse:hover{background-color:rgba(0,0,0,0.5);}
+.bouton-inverse:hover,
+.bouton-bleu:active{background-color:rgba(0,0,0,0.5);}
 .bouton-twitter {background: #56BDF2;  }
-.bouton-twitter:hover {background:#129ce7; }
+.bouton-twitter:hover,
+.bouton-twitter:active{background:#129ce7; }
 .bouton-facebook {background: #3B5998;color: white !important;}
-.bouton-facebook:hover {background:#283e68; }
+.bouton-facebook:hover,
+.bouton-facebook:active{background:#283e68; }
 
 .bg-image {background-size: cover;background-repeat:no-repeat;background-position:center center;background-attachment:scroll;}
 .bg3 {background-image: url(../img/background3.jpg);}

@@ -34,13 +34,13 @@ function first_load() {
             $(document).on( "click", "#btn-login", function(e){ login();});
             $(document).on( "click", "#btn-mdp-perdu", function(e){ mdp_perdu();});
             $(document).on( "click", "#btn-inscription", function(e){ inscription();});
-      });
-      $(document).on('pagebeforeshow', '#nointernet', function (e, data) {
-            previous=data.prevPage.attr('id');
       }); 
       $(document).on('pagebeforeshow', '#connexion',function(){
             $('#connexion-status').html('');
-      });    
+      });   
+      $(document).on('pagebeforeshow', '#nointernet', function (e, data) {
+            previous=data.prevPage.attr('id');
+      }); 
       $(document).on( "click", ".retour-landing", function(e){
             e.preventDefault();
             $.mobile.navigate('#landing');
