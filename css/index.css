@@ -18,14 +18,14 @@ h2 {font-weight: 300; font-size:1.4em; text-align:center; margin-bottom: 0.5em;}
 .ui-overlay-a, .ui-page-theme-a, .ui-page-theme-a .ui-panel-wrapper { background-color: #f0f0f5; }
 
 .icone-retour {top: 1em; left: .5em; color: white !important; position: absolute; z-index: 1;}
-.bouton {font-size: 1em; text-align: center;  border: 0; text-decoration: none; box-sizing: border-box; -webkit-transition: all .5s ease;-moz-transition: all .5s ease;-o-transition: all .5s ease;-ms-transition: all .5s ease; transition: all .5s ease;}
+.bouton {font-size: 1.2em; text-align: center;  border: 0; text-decoration: none; box-sizing: border-box; -webkit-transition: all .5s ease;-moz-transition: all .5s ease;-o-transition: all .5s ease;-ms-transition: all .5s ease; transition: all .5s ease;}
 .bouton:hover{cursor:pointer;}
 .bouton-rond {border-radius:100em;}
 .bouton-inline {display:inline-block; vertical-align:middle;}
 .bouton-block {display:block; vertical-align:middle;}
-.bouton-moyen {padding: 0.5em .8em; margin: .5em;}
+.bouton-moyen {padding: 0.6em .8em; margin: .5em;}
 .bouton-majuscules {font-size:.75em; text-transform:uppercase;}
-.bouton-form {width: 12em; margin-left:auto; margin-right:auto;}
+.bouton-form {width: 14em; margin-left:auto; margin-right:auto;}
 .bouton-transparent {color: #eee !important; background-color:transparent;}
 .bouton-orange {color: white !important; background-color: #FF8800 !important;}
 .bouton-orange:hover {background-color: #ca6a00 !important;}
