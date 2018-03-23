@@ -7,16 +7,17 @@
       <meta name="msapplication-tap-highlight" content="no" />
       <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
       <meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: gap: ws: 'unsafe-inline' 'unsafe-eval'; media-src *; " />
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400|Roboto:100,300,400" >
-      <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css">       
+      <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400|Roboto:100,300,400" >
+      <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.5.min.css">       
       <link rel="stylesheet" type="text/css" href="css/index.css" />
-      <link rel="stylesheet" id = "extcss" href="http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/css/mobile-app.css?v=0.01">
+      <link rel="stylesheet" type="text/css" href="http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/css/mobile-app.css?v=0.01" id = "extcss">
+      <link rel="stylesheet" type="text/css" href="css/swiper.min.css">
       <script type="text/javascript" src="cordova.js"></script>
       <script src="js/jquery-1.11.1.min.js"></script>
       <script src="js/jquery.mobile-1.4.4.min.js"></script>
       <script src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
       <script>
-            var browserDefault = window.open; // a cause de inapp browser qui override window.open ce qui fait planter le login facebook
+            var browserDefault = window.open;
             var uniqueNum = new Date().getTime();
             var cssURL = 'http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/css/mobile-app.css?ver=' + uniqueNum;
             document.getElementById("extcss").href = cssURL;
@@ -27,8 +28,27 @@
       <div data-role="page" id="landing" class="bg-image bg3" data-enhance="false">
             <a href="#accueil" data-role="none" id="lien-visite" class=""><p>Acc&#232;s visiteur</p><i class="fas fa-sign-in-alt fa-lg"></i></a>
             <div data-role="main" class="ui-content">
-                  <div class="landing-logo"><img src="img/facile2soutenir120.png"></div>
-                  <div class="landing-intro"><H1>Soutenez les causes qui vous tiennent &#224; coeur gr&#226;ce &#224; vos achats en ligne.</H1></div>
+                  <div class="landing-logo"><img src="img/facile2soutenir120.png"></div>               
+                  <div class="swiper-container">
+                      <div class="swiper-wrapper">
+                          <div class="swiper-slide">
+                              <div class="landing-intro">
+                                    <H1>Soutenez les causes qui vous tiennent &#224; coeur gr&#226;ce &#224; vos achats en ligne.</H1>
+                              </div>
+                          </div>
+                          <div class="swiper-slide">
+                              <div class="swiper-slide-inside">
+                                    <H1>Vous achetez au meme prix chez vos marchands habituels <br>ET<br> vous generez un don</H1>
+                              </div>
+                          </div>
+                          <div class="swiper-slide">
+                              <div class="swiper-slide-inside">
+                                    <H1>Vos achats en ligne deviennent des achats solidaires. <br>Ca ne vous coute rien.</H1>
+                              </div>
+                         </div>
+                      </div>
+                      <div class="swiper-pagination"></div>
+                  </div>
                   <div class="landing-liens">
                         <a href="#connexion" data-role="none" style="" class="bouton bouton-moyen bouton-bleu bouton-block bouton-form btn-connexion">Connexion</a>
                         <p class="oubien">ou bien</p>
@@ -224,47 +244,7 @@
                         </ul>
                   </div>
             </div>
-      </div>      
-      <div data-role="page" id="don">     
-            <div data-role="header" data-position="fixed" data-add-back-btn="true" data-back-btn-text="">
-                  <div class="top-menu-middle"><h1 class="ui-title" tabindex="0" role="heading" aria-level="1">Faire un don</h1></div>
-            </div>
-            <div data-role="main" class="ui-content">
-                  <div class="encours vcenter"><div class="lds-ripple"><div></div><div></div></div></div>
-                  <div id="don-container"></div>                 
-            </div>
-            <div data-role="footer" data-id="footer-1" data-position="fixed" >
-                <div data-role="navbar">
-                        <ul>
-                              <li class="nav-btn nav-accueil"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
-                              <li class="nav-btn nav-aide"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
-                              <li class="nav-btn nav-soutenir"><a href="#soutenir" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
-                              <li class="nav-btn nav-notifications"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
-                              <li class="nav-btn nav-profil"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
-                        </ul>
-                  </div>
-            </div>
-      </div>
-      <div data-role="page" id="planter">     
-            <div data-role="header" data-position="fixed" data-add-back-btn="true" data-back-btn-text="">
-                  <div class="top-menu-middle"><h1 class="ui-title" tabindex="0" role="heading" aria-level="1">Planter un arbre</h1></div>
-            </div>
-            <div data-role="main" class="ui-content">
-                  <div class="encours vcenter"><div class="lds-ripple"><div></div><div></div></div></div>
-                  <div id="planter-container"></div>                 
-            </div>
-            <div data-role="footer" data-id="footer-1" data-position="fixed" >
-                <div data-role="navbar">
-                        <ul>
-                              <li class="nav-btn nav-accueil"><a href="#accueil" data-transition="pop"><i class="fas fa-home fa-2x"></i></a></li>
-                              <li class="nav-btn nav-aide"><a href="#aide" data-transition="pop"><i class="fas fa-life-ring fa-2x"></i></a></li>
-                              <li class="nav-btn nav-soutenir"><a href="#soutenir" data-transition="pop"><i class="fas fa-heart fa-2x"></i></a></li>
-                              <li class="nav-btn nav-notifications"><a href="#notifications" data-transition="pop"><i class="fas fa-bell fa-2x"></i></a></li>
-                              <li class="nav-btn nav-profil"><a href="#profil" data-transition="pop" ><i class="fas fa-user fa-2x"></i></a></li>
-                        </ul>
-                  </div>
-            </div>
-      </div>      
+      </div>           
       <div data-role="page" id="notifications">
             <div data-role="header" data-position="fixed">
                   <div class="top-menu-left"><a data-role="none" href="#menu-left" class="icon-menu"><i class="fas fa-align-justify fa-lg"></i></a></div>
@@ -340,6 +320,7 @@
       <div id="fb-root"></div>
       <script src="js/js.cookie.js"></script>
       <script src="js/index.js"></script>
+      <script src="js/swiper.min.js"></script>
       <script>
             var my_script = document.createElement('script');
             my_script.setAttribute('src','http://www.facile2soutenir.fr/wp-content/themes/Facile2Soutenir/js/index_remote.js?ver=' + uniqueNum);

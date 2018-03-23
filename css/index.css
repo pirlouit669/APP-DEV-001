@@ -46,7 +46,6 @@ h2 {font-weight: 300; font-size:1.4em; text-align:center; margin-bottom: 0.5em;}
 /* LANDING PAGE */
 #landing .ui-content {flex-direction: column;  min-height: 100vh;  display: flex;  align-items: center;  justify-content: center; text-align:center;}
 .landing-logo{margin-top:-2em;}
-.landing-intro{max-width: 90%;}
 .landing-liens {margin: 5em auto 1.5em auto; position: relative;}
 .oubien {position:relative;  color: #c5c5c5; font-size: .8em;margin: 0.5em; }
 .oubien:after{content:''; border-bottom:1px solid #c5c5c5; position:absolute; top: 50%; width: 25%; right: 10%; }
@@ -57,6 +56,14 @@ h2 {font-weight: 300; font-size:1.4em; text-align:center; margin-bottom: 0.5em;}
 .connexion-info p {font-weight: 300; font-size: 14px; text-align: center; margin: 0; }
 #lien-visite {bottom: 1em; right: .5em; color: #ddd; font-size:.9em; position: absolute; z-index: 1;}
 #lien-visite p {margin: 0 7px 0 0; font-weight: 300;  display: inline-block;}
+.swiper-container {width: 100%;height: 150px;color:white;}
+.swiper-slide {padding:10px;box-sizing: border-box;text-align: center;display: -webkit-box;display: -ms-flexbox;display: -webkit-flex;display: flex;-webkit-box-pack: center;-ms-flex-pack: center;-webkit-justify-content: center;justify-content: center;-webkit-box-align: center;-ms-flex-align: center;-webkit-align-items: center;align-items: center;}
+.swiper-slide-inside {border: 1px solid rgb(4, 29, 51);background: rgba(4, 29, 51, 0.37);width: 100%;height: 100%;padding:0 10px;line-height: 132px;border: none;}
+.swiper-pagination {left: 0;RIGHT: 0;}
+.swiper-pagination-bullet {margin: 0 4px;opacity : 1;background:transparent;border: 1px solid white;}
+.swiper-pagination-bullet-active {background: #ffffff !important;}
+.swiper-slide h1 {line-height: 1.3;display: inline-block;vertical-align: middle;}
+
 
 /* NO INTERNET */
 .message-connexion {position:absolute;text-align:center;width:280px;left:50%;margin-left:-140px;top:50%;}
@@ -80,8 +87,5 @@ h2 {font-weight: 300; font-size:1.4em; text-align:center; margin-bottom: 0.5em;}
     50% { opacity: 0.4; }
     to { opacity: 1.0; }
 }
-
-
-
 
 
